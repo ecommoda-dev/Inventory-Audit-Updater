@@ -1150,18 +1150,24 @@ function showToast(msg, type = '') {
   setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-// ─── Date format (Cairo UTC+3) ────────────────────────────────────────────────
+// ─── Date format — Cairo UTC+3, Latin numerals, same style as v1.x ───────────
+function toCairo(isoString) {
+  // تحويل يدوي لتوقيت القاهرة UTC+3 مع الحفاظ على أرقام لاتينية
+  return new Date(new Date(isoString).getTime() + 3 * 60 * 60 * 1000);
+}
 function formatDateTime(isoString) {
-  const d = new Date(isoString);
-  return d.toLocaleString('ar-EG', {
-    timeZone:    'Africa/Cairo',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', hour12: true,
-  });
+  const d   = toCairo(isoString);
+  const pad = n => String(n).padStart(2, '0');
+  let h     = d.getUTCHours();
+  const m   = pad(d.getUTCMinutes());
+  const ampm= h >= 12 ? 'مساءً' : 'صباحاً';
+  h         = h % 12 || 12;
+  return `${pad(d.getUTCDate())}-${pad(d.getUTCMonth()+1)}-${d.getUTCFullYear()} الساعة ${pad(h)}:${m} ${ampm}`;
 }
 function formatDate(isoString) {
-  const d = new Date(isoString);
-  return d.toLocaleDateString('en-GB', { timeZone: 'Africa/Cairo', day: '2-digit', month: '2-digit', year: 'numeric' });
+  const d   = toCairo(isoString);
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getUTCDate())}-${pad(d.getUTCMonth()+1)}-${d.getUTCFullYear()}`;
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────
