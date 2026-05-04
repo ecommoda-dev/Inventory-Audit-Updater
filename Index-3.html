@@ -110,14 +110,12 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
 
 /* custom date input wrapper */
 .log-date-wrap{position:relative;display:flex;align-items:center;}
-.log-date-wrap input[type=date]{width:148px;height:34px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:inherit;font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;box-sizing:border-box;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.log-date-wrap input[type=date]{width:148px;height:34px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:inherit;font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;box-sizing:border-box;cursor:pointer;}
 .log-date-wrap input[type=date]:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.08);}
-.log-date-wrap input[type=date]::-webkit-calendar-picker-indicator{opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;cursor:pointer;}
-.log-date-icon{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;pointer-events:none;}
 
-/* clear filters btn */
-.log-clear-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:600;color:var(--text-secondary);background:var(--surface);cursor:pointer;transition:all .15s;white-space:nowrap;height:34px;}
-.log-clear-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-light);}
+/* clear filters btn — أحمر دائماً، highlight عند hover */
+.log-clear-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--red-border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:600;color:var(--red);background:var(--red-light);cursor:pointer;transition:all .15s;white-space:nowrap;height:34px;}
+.log-clear-btn:hover{background:var(--red);color:#fff;border-color:var(--red);}
 
 /* stats + refresh bar */
 .log-stats-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);}
@@ -365,6 +363,7 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
 .toast.error{background:var(--red);}
 .toast.success{background:var(--green);}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
 
 <body>
 
@@ -814,14 +813,12 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
               <span class="log-flabel">من تاريخ</span>
               <div class="log-date-wrap">
                 <input type="date" id="logFilterDateFrom" onchange="onLogFilterChange()" />
-                <span class="log-date-icon">📅</span>
               </div>
             </div>
             <div class="log-fg">
               <span class="log-flabel">إلى تاريخ</span>
               <div class="log-date-wrap">
                 <input type="date" id="logFilterDateTo" onchange="onLogFilterChange()" />
-                <span class="log-date-icon">📅</span>
               </div>
             </div>
             <div class="log-fg" style="align-self:flex-end;">
@@ -1177,8 +1174,8 @@ function updateLogExportBtn() {
   btn.textContent = has ? `⬇ تصدير المحدد (${logSelectedIds.size}) .xlsx` : '⬇ تصدير المحدد .xlsx';
 }
 
-// ─── Log Export — xlsx حقيقي عبر SheetJS ─────────────────────────────────────
-function exportSelectedLog() {
+// ─── Log Export — ExcelJS (المكتبة المعتمدة — Master Reference §8.3) ──────────
+async function exportSelectedLog() {
   if (logSelectedIds.size === 0) return;
   const skuCountMap = buildSkuCountMap(logAllData);
 
@@ -1191,47 +1188,79 @@ function exportSelectedLog() {
     const delta = e.delta ?? 0;
     const typeLabel = type === 'ok' ? 'مظبوط'
       : type === 'adjustment' ? (delta > 0 ? `زيادة +${delta}` : `نقصان ${delta}`) : type;
+
+    // فصل التاريخ والوقت لعمودين منفصلين
+    let dateOnly = '—', timeOnly = '—';
+    if (e.timestamp) {
+      const d    = toCairo(e.timestamp);
+      const pad  = n => String(n).padStart(2, '0');
+      dateOnly   = `${pad(d.getUTCDate())}-${pad(d.getUTCMonth()+1)}-${d.getUTCFullYear()}`;
+      let h      = d.getUTCHours();
+      const ampm = h >= 12 ? 'مساءً' : 'صباحاً';
+      h          = h % 12 || 12;
+      timeOnly   = `${pad(h)}:${pad(d.getUTCMinutes())} ${ampm}`;
+    }
+
     return {
-      'التاريخ والوقت': e.timestamp ? formatDateTime(e.timestamp) : '—',
+      'التاريخ':        dateOnly,
+      'الوقت':          timeOnly,
       'الموظف':         (e.employee || '').replace(/_/g, ' '),
-      'SKU':            e.sku || '—',
-      'المنتج':         e.product_title || '—',
+      'SKU':            e.sku || null,
+      'المنتج':         e.product_title || null,
       'نوع العملية':    typeLabel,
-      'قبل':            e.value_before ?? '',
-      'بعد':            e.value_after  ?? '',
-      'التغيير':        delta || '',
-      'عدد مرات الجرد': e.sku ? (skuCountMap[e.sku] || 0) : '',
-      'الملاحظات':      e.notes || '',
+      'قبل':            e.value_before ?? null,
+      'بعد':            e.value_after  ?? null,
+      'التغيير':        delta !== 0 ? delta : null,
+      'عدد مرات الجرد': e.sku ? (skuCountMap[e.sku] || 0) : null,
+      'الملاحظات':      e.notes || null,
     };
   }).filter(Boolean);
 
   if (!rows.length) return;
 
-  // استخدام SheetJS لإنتاج xlsx حقيقي
-  if (typeof XLSX === 'undefined') {
-    showToast('جاري تحميل مكتبة الـ Excel...', '');
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-    s.onload = () => doXlsxExport(rows);
-    document.head.appendChild(s);
-  } else {
-    doXlsxExport(rows);
-  }
-}
-
-function doXlsxExport(rows) {
   try {
-    const ws = XLSX.utils.json_to_sheet(rows, { skipHeader: false });
-    // RTL + عرض الأعمدة
-    ws['!cols'] = [
-      {wch:22},{wch:18},{wch:22},{wch:40},{wch:16},
-      {wch:8},{wch:8},{wch:10},{wch:16},{wch:35}
+    const wb = new ExcelJS.Workbook();
+    wb.views = [{ rightToLeft: true }];
+
+    const ws = wb.addWorksheet('سجل الجرد');
+    ws.views = [{ state: 'frozen', ySplit: 1, rightToLeft: true }];
+
+    const headers = Object.keys(rows[0]);
+    ws.columns = [
+      { header: 'التاريخ',        key: 'التاريخ',        width: 16 },
+      { header: 'الوقت',          key: 'الوقت',          width: 14 },
+      { header: 'الموظف',         key: 'الموظف',         width: 18 },
+      { header: 'SKU',            key: 'SKU',            width: 24 },
+      { header: 'المنتج',         key: 'المنتج',         width: 42 },
+      { header: 'نوع العملية',    key: 'نوع العملية',    width: 16 },
+      { header: 'قبل',            key: 'قبل',            width: 8  },
+      { header: 'بعد',            key: 'بعد',            width: 8  },
+      { header: 'التغيير',        key: 'التغيير',        width: 10 },
+      { header: 'عدد مرات الجرد', key: 'عدد مرات الجرد', width: 16 },
+      { header: 'الملاحظات',      key: 'الملاحظات',      width: 36 },
     ];
-    const wb = XLSX.utils.book_new();
-    wb.Views = [{ RTL: true }];
-    XLSX.utils.book_append_sheet(wb, ws, 'سجل الجرد');
-    const fname = `audit-log-${new Date().toISOString().substring(0,10)}.xlsx`;
-    XLSX.writeFile(wb, fname);
+
+    // البيانات — null للخلايا الفارغة (ليس '')
+    rows.forEach(row => {
+      const cleaned = {};
+      for (const k of headers) cleaned[k] = row[k] ?? null;
+      ws.addRow(cleaned);
+    });
+
+    // تنسيق الأرقام
+    ws.eachRow((r, idx) => {
+      if (idx === 1) return;
+      r.eachCell(c => { if (typeof c.value === 'number') c.numFmt = '#,##0'; });
+    });
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url    = URL.createObjectURL(blob);
+    const a      = document.createElement('a');
+    a.href     = url;
+    a.download = `audit-export-${new Date().toISOString().substring(0, 10)}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
     showToast(`تم تصدير ${rows.length} عملية ✓`, 'success');
   } catch (err) {
     showToast('خطأ في التصدير: ' + err.message, 'error');
