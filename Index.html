@@ -78,18 +78,70 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
 .cl-fix{background:#fef2f2;color:#dc2626;}
 .cl-change{background:#fffbeb;color:#92400e;}
 
-/* ─── Audit Log Modal ─── */
-.log-modal .modal{max-width:680px;max-height:85vh;display:flex;flex-direction:column;}
-.log-filters-bar{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-.log-filter-select{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:5px 8px;font-family:inherit;font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;}
-.log-search-input{flex:1;min-width:140px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:5px 9px;font-family:inherit;font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;direction:rtl;}
-.log-search-input:focus,.log-filter-select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.08);}
-.log-body{overflow-y:auto;flex:1;}
+/* ─── Main Tabs (Segmented — Mix1 V2) ─── */
+.main-tabs-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;box-shadow:var(--shadow);}
+.main-seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:10px;padding:4px;gap:3px;}
+.main-seg-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 32px;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;border:none;background:transparent;transition:all .15s;min-width:130px;}
+.main-seg-btn .msb-icon{font-size:16px;}
+.main-seg-btn.active{background:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(37,99,235,.3);}
+.main-seg-btn:not(.active):hover{background:var(--accent-light);color:var(--accent);}
+
+/* ─── Audit Log Tab ─── */
+.log-tab-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+
+/* filters collapsible */
+.log-filters-section{border-bottom:1px solid var(--border);}
+.log-filters-header{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;background:var(--surface-2);cursor:pointer;user-select:none;transition:background .12s;}
+.log-filters-header:hover{background:#f0f4f8;}
+.log-filters-title{font-size:12px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px;}
+.log-filters-toggle{font-size:13px;color:var(--text-muted);transition:transform .25s;}
+.log-filters-toggle.open{transform:rotate(180deg);}
+.log-filters-body{padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
+.log-filters-body.collapsed{display:none;}
+.log-frow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.log-fg{display:flex;flex-direction:column;gap:3px;}
+.log-flabel{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.log-fsel,.log-finput{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:inherit;font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;height:34px;box-sizing:border-box;}
+.log-fsel:focus,.log-finput:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.08);}
+.log-fsel.w-emp{width:160px;}
+.log-fsel.w-type{width:155px;}
+.log-fsel.w-count{width:130px;}
+.log-finput.w-search{width:220px;}
+
+/* custom date input wrapper */
+.log-date-wrap{position:relative;display:flex;align-items:center;}
+.log-date-wrap input[type=date]{width:148px;height:34px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:inherit;font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;box-sizing:border-box;cursor:pointer;}
+.log-date-wrap input[type=date]:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.08);}
+
+/* clear filters btn — أحمر دائماً، highlight عند hover */
+.log-clear-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--red-border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:600;color:var(--red);background:var(--red-light);cursor:pointer;transition:all .15s;white-space:nowrap;height:34px;}
+.log-clear-btn:hover{background:var(--red);color:#fff;border-color:var(--red);}
+
+/* stats + refresh bar */
+.log-stats-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);}
+.log-refresh-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--green-border);border-radius:var(--radius-sm);font-family:inherit;font-size:11px;font-weight:600;color:var(--green);background:var(--green-light);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.log-refresh-btn:hover{background:var(--green);color:#fff;}
+.log-stat-chip{font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3px 10px;}
+.log-stat-chip strong{color:var(--text-primary);}
+.log-stat-chip.filtered strong{color:var(--accent);}
+.log-export-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--green-border);border-radius:var(--radius-sm);font-family:inherit;font-size:11px;font-weight:600;color:var(--green);background:var(--green-light);cursor:pointer;transition:all .15s;margin-right:auto;opacity:.5;pointer-events:none;}
+.log-export-btn.enabled{opacity:1;pointer-events:all;}
+.log-export-btn:hover{background:var(--green);color:#fff;}
+
+/* log list */
+.log-list-head{display:flex;align-items:center;gap:10px;padding:7px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);}
+.log-list-head input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent);}
+.log-list-head-lbl{font-size:11px;font-weight:600;color:var(--text-secondary);}
+.log-body{overflow-y:auto;max-height:600px;}
 .log-entry{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;transition:background .1s;}
 .log-entry:hover{background:var(--surface-2);}
+.log-entry.selected{background:var(--accent-light);}
+.log-cb{flex-shrink:0;padding-top:3px;}
+.log-cb input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent);}
 .log-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0;}
 .log-dot-ok{background:var(--green);}
-.log-dot-adj{background:var(--amber);}
+.log-dot-adj-pos{background:var(--green);}
+.log-dot-adj-neg{background:var(--red);}
 .log-entry-content{flex:1;min-width:0;}
 .log-entry-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;}
 .log-sku-badge{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:4px;padding:1px 7px;}
@@ -98,12 +150,14 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
 .log-type-adj-pos{background:#f0fdf4;color:#15803d;}
 .log-type-adj-neg{background:var(--red-light);color:var(--red);}
 .log-emp-badge{font-size:11px;font-weight:600;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:4px;padding:1px 7px;}
+.log-count-badge{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--purple);background:var(--purple-light);border:1px solid var(--purple-border);border-radius:4px;padding:1px 7px;}
 .log-product-name{font-size:12px;color:var(--text-secondary);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.log-qty-change{font-size:11px;font-family:var(--font-mono);margin-bottom:2px;}
+.log-qty-pos{color:var(--green);}
+.log-qty-neg{color:var(--red);}
 .log-meta{font-size:11px;color:var(--text-muted);}
-.log-notes{font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:2px;}
+.log-notes{font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:2px;display:flex;align-items:flex-start;gap:4px;}
 .log-empty{padding:40px;text-align:center;color:var(--text-muted);font-size:13px;}
-.log-sync-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--green-border);border-radius:var(--radius-sm);font-family:inherit;font-size:11px;font-weight:600;color:var(--green);background:var(--green-light);cursor:pointer;transition:all .15s;margin-right:auto;}
-.log-sync-btn:hover{background:var(--green);color:#fff;}
 
 /* ─── Search ─── */
 .search-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px;box-shadow:var(--shadow);}
@@ -309,6 +363,7 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
 .toast.error{background:var(--red);}
 .toast.success{background:var(--green);}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
 
 <body>
 
@@ -439,7 +494,22 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
     </div>
     <div class="changelog-body" style="overflow-y:auto;padding:20px;flex:1;">
       <div class="cl-version">
-        <span class="cl-ver-badge">v2.0.0</span>
+        <span class="cl-ver-badge">v2.1.0</span>
+        <span class="cl-ver-date">04-05-2026</span>
+      </div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>سجل العمليات أصبح تاب مستقل بدلاً من Modal منبثق</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>فلتر نوع التعديل: زيادة ↑ / نقصان ↓ منفصلَين</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>فلتر عدد مرات الجرد لنفس الـ SKU (1–10 وأكثر من 10)</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>فلتر من تاريخ / إلى تاريخ</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>بحث في الملحوظات</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>Checkbox لتحديد عمليات وتصدير المحدد .xlsx</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>عرض إجمالي السجل ونتائج الفلتر الحالي</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>قسم الفلاتر قابل للطي Collapse</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>إخفاء سجلات الدخول والخروج من السجل</span></li>
+      </ul>
+      <div class="cl-version">
+        <span class="cl-ver-badge" style="background:#f9fafb;color:#6b7280;border-color:#d1d5db;">v2.0.0</span>
         <span class="cl-ver-date">04-05-2026</span>
       </div>
       <ul class="cl-items">
@@ -480,36 +550,7 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
   </div>
 </div>
 
-<!-- ─── Audit Log Modal ───────────────────────────────────────────────────────── -->
-<div class="modal-overlay log-modal" id="logOverlay" onclick="closeLogOnBackdrop(event)">
-  <div class="modal" style="max-width:700px;max-height:85vh;display:flex;flex-direction:column;">
-    <div class="modal-header">
-      📋 سجل الجرد
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button class="log-sync-btn" id="logSyncBtn" onclick="loadLog()">↻ تحديث</button>
-        <button class="modal-close-btn" onclick="closeLog()">✕</button>
-      </div>
-    </div>
-    <div class="log-filters-bar">
-      <select class="log-filter-select" id="logFilterEmployee" onchange="loadLog()">
-        <option value="">كل الموظفين</option>
-      </select>
-      <select class="log-filter-select" id="logFilterType" onchange="loadLog()">
-        <option value="">كل العمليات</option>
-        <option value="ok">مظبوط فقط</option>
-        <option value="adjustment">تعديل فقط</option>
-        <option value="login">دخول</option>
-        <option value="logout">خروج</option>
-      </select>
-      <input type="text" class="log-search-input" id="logSearch" placeholder="🔍 ابحث بالـ SKU أو اسم المنتج..." oninput="onLogSearchInput()" />
-    </div>
-    <div class="log-body" id="logBody">
-      <div class="log-empty">اضغط تحديث لتحميل السجل</div>
-    </div>
-  </div>
-</div>
 
-<div class="container">
 
   <!-- ─── App Header ────────────────────────────────────────────────────────── -->
   <div class="app-header">
@@ -521,12 +562,28 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
       </div>
     </div>
     <div class="app-header-btns">
-      <button class="hbtn ver-btn" onclick="openChangelog()">v2.0.0 📋</button>
-      <button class="hbtn" onclick="openLog()">📋 سجل الجرد</button>
+      <button class="hbtn ver-btn" onclick="openChangelog()">v2.1.0 📋</button>
       <button class="hbtn" id="activeUserBtn" onclick="doLogout()">👤 —</button>
       <button class="hbtn" id="settingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
     </div>
   </div>
+
+  <!-- ─── Main Segmented Tabs ───────────────────────────────────────────────── -->
+  <div class="main-tabs-wrap">
+    <div class="main-seg">
+      <button class="main-seg-btn active" id="mainTabAudit" onclick="switchMainTab('audit')">
+        <span class="msb-icon">📦</span>
+        <span>الجرد</span>
+      </button>
+      <button class="main-seg-btn" id="mainTabLog" onclick="switchMainTab('log')">
+        <span class="msb-icon">📜</span>
+        <span>سجل العمليات</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Audit Tab Content ────────────────────────────────────────────────── -->
+  <div id="auditTabContent">
 
   <!-- ─── Search Card ───────────────────────────────────────────────────────── -->
   <div class="search-card" id="searchCard">
@@ -702,6 +759,108 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
     </div>
 
   </div><!-- /results -->
+  </div><!-- /auditTabContent -->
+
+  <!-- ─── Log Tab Content ──────────────────────────────────────────────────── -->
+  <div id="logTabContent" style="display:none;">
+    <div class="log-tab-wrap">
+
+      <!-- Filters collapsible -->
+      <div class="log-filters-section">
+        <div class="log-filters-header" onclick="toggleLogFilters()">
+          <div class="log-filters-title">
+            <span>🔽</span>
+            <span>الفلاتر</span>
+          </div>
+          <span class="log-filters-toggle open" id="logFiltersToggleIcon">▲</span>
+        </div>
+        <div class="log-filters-body" id="logFiltersBody">
+          <!-- Row 1: employee, type, count, date from, date to, clear btn -->
+          <div class="log-frow">
+            <div class="log-fg">
+              <span class="log-flabel">الموظف</span>
+              <select class="log-fsel w-emp" id="logFilterEmployee" onchange="onLogEmpFilterChange()">
+                <option value="">كل الموظفين</option>
+              </select>
+            </div>
+            <div class="log-fg">
+              <span class="log-flabel">نوع التعديل</span>
+              <select class="log-fsel w-type" id="logFilterType" onchange="onLogFilterChange()">
+                <option value="">كل العمليات</option>
+                <option value="ok">مظبوط فقط</option>
+                <option value="adj_pos">زيادة فقط ↑</option>
+                <option value="adj_neg">نقصان فقط ↓</option>
+              </select>
+            </div>
+            <div class="log-fg">
+              <span class="log-flabel">عدد مرات الجرد (SKU)</span>
+              <select class="log-fsel w-count" id="logFilterCount" onchange="onLogFilterChange()">
+                <option value="">الكل</option>
+                <option value="1">1 مرة</option>
+                <option value="2">2 مرة</option>
+                <option value="3">3 مرات</option>
+                <option value="4">4 مرات</option>
+                <option value="5">5 مرات</option>
+                <option value="6">6 مرات</option>
+                <option value="7">7 مرات</option>
+                <option value="8">8 مرات</option>
+                <option value="9">9 مرات</option>
+                <option value="10">10 مرات</option>
+                <option value="10+">أكثر من 10</option>
+              </select>
+            </div>
+            <div class="log-fg">
+              <span class="log-flabel">من تاريخ</span>
+              <div class="log-date-wrap">
+                <input type="date" id="logFilterDateFrom" onchange="onLogFilterChange()" />
+              </div>
+            </div>
+            <div class="log-fg">
+              <span class="log-flabel">إلى تاريخ</span>
+              <div class="log-date-wrap">
+                <input type="date" id="logFilterDateTo" onchange="onLogFilterChange()" />
+              </div>
+            </div>
+            <div class="log-fg" style="align-self:flex-end;">
+              <button class="log-clear-btn" onclick="clearLogFilters()">✕ مسح كل الفلاتر</button>
+            </div>
+          </div>
+          <!-- Row 2: sku/product search, notes search -->
+          <div class="log-frow">
+            <div class="log-fg" style="flex:1;">
+              <span class="log-flabel">بحث بالـ SKU أو اسم المنتج</span>
+              <input type="text" class="log-finput w-search" style="width:100%;" id="logSearch" placeholder="ابحث بالـ SKU أو اسم المنتج..." oninput="onLogSearchInput()" />
+            </div>
+            <div class="log-fg" style="flex:1;">
+              <span class="log-flabel">بحث في الملحوظات</span>
+              <input type="text" class="log-finput w-search" style="width:100%;" id="logSearchNotes" placeholder="ابحث في الملحوظات..." oninput="onLogSearchInput()" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats + refresh bar -->
+      <div class="log-stats-bar">
+        <button class="log-refresh-btn" onclick="loadLog()">↺ تحديث</button>
+        <div class="log-stat-chip">إجمالي السجل: <strong id="logTotalCount">—</strong></div>
+        <div class="log-stat-chip filtered">نتائج الفلتر: <strong id="logFilteredCount">—</strong></div>
+        <button class="log-export-btn" id="logExportBtn" onclick="exportSelectedLog()">⬇ تصدير المحدد .xlsx</button>
+      </div>
+
+      <!-- List header (select all) -->
+      <div class="log-list-head">
+        <input type="checkbox" id="logSelectAll" onchange="toggleLogSelectAll(this)" />
+        <span class="log-list-head-lbl">تحديد الكل</span>
+      </div>
+
+      <!-- Log entries -->
+      <div class="log-body" id="logBody">
+        <div class="log-empty">اضغط تحديث لتحميل السجل</div>
+      </div>
+
+    </div>
+  </div><!-- /logTabContent -->
+
 </div><!-- /container -->
 
 <div class="toast" id="toast"></div>
@@ -787,110 +946,325 @@ function openChangelog()                  { document.getElementById('changelogOv
 function closeChangelog()                 { document.getElementById('changelogOverlay').classList.remove('open'); }
 function closeChangelogOnBackdrop(e)      { if (e.target === document.getElementById('changelogOverlay')) closeChangelog(); }
 
-// ─── Audit Log Modal ──────────────────────────────────────────────────────────
-function openLog() {
-  document.getElementById('logOverlay').classList.add('open');
+// ─── Main Tab Switch ──────────────────────────────────────────────────────────
+function switchMainTab(tab) {
+  const isAudit = tab === 'audit';
+  document.getElementById('mainTabAudit').classList.toggle('active', isAudit);
+  document.getElementById('mainTabLog').classList.toggle('active', !isAudit);
+  document.getElementById('auditTabContent').style.display = isAudit ? 'block' : 'none';
+  document.getElementById('logTabContent').style.display   = isAudit ? 'none'  : 'block';
+  if (!isAudit && !logLoaded) loadLog();
+}
+
+// ─── Log Filters Collapse ─────────────────────────────────────────────────────
+let logFiltersOpen = true;
+function toggleLogFilters() {
+  logFiltersOpen = !logFiltersOpen;
+  document.getElementById('logFiltersBody').classList.toggle('collapsed', !logFiltersOpen);
+  document.getElementById('logFiltersToggleIcon').classList.toggle('open', logFiltersOpen);
+}
+
+// ─── Clear All Filters ────────────────────────────────────────────────────────
+function clearLogFilters() {
+  document.getElementById('logFilterEmployee').value = '';
+  document.getElementById('logFilterType').value     = '';
+  document.getElementById('logFilterCount').value    = '';
+  document.getElementById('logFilterDateFrom').value = '';
+  document.getElementById('logFilterDateTo').value   = '';
+  document.getElementById('logSearch').value         = '';
+  document.getElementById('logSearchNotes').value    = '';
+  // إذا كان الموظف اتغير سابقاً ممكن البيانات تكون مفلترة — أعد الجلب الكامل
   loadLog();
 }
-function closeLog()                       { document.getElementById('logOverlay').classList.remove('open'); }
-function closeLogOnBackdrop(e)            { if (e.target === document.getElementById('logOverlay')) closeLog(); }
 
+// ─── Audit Log Tab ────────────────────────────────────────────────────────────
+let logLoaded    = false;
+let logAllData   = [];      // البيانات المجلوبة (حسب فلتر الموظف)
+let logTotalAll  = 0;       // الإجمالي الحقيقي (بدون أي فلتر) — يُجلب مرة واحدة
+let logSelectedIds = new Set();
 let logDebounce = null;
-function onLogSearchInput() {
-  clearTimeout(logDebounce);
-  logDebounce = setTimeout(loadLog, 300);
+
+function onLogFilterChange() {
+  if (!logLoaded) { loadLog(); return; }
+  applyLogFilters();
+}
+function onLogEmpFilterChange() { loadLog(); }
+function onLogSearchInput()  { clearTimeout(logDebounce); logDebounce = setTimeout(applyLogFilters, 300); }
+
+// بناء count map — كم مرة ظهر كل SKU
+function buildSkuCountMap(entries) {
+  const map = {};
+  entries.forEach(e => { if (e.sku) map[e.sku] = (map[e.sku] || 0) + 1; });
+  return map;
 }
 
 async function loadLog() {
   const body = document.getElementById('logBody');
   body.innerHTML = '<div class="log-empty"><div class="loading-spinner"></div><p style="margin-top:8px;font-size:12px;">جاري التحميل...</p></div>';
-  try {
-    const cfg     = getConfig();
-    const params  = new URLSearchParams({ action: 'get_logs', limit: '200' });
-    const emp     = document.getElementById('logFilterEmployee').value;
-    const type    = document.getElementById('logFilterType').value;
-    const search  = document.getElementById('logSearch').value.trim();
-    if (emp)    params.set('employee', emp);
-    if (type)   params.set('type', type);
-    if (search) params.set('search', search);
+  document.getElementById('logFilteredCount').textContent = '—';
 
-    const res  = await fetch(`${cfg.url}?${params}`, {
-      headers: { 'Authorization': `Bearer ${cfg.secret}` },
-    });
+  try {
+    const cfg    = getConfig();
+    const emp    = document.getElementById('logFilterEmployee').value;
+
+    // ① جلب الإجمالي الكلي (بدون فلتر موظف) مرة واحدة فقط
+    if (logTotalAll === 0 || !emp) {
+      const pTotal = new URLSearchParams({ action: 'get_logs', limit: '5000' });
+      const rTotal = await fetch(`${cfg.url}?${pTotal}`, { headers: { 'Authorization': `Bearer ${cfg.secret}` } });
+      const dTotal = await rTotal.json();
+      if (dTotal.ok) {
+        logTotalAll = (dTotal.entries || []).filter(e => e.type !== 'login' && e.type !== 'logout').length;
+      }
+    }
+    document.getElementById('logTotalCount').textContent = logTotalAll.toLocaleString('en-US');
+
+    // ② جلب السجل — مع فلتر الموظف لو محدد
+    const params = new URLSearchParams({ action: 'get_logs', limit: '5000' });
+    if (emp) params.set('employee', emp);
+
+    const res  = await fetch(`${cfg.url}?${params}`, { headers: { 'Authorization': `Bearer ${cfg.secret}` } });
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || 'خطأ في جلب السجل');
-    renderLog(data.entries || []);
+
+    logAllData = (data.entries || []).filter(e => e.type !== 'login' && e.type !== 'logout');
+    logLoaded  = true;
+    applyLogFilters();
   } catch (e) {
     body.innerHTML = `<div class="log-empty">⚠️ ${e.message}</div>`;
+    document.getElementById('logTotalCount').textContent = '—';
   }
 }
 
-function renderLog(entries) {
+function applyLogFilters() {
+  const type     = document.getElementById('logFilterType').value;
+  const countVal = document.getElementById('logFilterCount').value;
+  const dateFrom = document.getElementById('logFilterDateFrom').value;
+  const dateTo   = document.getElementById('logFilterDateTo').value;
+  const search   = document.getElementById('logSearch').value.trim().toLowerCase();
+  const searchN  = document.getElementById('logSearchNotes').value.trim().toLowerCase();
+
+  const skuCountMap = buildSkuCountMap(logAllData);
+
+  const filtered = logAllData.filter(e => {
+    const etype = e.type || 'ok';
+    if (type === 'ok'      && etype !== 'ok') return false;
+    if (type === 'adj_pos' && !(etype === 'adjustment' && (e.delta ?? 0) > 0)) return false;
+    if (type === 'adj_neg' && !(etype === 'adjustment' && (e.delta ?? 0) < 0)) return false;
+
+    if (countVal) {
+      const cnt = skuCountMap[e.sku] || 0;
+      if (countVal === '10+') { if (cnt <= 10) return false; }
+      else { if (cnt !== parseInt(countVal)) return false; }
+    }
+
+    if (dateFrom || dateTo) {
+      const ts = e.timestamp ? e.timestamp.substring(0, 10) : '';
+      if (dateFrom && ts < dateFrom) return false;
+      if (dateTo   && ts > dateTo)   return false;
+    }
+
+    if (search) {
+      const skuMatch  = (e.sku           || '').toLowerCase().includes(search);
+      const nameMatch = (e.product_title || '').toLowerCase().includes(search);
+      if (!skuMatch && !nameMatch) return false;
+    }
+
+    if (searchN && !(e.notes || '').toLowerCase().includes(searchN)) return false;
+
+    return true;
+  });
+
+  document.getElementById('logFilteredCount').textContent = filtered.length.toLocaleString('en-US');
+  renderLog(filtered, skuCountMap);
+}
+
+function renderLog(entries, skuCountMap) {
   const body = document.getElementById('logBody');
+  logSelectedIds.clear();
+  updateLogExportBtn();
+  document.getElementById('logSelectAll').checked = false;
+
   if (!entries.length) {
     body.innerHTML = '<div class="log-empty">لا توجد نتائج تطابق الفلاتر المحددة</div>';
     return;
   }
-  body.innerHTML = entries.map(e => {
-    // D1 field names
-    const type        = e.type || 'ok';
-    const sku         = e.sku         || null;
-    const productTitle= e.product_title || null;
-    const employee    = e.employee    || null;
-    const delta       = e.delta       ?? 0;
-    const valBefore   = e.value_before ?? 0;
-    const valAfter    = e.value_after  ?? 0;
-    const notes       = e.notes       || null;
-    const timestamp   = e.timestamp   || null;
 
-    // dot color + type badge
+  body.innerHTML = entries.map((e, idx) => {
+    const type         = e.type || 'ok';
+    const sku          = e.sku          || null;
+    const productTitle = e.product_title || null;
+    const employee     = e.employee     || null;
+    const delta        = e.delta        ?? 0;
+    const valBefore    = e.value_before ?? 0;
+    const valAfter     = e.value_after  ?? 0;
+    const notes        = e.notes        || null;
+    const timestamp    = e.timestamp    || null;
+    const entryId      = e.id || idx;
+
     let dotClass, typeHtml;
     if (type === 'ok') {
       dotClass = 'log-dot-ok';
       typeHtml = '<span class="log-type-badge log-type-ok">✅ مظبوط</span>';
     } else if (type === 'adjustment') {
-      dotClass = 'log-dot-adj';
-      typeHtml = delta > 0
-        ? `<span class="log-type-badge log-type-adj-pos">↑ +${delta.toLocaleString('en-US')}</span>`
-        : `<span class="log-type-badge log-type-adj-neg">↓ ${delta.toLocaleString('en-US')}</span>`;
-    } else if (type === 'login') {
-      dotClass = 'log-dot-ok';
-      typeHtml = '<span class="log-type-badge" style="background:#f0fdf4;color:#15803d;">🔑 دخول</span>';
-    } else if (type === 'logout') {
-      dotClass = '';
-      typeHtml = '<span class="log-type-badge" style="background:#f9fafb;color:#6b7280;">🚪 خروج</span>';
+      if (delta > 0) {
+        dotClass = 'log-dot-adj-pos';
+        typeHtml = `<span class="log-type-badge log-type-adj-pos">↑ +${delta.toLocaleString('en-US')}</span>`;
+      } else {
+        dotClass = 'log-dot-adj-neg';
+        typeHtml = `<span class="log-type-badge log-type-adj-neg">↓ ${delta.toLocaleString('en-US')}</span>`;
+      }
     } else {
       dotClass = '';
       typeHtml = `<span class="log-type-badge" style="background:var(--bg);color:var(--text-muted);">${type}</span>`;
     }
 
-    const empHtml     = employee ? `<span class="log-emp-badge">👤 ${employee.replace(/_/g, ' ')}</span>` : '';
-    const dateStr     = timestamp ? formatDateTime(timestamp) : '—';
-    const skuHtml     = sku ? `<span class="log-sku-badge">${sku}</span>` : '';
-    const titleHtml   = productTitle ? `<div class="log-product-name">${productTitle}</div>` : '';
-    const notesHtml   = notes ? `<div class="log-notes">📝 ${notes}</div>` : '';
+    const skuCount   = sku ? (skuCountMap[sku] || 0) : 0;
+    const countBadge = sku ? `<span class="log-count-badge">× ${skuCount.toLocaleString('en-US')} جرد</span>` : '';
+    const skuHtml    = sku ? `<span class="log-sku-badge">${sku}</span>` : '';
+    const empHtml    = employee ? `<span class="log-emp-badge">👤 ${employee.replace(/_/g, ' ')}</span>` : '';
+    const titleHtml  = productTitle ? `<div class="log-product-name">${productTitle}</div>` : '';
+    const notesHtml  = notes ? `<div class="log-notes">📝 ${notes}</div>` : '';
+    const dateStr    = timestamp ? formatDateTime(timestamp) : '—';
 
-    let qtyInfo = '';
+    let qtyHtml = '';
     if (type === 'ok') {
-      qtyInfo = `قطع الرف: ${valBefore.toLocaleString('en-US')}`;
+      qtyHtml = `<div class="log-qty-change log-qty-pos">عدد الرف: ${valBefore.toLocaleString('en-US')}</div>`;
     } else if (type === 'adjustment') {
-      qtyInfo = `قبل: ${valBefore.toLocaleString('en-US')} → بعد: ${valAfter.toLocaleString('en-US')}`;
+      const cls = delta > 0 ? 'log-qty-pos' : 'log-qty-neg';
+      qtyHtml = `<div class="log-qty-change ${cls}">قبل: ${valBefore.toLocaleString('en-US')} → بعد: ${valAfter.toLocaleString('en-US')}</div>`;
     }
 
-    return `<div class="log-entry">
+    return `<div class="log-entry" id="log-entry-${entryId}">
+      <div class="log-cb"><input type="checkbox" class="log-entry-cb" data-id="${entryId}" data-idx="${idx}" onchange="onLogCbChange(this)" /></div>
       <div class="log-dot ${dotClass}"></div>
       <div class="log-entry-content">
-        <div class="log-entry-top">
-          ${skuHtml}
-          ${typeHtml}
-          ${empHtml}
-        </div>
+        <div class="log-entry-top">${skuHtml}${typeHtml}${empHtml}${countBadge}</div>
         ${titleHtml}
-        <div class="log-meta">${dateStr}${qtyInfo ? ' · ' + qtyInfo : ''}</div>
+        ${qtyHtml}
+        <div class="log-meta">${dateStr}</div>
         ${notesHtml}
       </div>
     </div>`;
   }).join('');
+}
+
+// ─── Log Checkbox ─────────────────────────────────────────────────────────────
+function onLogCbChange(cb) {
+  const id = cb.dataset.id;
+  if (cb.checked) logSelectedIds.add(id); else logSelectedIds.delete(id);
+  updateLogExportBtn();
+  const allCbs = document.querySelectorAll('.log-entry-cb');
+  document.getElementById('logSelectAll').checked = allCbs.length > 0 && [...allCbs].every(c => c.checked);
+  document.getElementById(`log-entry-${id}`)?.classList.toggle('selected', cb.checked);
+}
+function toggleLogSelectAll(master) {
+  document.querySelectorAll('.log-entry-cb').forEach(cb => {
+    cb.checked = master.checked;
+    const id = cb.dataset.id;
+    if (master.checked) logSelectedIds.add(id); else logSelectedIds.delete(id);
+    document.getElementById(`log-entry-${id}`)?.classList.toggle('selected', master.checked);
+  });
+  updateLogExportBtn();
+}
+function updateLogExportBtn() {
+  const btn = document.getElementById('logExportBtn');
+  if (!btn) return;
+  const has = logSelectedIds.size > 0;
+  btn.classList.toggle('enabled', has);
+  btn.textContent = has ? `⬇ تصدير المحدد (${logSelectedIds.size}) .xlsx` : '⬇ تصدير المحدد .xlsx';
+}
+
+// ─── Log Export — ExcelJS (المكتبة المعتمدة — Master Reference §8.3) ──────────
+async function exportSelectedLog() {
+  if (logSelectedIds.size === 0) return;
+  const skuCountMap = buildSkuCountMap(logAllData);
+
+  const cbs  = [...document.querySelectorAll('.log-entry-cb')].filter(c => c.checked);
+  const rows = cbs.map(cb => {
+    const idx = parseInt(cb.dataset.idx);
+    const e   = logAllData[idx];
+    if (!e) return null;
+    const type  = e.type || 'ok';
+    const delta = e.delta ?? 0;
+    const typeLabel = type === 'ok' ? 'مظبوط'
+      : type === 'adjustment' ? (delta > 0 ? `زيادة +${delta}` : `نقصان ${delta}`) : type;
+
+    // فصل التاريخ والوقت لعمودين منفصلين
+    let dateOnly = '—', timeOnly = '—';
+    if (e.timestamp) {
+      const d    = toCairo(e.timestamp);
+      const pad  = n => String(n).padStart(2, '0');
+      dateOnly   = `${pad(d.getUTCDate())}-${pad(d.getUTCMonth()+1)}-${d.getUTCFullYear()}`;
+      let h      = d.getUTCHours();
+      const ampm = h >= 12 ? 'مساءً' : 'صباحاً';
+      h          = h % 12 || 12;
+      timeOnly   = `${pad(h)}:${pad(d.getUTCMinutes())} ${ampm}`;
+    }
+
+    return {
+      'التاريخ':        dateOnly,
+      'الوقت':          timeOnly,
+      'الموظف':         (e.employee || '').replace(/_/g, ' '),
+      'SKU':            e.sku || null,
+      'المنتج':         e.product_title || null,
+      'نوع العملية':    typeLabel,
+      'قبل':            e.value_before ?? null,
+      'بعد':            e.value_after  ?? null,
+      'التغيير':        delta !== 0 ? delta : null,
+      'عدد مرات الجرد': e.sku ? (skuCountMap[e.sku] || 0) : null,
+      'الملاحظات':      e.notes || null,
+    };
+  }).filter(Boolean);
+
+  if (!rows.length) return;
+
+  try {
+    const wb = new ExcelJS.Workbook();
+    wb.views = [{ rightToLeft: true }];
+
+    const ws = wb.addWorksheet('سجل الجرد');
+    ws.views = [{ state: 'frozen', ySplit: 1, rightToLeft: true }];
+
+    const headers = Object.keys(rows[0]);
+    ws.columns = [
+      { header: 'التاريخ',        key: 'التاريخ',        width: 16 },
+      { header: 'الوقت',          key: 'الوقت',          width: 14 },
+      { header: 'الموظف',         key: 'الموظف',         width: 18 },
+      { header: 'SKU',            key: 'SKU',            width: 24 },
+      { header: 'المنتج',         key: 'المنتج',         width: 42 },
+      { header: 'نوع العملية',    key: 'نوع العملية',    width: 16 },
+      { header: 'قبل',            key: 'قبل',            width: 8  },
+      { header: 'بعد',            key: 'بعد',            width: 8  },
+      { header: 'التغيير',        key: 'التغيير',        width: 10 },
+      { header: 'عدد مرات الجرد', key: 'عدد مرات الجرد', width: 16 },
+      { header: 'الملاحظات',      key: 'الملاحظات',      width: 36 },
+    ];
+
+    // البيانات — null للخلايا الفارغة (ليس '')
+    rows.forEach(row => {
+      const cleaned = {};
+      for (const k of headers) cleaned[k] = row[k] ?? null;
+      ws.addRow(cleaned);
+    });
+
+    // تنسيق الأرقام
+    ws.eachRow((r, idx) => {
+      if (idx === 1) return;
+      r.eachCell(c => { if (typeof c.value === 'number') c.numFmt = '#,##0'; });
+    });
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url    = URL.createObjectURL(blob);
+    const a      = document.createElement('a');
+    a.href     = url;
+    a.download = `audit-export-${new Date().toISOString().substring(0, 10)}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`تم تصدير ${rows.length} عملية ✓`, 'success');
+  } catch (err) {
+    showToast('خطأ في التصدير: ' + err.message, 'error');
+  }
 }
 
 // ─── Employees — Dynamic List ─────────────────────────────────────────────────
