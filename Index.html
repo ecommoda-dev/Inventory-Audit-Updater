@@ -108,10 +108,31 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
 .log-fsel.w-count{width:130px;}
 .log-finput.w-search{width:220px;}
 
-/* custom date input wrapper */
+/* custom date input — placeholder trick + click anywhere */
 .log-date-wrap{position:relative;display:flex;align-items:center;}
-.log-date-wrap input[type=date]{width:148px;height:34px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:inherit;font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;box-sizing:border-box;cursor:pointer;}
+.log-date-wrap input[type=date]{width:160px;height:34px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:inherit;font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;box-sizing:border-box;cursor:pointer;}
 .log-date-wrap input[type=date]:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.08);}
+.log-date-wrap input[type=date]::-webkit-datetime-edit-text,
+.log-date-wrap input[type=date]::-webkit-datetime-edit-month-field,
+.log-date-wrap input[type=date]::-webkit-datetime-edit-day-field,
+.log-date-wrap input[type=date]::-webkit-datetime-edit-year-field{color:var(--text-primary);}
+.log-date-wrap input[type=date].empty::-webkit-datetime-edit{color:var(--text-secondary);}
+
+/* preset dropdown */
+.log-preset-wrap{position:relative;align-self:flex-end;}
+.log-preset-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:600;color:var(--text-secondary);background:var(--surface);cursor:pointer;transition:all .15s;height:34px;white-space:nowrap;}
+.log-preset-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+.log-preset-btn.has-preset{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+.log-preset-btn .pr-arrow{font-size:10px;transition:transform .2s;}
+.log-preset-btn.open .pr-arrow{transform:rotate(180deg);}
+.log-preset-menu{position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-sm);box-shadow:0 4px 20px rgba(0,0,0,.12);z-index:200;min-width:170px;padding:4px;display:none;}
+.log-preset-menu.open{display:block;}
+.log-preset-item{padding:7px 12px;font-size:12px;font-weight:500;border-radius:6px;cursor:pointer;color:var(--text-primary);transition:background .1s;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.log-preset-item:hover{background:var(--surface-2);}
+.log-preset-item.active{background:var(--accent-light);color:var(--accent);}
+.log-preset-item .pr-check{font-size:11px;color:var(--accent);display:none;}
+.log-preset-item.active .pr-check{display:block;}
+.log-preset-sep{height:1px;background:var(--border);margin:3px 4px;}
 
 /* clear filters btn — أحمر دائماً، highlight عند hover */
 .log-clear-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--red-border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:600;color:var(--red);background:var(--red-light);cursor:pointer;transition:all .15s;white-space:nowrap;height:34px;}
@@ -812,13 +833,38 @@ body{font-family:'Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--
             <div class="log-fg">
               <span class="log-flabel">من تاريخ</span>
               <div class="log-date-wrap">
-                <input type="date" id="logFilterDateFrom" onchange="onLogFilterChange()" />
+                <input type="date" id="logFilterDateFrom" class="empty" onchange="onLogFilterChange(); updateDateEmptyClass(this);" onclick="this.showPicker&&this.showPicker();" />
               </div>
             </div>
             <div class="log-fg">
               <span class="log-flabel">إلى تاريخ</span>
               <div class="log-date-wrap">
-                <input type="date" id="logFilterDateTo" onchange="onLogFilterChange()" />
+                <input type="date" id="logFilterDateTo" class="empty" onchange="onLogFilterChange(); updateDateEmptyClass(this);" onclick="this.showPicker&&this.showPicker();" />
+              </div>
+            </div>
+            <!-- Preset Dropdown -->
+            <div class="log-fg">
+              <span class="log-flabel">فترة سريعة</span>
+              <div class="log-preset-wrap" id="logPresetWrap">
+                <button class="log-preset-btn" id="logPresetBtn" onclick="togglePresetMenu(event)">
+                  <span id="logPresetLabel">⚡ اختار فترة</span>
+                  <span class="pr-arrow">▾</span>
+                </button>
+                <div class="log-preset-menu" id="logPresetMenu">
+                  <div class="log-preset-item" data-preset="today"      onclick="applyPreset('today')">      <span>اليوم</span>             <span class="pr-check">✓</span></div>
+                  <div class="log-preset-item" data-preset="yesterday"  onclick="applyPreset('yesterday')">  <span>أمس</span>               <span class="pr-check">✓</span></div>
+                  <div class="log-preset-sep"></div>
+                  <div class="log-preset-item" data-preset="last7"      onclick="applyPreset('last7')">      <span>آخر 7 أيام</span>        <span class="pr-check">✓</span></div>
+                  <div class="log-preset-item" data-preset="last30"     onclick="applyPreset('last30')">     <span>آخر 30 يوم</span>        <span class="pr-check">✓</span></div>
+                  <div class="log-preset-item" data-preset="last90"     onclick="applyPreset('last90')">     <span>آخر 90 يوم</span>        <span class="pr-check">✓</span></div>
+                  <div class="log-preset-sep"></div>
+                  <div class="log-preset-item" data-preset="thisMonth"  onclick="applyPreset('thisMonth')">  <span>الشهر الحالي</span>       <span class="pr-check">✓</span></div>
+                  <div class="log-preset-item" data-preset="lastMonth"  onclick="applyPreset('lastMonth')">  <span>الشهر السابق</span>       <span class="pr-check">✓</span></div>
+                  <div class="log-preset-item" data-preset="thisQuarter" onclick="applyPreset('thisQuarter')"><span>الربع الحالي</span>       <span class="pr-check">✓</span></div>
+                  <div class="log-preset-sep"></div>
+                  <div class="log-preset-item" data-preset="thisYear"   onclick="applyPreset('thisYear')">   <span>العام الحالي</span>       <span class="pr-check">✓</span></div>
+                  <div class="log-preset-item" data-preset="lastYear"   onclick="applyPreset('lastYear')">   <span>العام السابق</span>       <span class="pr-check">✓</span></div>
+                </div>
               </div>
             </div>
             <div class="log-fg" style="align-self:flex-end;">
@@ -964,16 +1010,146 @@ function toggleLogFilters() {
   document.getElementById('logFiltersToggleIcon').classList.toggle('open', logFiltersOpen);
 }
 
+// ─── Date Empty Class (placeholder visual) ────────────────────────────────────
+function updateDateEmptyClass(el) {
+  el.classList.toggle('empty', !el.value);
+}
+
+// ─── Preset Dropdown ──────────────────────────────────────────────────────────
+let activePreset = '';
+
+function togglePresetMenu(e) {
+  e.stopPropagation();
+  const btn  = document.getElementById('logPresetBtn');
+  const menu = document.getElementById('logPresetMenu');
+  const isOpen = menu.classList.contains('open');
+  menu.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+// إغلاق الـ dropdown عند الضغط خارجه
+document.addEventListener('click', () => {
+  document.getElementById('logPresetMenu')?.classList.remove('open');
+  document.getElementById('logPresetBtn')?.classList.remove('open');
+});
+
+function toLocalISO(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function applyPreset(preset) {
+  // إغلاق القائمة
+  document.getElementById('logPresetMenu').classList.remove('open');
+  document.getElementById('logPresetBtn').classList.remove('open');
+
+  // تحديد التواريخ حسب الـ preset — بتوقيت Cairo (UTC+3)
+  const now      = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
+  const today    = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  let from, to;
+
+  switch (preset) {
+    case 'today':
+      from = to = today; break;
+    case 'yesterday': {
+      const y = new Date(today); y.setUTCDate(y.getUTCDate() - 1);
+      from = to = y; break;
+    }
+    case 'last7': {
+      from = new Date(today); from.setUTCDate(from.getUTCDate() - 6);
+      to   = today; break;
+    }
+    case 'last30': {
+      from = new Date(today); from.setUTCDate(from.getUTCDate() - 29);
+      to   = today; break;
+    }
+    case 'last90': {
+      from = new Date(today); from.setUTCDate(from.getUTCDate() - 89);
+      to   = today; break;
+    }
+    case 'thisMonth':
+      from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
+      to   = today; break;
+    case 'lastMonth': {
+      const lm = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 1, 1));
+      from = lm;
+      to   = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 0));
+      break;
+    }
+    case 'thisQuarter': {
+      const q     = Math.floor(today.getUTCMonth() / 3);
+      from = new Date(Date.UTC(today.getUTCFullYear(), q * 3, 1));
+      to   = today; break;
+    }
+    case 'thisYear':
+      from = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
+      to   = today; break;
+    case 'lastYear': {
+      const y = today.getUTCFullYear() - 1;
+      from = new Date(Date.UTC(y, 0, 1));
+      to   = new Date(Date.UTC(y, 11, 31)); break;
+    }
+    default: return;
+  }
+
+  // تحديث حقول التاريخ
+  const fromInput = document.getElementById('logFilterDateFrom');
+  const toInput   = document.getElementById('logFilterDateTo');
+  fromInput.value = toLocalISO(from);
+  toInput.value   = toLocalISO(to);
+  updateDateEmptyClass(fromInput);
+  updateDateEmptyClass(toInput);
+
+  // تحديث الـ active state على الأيتمز
+  activePreset = preset;
+  document.querySelectorAll('.log-preset-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.preset === preset);
+  });
+
+  // تحديث نص الزرار
+  const labels = {
+    today:'اليوم', yesterday:'أمس', last7:'آخر 7 أيام', last30:'آخر 30 يوم',
+    last90:'آخر 90 يوم', thisMonth:'الشهر الحالي', lastMonth:'الشهر السابق',
+    thisQuarter:'الربع الحالي', thisYear:'العام الحالي', lastYear:'العام السابق'
+  };
+  const btn = document.getElementById('logPresetBtn');
+  document.getElementById('logPresetLabel').textContent = `⚡ ${labels[preset]}`;
+  btn.classList.add('has-preset');
+
+  // تطبيق فوري
+  if (!logLoaded) { loadLog(); } else { applyLogFilters(); }
+}
+
+// إعادة تعيين الـ preset عند تغيير التاريخ يدوياً
+function onLogFilterChange() {
+  activePreset = '';
+  document.querySelectorAll('.log-preset-item').forEach(el => el.classList.remove('active'));
+  const btn = document.getElementById('logPresetBtn');
+  if (btn) {
+    document.getElementById('logPresetLabel').textContent = '⚡ اختار فترة';
+    btn.classList.remove('has-preset');
+  }
+  if (!logLoaded) { loadLog(); return; }
+  applyLogFilters();
+}
+
 // ─── Clear All Filters ────────────────────────────────────────────────────────
 function clearLogFilters() {
   document.getElementById('logFilterEmployee').value = '';
   document.getElementById('logFilterType').value     = '';
   document.getElementById('logFilterCount').value    = '';
-  document.getElementById('logFilterDateFrom').value = '';
-  document.getElementById('logFilterDateTo').value   = '';
+  const fromInput = document.getElementById('logFilterDateFrom');
+  const toInput   = document.getElementById('logFilterDateTo');
+  fromInput.value = '';
+  toInput.value   = '';
+  updateDateEmptyClass(fromInput);
+  updateDateEmptyClass(toInput);
   document.getElementById('logSearch').value         = '';
   document.getElementById('logSearchNotes').value    = '';
-  // إذا كان الموظف اتغير سابقاً ممكن البيانات تكون مفلترة — أعد الجلب الكامل
+  activePreset = '';
+  document.querySelectorAll('.log-preset-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('logPresetLabel').textContent = '⚡ اختار فترة';
+  document.getElementById('logPresetBtn').classList.remove('has-preset');
   loadLog();
 }
 
@@ -984,10 +1160,6 @@ let logTotalAll  = 0;       // الإجمالي الحقيقي (بدون أي ف
 let logSelectedIds = new Set();
 let logDebounce = null;
 
-function onLogFilterChange() {
-  if (!logLoaded) { loadLog(); return; }
-  applyLogFilters();
-}
 function onLogEmpFilterChange() { loadLog(); }
 function onLogSearchInput()  { clearTimeout(logDebounce); logDebounce = setTimeout(applyLogFilters, 300); }
 
