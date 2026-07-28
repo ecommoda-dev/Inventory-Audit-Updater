@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Inventory Audit v4.0.0</title>
+<title>Inventory Audit v4.0.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -223,25 +223,25 @@ td.centered{text-align:center;}
 .barcode-icon{padding:0 14px;color:var(--text-muted);font-size:20px;}
 #results{display:none;}
 #results.visible{display:block;}
-.product-topbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;}
+.product-topbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;}
 .product-topbar.status-active{background:#f0fdf4;border-color:#86efac;}
 .product-topbar.status-other{background:#fef2f2;border-color:#fca5a5;}
-.product-img-wrap{width:165px;height:165px;border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:56px;color:var(--text-muted);}
+.product-main-stack{display:flex;flex-direction:column;align-items:center;gap:7px;flex-shrink:0;}
+.product-img-wrap{width:210px;height:210px;border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:64px;color:var(--text-muted);cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.product-img-wrap:hover{transform:scale(1.015);box-shadow:0 4px 16px rgba(0,0,0,.12);}
 .product-img-wrap img{width:100%;height:100%;object-fit:cover;}
-.product-main-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
-.product-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.product-links-row{display:flex;flex-direction:column;gap:3px;}
-.sku-link{display:inline-flex;align-items:center;gap:4px;text-decoration:none;width:fit-content;}
-.sku-pill{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:5px;padding:3px 9px;}
-.sku-arrow{font-size:11px;color:var(--text-muted);}
-.history-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:5px;padding:3px 9px;text-decoration:none;width:fit-content;}
-.product-right-info{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.product-brand-line{font-size:16px;font-weight:800;color:var(--text-primary);text-align:center;margin-top:2px;}
+.product-sku-line{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:5px;padding:3px 10px;}
+.product-size-line{font-size:16px;font-weight:800;color:var(--green);background:var(--green-light);border:1px solid var(--green-border);border-radius:6px;padding:3px 16px;}
+.product-color-line{font-size:11px;font-weight:600;color:var(--purple);background:var(--purple-light);border:1px solid var(--purple-border);border-radius:5px;padding:2px 9px;}
+.product-nav-col{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+.nav-link-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:6px;padding:6px 13px;text-decoration:none;white-space:nowrap;}
+.nav-link-btn:hover{background:var(--accent);color:#fff;}
 .status-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 .status-ACTIVE{background:var(--green-light);color:var(--green);}.status-OTHER{background:var(--red-light);color:var(--red);}
-.options-wrap{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
-.option-pill{border-radius:5px;padding:2px 9px;font-size:11px;font-weight:600;border:1px solid;}
-.option-pill-shoe{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}.option-pill-color{background:#fdf4ff;color:#7e22ce;border-color:#e9d5ff;}.option-pill-other{background:var(--bg);color:var(--text-secondary);border-color:var(--border);}
 .refresh-btn{display:none;align-items:center;gap:5px;padding:5px 11px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
+#imageLightboxOverlay{background:rgba(0,0,0,.85);cursor:zoom-out;}
+#imageLightboxOverlay img{max-width:92vw;max-height:92vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);cursor:default;}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;box-shadow:var(--shadow);}
 .stat-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
 .stat-value{font-size:28px;font-weight:700;line-height:1.1;margin:4px 0;font-variant-numeric:tabular-nums;}
@@ -292,8 +292,11 @@ td.centered{text-align:center;}
 .btn-apply:disabled{opacity:.5;cursor:not-allowed;}
 .scan-count-panel{display:none;border-top:1px solid var(--border);margin-top:16px;padding-top:16px;}
 .scan-count-panel.visible{display:block;}
-.scan-count-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.scan-count-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
 .scan-count-title{font-size:13px;font-weight:700;}
+.scan-count-header-btns{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.btn-reset-count-sm{display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--red-light);color:var(--red);border:1px solid var(--red-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-reset-count-sm:hover{background:var(--red);color:#fff;}
 .scan-count-input-wrap{display:flex;align-items:center;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:18px;transition:all .15s;}
 .scan-count-input-wrap.scanning{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.1);}
 .scan-count-input-wrap.disabled-no-barcode{opacity:.5;pointer-events:none;background:var(--surface-2);}
@@ -303,16 +306,12 @@ td.centered{text-align:center;}
 .scan-count-number{font-size:52px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums;line-height:1;transition:transform .15s;display:inline-block;}
 .scan-count-number.pulse{transform:scale(1.18);}
 .scan-count-label{font-size:12px;color:var(--text-muted);margin-top:4px;}
-.scan-count-manual{display:flex;align-items:center;gap:10px;margin-bottom:16px;justify-content:center;}
+.scan-count-manual{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px;}
 .scan-count-manual label{font-size:12px;font-weight:600;color:var(--text-secondary);}
-.scan-count-manual input{width:80px;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);padding:7px;font-family:var(--mono);font-size:14px;text-align:center;outline:none;}
-.scan-count-manual input:focus{border-color:var(--accent);}
-.scan-count-total-row{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:18px;padding:10px;background:var(--surface-2);border-radius:var(--radius-sm);}
+.scan-count-manual #scanCountManual{width:80px;border:none;outline:none;padding:8px 6px;font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text-primary);text-align:center;background:transparent;}
+.scan-count-total-row{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:20px;padding:10px;background:var(--surface-2);border-radius:var(--radius-sm);}
 .scan-count-total-row span:last-child{font-size:22px;color:var(--accent);font-family:var(--mono);}
-.scan-count-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-.btn-reset-count{padding:9px 18px;background:var(--red-light);color:var(--red);border:1.5px solid var(--red-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;}
-.btn-reset-count:hover{background:var(--red);color:#fff;}
-.btn-finish-count{padding:9px 22px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;}
+.btn-finish-count{display:block;width:100%;padding:14px 22px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:15px;font-weight:800;cursor:pointer;text-align:center;box-shadow:0 2px 8px rgba(22,163,74,.25);}
 .btn-finish-count:hover{filter:brightness(.93);}
 #warningBanner{display:none;background:#fef2f2;border:2px solid var(--red);border-radius:var(--radius-sm);padding:16px 20px;margin-bottom:10px;align-items:flex-start;gap:12px;}
 .warning-icon{font-size:22px;flex-shrink:0;}
@@ -444,7 +443,16 @@ td.centered{text-align:center;}
   <div class="modal" style="max-width:500px;max-height:80vh;display:flex;flex-direction:column;">
     <div class="modal-header">📋 سجل التحديثات<button class="modal-close-btn" onclick="closeChangelog()">✕</button></div>
     <div class="changelog-body" style="flex:1;overflow-y:auto;">
-      <div class="cl-version"><span class="cl-ver-badge">v4.0.0</span><span class="cl-ver-date">28-07-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge">v4.0.1</span><span class="cl-ver-date">28-07-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>مسح الباركود لم يعد يبدّل تلقائياً لتاب "بحث بالـ SKU" — يفضل على وضع المسح لاستمرار السكانر</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>وضع العد بالسكانر: زرار "✅ إنهاء العد" أصبح CTA رئيسي بعرض كامل في المنتصف، وزرار "إعادة العد" انتقل لزرار صغير ثانوي بجانب الإلغاء</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>خانة "+ عدد إضافي يدوي" أصبحت بنفس تصميم الـ stepper (−/+) المستخدم في تعديل المخزون</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>إعادة تصميم بطاقة المنتج: صورة أكبر + اسم البراند (من Shopify vendor) + SKU + المقاس كل سطر بلون/حجم مستقل — وزرارا فتح صفحة الـ SKU وسجل التعديلات انتقلا للجهة المقابلة</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>الضغط على صورة المنتج يفتح Popup بحجم الشاشة كاملة</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>Worker: إضافة product.vendor لـ list_skus و lookup_barcode لعرض اسم البراند</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge" style="background:#f9fafb;color:#374151;border-color:#d1d5db;">v4.0.0</span><span class="cl-ver-date">28-07-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>عد الرف بالسكانر (📷 ابدأ العد بالسكانر) — كل مسح لباركود الـ SKU الحالي يزيد العداد الحي +1</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>إدخال يدوي اختياري يُجمع مع عدد السكانر (للقطع بدون باركود ظاهر)</span></li>
@@ -500,8 +508,8 @@ td.centered{text-align:center;}
           <div class="about-label">الـ Endpoints</div>
           <div class="about-endpoints">
             <div class="about-ep"><code>get_audit_priorities</code><span>جلب المنتجات للـ Priority Queue — يستثني Untracked + Suspended</span></div>
-            <div class="about-ep"><code>list_skus</code><span>بحث SKU / اسم المنتج — يستثني Suspended</span></div>
-            <div class="about-ep"><code>lookup_barcode</code><span>بحث بالباركود — يستثني Suspended</span></div>
+            <div class="about-ep"><code>list_skus</code><span>بحث SKU / اسم المنتج — يستثني Suspended، يرجع product.vendor</span></div>
+            <div class="about-ep"><code>lookup_barcode</code><span>بحث بالباركود — يستثني Suspended، يرجع product.vendor</span></div>
             <div class="about-ep"><code>get_details</code><span>أوردرات Unfulfilled + حالة التغليف S1/S2</span></div>
             <div class="about-ep"><code>adjust_inventory</code><span>تعديل Available + تسجيل D1</span></div>
             <div class="about-ep"><code>set_audit_date</code><span>تسجيل جرد مظبوط بدون تعديل</span></div>
@@ -511,7 +519,7 @@ td.centered{text-align:center;}
       <details style="margin-top:8px;">
         <summary class="about-summary">🔧 تشريح الكود</summary>
         <div class="about-body">
-          <pre class="about-code">FEATURE MAP (v4.0.0)
+          <pre class="about-code">FEATURE MAP (v4.0.1)
 Feature                            | File   | §Section  | fn / action
 ----------------------------------------------------------------------
 Priority Queue — جلب               | Worker | §SHOPIFY  | getAllVariantsForAudit
@@ -530,6 +538,10 @@ Scanner Piece Counting (v4.0)       | HTML   | §TOOL-JS  | scanCount* / §TOOL-
   - تعبئة تلقائية لخانة التعديل     |        |           | showAdjustPanel(prefillDelta)
 Login — state machine               | HTML   | §AUTH-JS  | renderLoginMode (4 states)
 سجل العمليات                        | HTML   | §LOG-JS   | loadLog/exportSelectedLog
+Product Card v2 (v4.0.1)            | HTML   | §TOOL-JS  | renderProductCard (brand/SKU/size lines)
+Image Lightbox (v4.0.1)             | HTML   | §TOOL-JS  | openImageLightbox/closeImageLightbox
+Barcode no-tab-switch fix (v4.0.1)  | HTML   | §TOOL-JS  | lookupByBarcode
+Manual Count Stepper (v4.0.1)       | HTML   | §TOOL-JS  | stepManualCount
 
 KEY VARIABLES
 LS_URL_KEY            = 'stockaudit_worker_url'
@@ -562,6 +574,11 @@ SCANNER PIECE COUNTING (v4.0 — لا تغيير في الـ Worker)
     - فرق → يفتح adjust-panel مع delta معبأ تلقائياً (قابل للتعديل اليدوي) + ملاحظة تلقائية بتفاصيل العد
 • لا endpoints جديدة — نفس set_audit_date / adjust_inventory الحاليين
 
+PRODUCT CARD (v4.0.1)
+• البراند = product.vendor من Shopify — لو فاضي، يعرض اسم المنتج الكامل كـ fallback
+• الصورة قابلة للضغط → Popup بحجم الشاشة الكاملة (imageLightboxOverlay)
+• زرارا "صفحة الـ SKU" و"سجل التعديلات" في عمود منفصل (product-nav-col) بجانب الصورة
+
 EXCLUSIONS (Worker-side)
 • Inventory not tracked -> Priority Queue only
 • Tag: Suspended -> everywhere in tool</pre>
@@ -570,6 +587,10 @@ EXCLUSIONS (Worker-side)
     </div>
     <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeAbout()">إغلاق</button></div>
   </div>
+</div>
+<!-- Image Lightbox — v4.0.1 -->
+<div class="modal-overlay" id="imageLightboxOverlay" onclick="closeImageLightbox()">
+  <img id="lightboxImg" src="" alt="" onclick="event.stopPropagation()" />
 </div>
 <!-- Post-Audit Popup -->
 <div class="modal-overlay" id="postAuditOverlay" onclick="if(event.target===this)closePostAuditPopup()">
@@ -589,7 +610,7 @@ EXCLUSIONS (Worker-side)
   <div class="app-header-btns">
     <button class="hbtn" id="activeUserBtn" onclick="doLogout()">👤 —</button>
     <button class="hbtn" onclick="openAbout()">ℹ️ عن الأداة</button>
-    <button class="hbtn ver-btn" onclick="openChangelog()">v4.0.0 📋</button>
+    <button class="hbtn ver-btn" onclick="openChangelog()">v4.0.1 📋</button>
     <button class="hbtn" id="settingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
   </div>
 </div>
@@ -618,15 +639,19 @@ EXCLUSIONS (Worker-side)
   </div>
   <div id="results">
     <div class="product-topbar" id="productTopbar">
-      <div class="product-img-wrap" id="productImgWrap">📦</div>
-      <div class="product-main-info">
-        <div class="product-name" id="productTitle">—</div>
-        <div class="product-links-row">
-          <a class="sku-link" id="productSkuLink" href="#" target="_blank"><span class="sku-pill" id="productSkuDisplay">SKU: —</span><span class="sku-arrow">↗</span></a>
-          <a class="history-link" id="historyLink" href="#" target="_blank">📋 سجل التعديلات ↗</a>
-        </div>
+      <div class="product-main-stack">
+        <div class="product-img-wrap" id="productImgWrap" onclick="openImageLightbox()">📦</div>
+        <div class="product-brand-line" id="productBrand">—</div>
+        <div class="product-sku-line" id="productSkuDisplay">—</div>
+        <div class="product-size-line" id="productSizeVal" style="display:none;"></div>
+        <div class="product-color-line" id="productColorVal" style="display:none;"></div>
       </div>
-      <div class="product-right-info"><div id="productStatus"></div><div class="options-wrap" id="productOptions"></div><button class="refresh-btn" id="refreshBtn" onclick="refreshCurrent()">↻ Refresh</button></div>
+      <div class="product-nav-col">
+        <div id="productStatus"></div>
+        <a class="nav-link-btn" id="productSkuLink" href="#" target="_blank">↗ صفحة الـ SKU</a>
+        <a class="nav-link-btn" id="historyLink" href="#" target="_blank">📋 سجل التعديلات</a>
+        <button class="refresh-btn" id="refreshBtn" onclick="refreshCurrent()">↻ Refresh</button>
+      </div>
     </div>
     <div style="display:flex;align-items:center;gap:0;margin-bottom:10px;">
       <div class="stat-card" style="flex:1.4;min-width:0;padding:16px 14px;border:2px solid #d97706;background:#fef9c3;"><div class="stat-label">عدد القطع على الرف</div><div class="stat-value val-shelf" id="qtyShelf">—</div><div class="stat-desc">المتوقع عند الجرد</div></div>
@@ -658,7 +683,10 @@ EXCLUSIONS (Worker-side)
       <div class="scan-count-panel" id="scanCountPanel">
         <div class="scan-count-header">
           <div class="scan-count-title">📷 وضع العد بالسكانر — امسح كل قطعة موجودة على الرف</div>
-          <button class="btn-back" onclick="cancelScanCount()">✕ إلغاء العد</button>
+          <div class="scan-count-header-btns">
+            <button class="btn-reset-count-sm" onclick="resetScanCount()">🔄 إعادة العد</button>
+            <button class="btn-back" onclick="cancelScanCount()">✕ إلغاء العد</button>
+          </div>
         </div>
         <div class="scan-count-input-wrap" id="scanCountInputWrap">
           <span class="barcode-icon">🔫</span>
@@ -670,13 +698,14 @@ EXCLUSIONS (Worker-side)
         </div>
         <div class="scan-count-manual">
           <label for="scanCountManual">+ عدد إضافي يدوي (اختياري)</label>
-          <input type="number" id="scanCountManual" min="0" value="0" oninput="updateScanCountTotal()" />
+          <div class="delta-wrap">
+            <button class="delta-btn minus" onclick="stepManualCount(-1)">−</button>
+            <input type="number" id="scanCountManual" min="0" value="0" oninput="updateScanCountTotal()" />
+            <button class="delta-btn" onclick="stepManualCount(1)">+</button>
+          </div>
         </div>
         <div class="scan-count-total-row"><span>الإجمالي:</span><span id="scanCountTotal">0</span></div>
-        <div class="scan-count-actions">
-          <button class="btn-reset-count" onclick="resetScanCount()">🔄 إعادة العد من الصفر</button>
-          <button class="btn-finish-count" onclick="finishScanCount()">✅ إنهاء العد ومقارنة النتيجة</button>
-        </div>
+        <button class="btn-finish-count" onclick="finishScanCount()">✅ إنهاء العد ومقارنة النتيجة</button>
       </div>
       <div class="adjust-panel" id="adjustPanel">
         <div class="adjust-panel-header"><div class="adjust-panel-title">🔧 تعديل المخزون</div><button class="btn-back" onclick="hideAdjustPanel()">← رجوع</button></div>
@@ -1054,7 +1083,7 @@ function handleScanCountInput(){
 // ══════════════════════════════════════════════════════
 // §TOOL-JS
 // ══════════════════════════════════════════════════════
-let currentSku=null,currentVariant=null,currentShelfQty=null,selectedOrderIds=new Set(),_searchDebounce=null;
+let currentSku=null,currentVariant=null,currentShelfQty=null,selectedOrderIds=new Set(),_searchDebounce=null,currentImgUrl=null;
 let priorityData=null,priorityFiltered=[],priorityMode={active:false,currentProductId:null};
 let lastPriorityRefreshTime=null,pfFiltersOpen=true,_pfSearchDebounce=null;
 let scanCountState={active:false,scannerCount:0,targetBarcode:null};
@@ -1226,19 +1255,31 @@ async function loadSkus(search){dropdownList.innerHTML='<div class="dropdown-loa
 function renderDropdown(variants){if(!variants.length){dropdownList.innerHTML='<div class="dropdown-empty">لا توجد نتائج</div>';return;}dropdownList.innerHTML=variants.map(v=>'<div class="dropdown-item" onclick=\'selectVariant('+JSON.stringify(v).replace(/'/g,"&#39;")+')\' ><span class="item-sku">'+(v.sku||'—')+'</span><span class="item-name">'+(v.product?.title||'')+' '+(v.selectedOptions?.map(o=>o.value).join(' / ')||'')+'</span></div>').join('');dropdownList.classList.add('open');}
 function selectVariant(variant){currentSku=variant.sku;currentVariant=variant;skuSearch.value=variant.sku;clearBtn.classList.add('visible');dropdownList.classList.remove('open');renderProductCard(variant);loadOrders(variant);}
 function switchTab(tab){document.getElementById('tabSku').classList.toggle('active',tab==='sku');document.getElementById('tabBarcode').classList.toggle('active',tab==='barcode');document.getElementById('skuMode').style.display=tab==='sku'?'block':'none';document.getElementById('barcodeMode').classList.toggle('active',tab==='barcode');if(tab==='barcode')barcodeInput.focus();}
-async function lookupByBarcode(barcode){showToast('جاري البحث...','');try{const data=await apiGet('lookup_barcode',{barcode});if(!data.variant){showToast('لا يوجد منتج بهذا الباركود','error');return;}showToast('تم العثور على المنتج','success');selectVariant(data.variant);switchTab('sku');skuSearch.value=data.variant.sku;clearBtn.classList.add('visible');}catch(e){showToast(e.message,'error');}}
+async function lookupByBarcode(barcode){showToast('جاري البحث...','');try{const data=await apiGet('lookup_barcode',{barcode});if(!data.variant){showToast('لا يوجد منتج بهذا الباركود','error');return;}showToast('تم العثور على المنتج','success');selectVariant(data.variant);/* v4.0.1: لا تبديل تلقائي للتاب — يفضل على وضع مسح الباركود لاستمرار المسح */skuSearch.value=data.variant.sku;clearBtn.classList.add('visible');barcodeInput.focus();}catch(e){showToast(e.message,'error');}}
+function openImageLightbox(){if(!currentImgUrl)return;document.getElementById('lightboxImg').src=currentImgUrl;document.getElementById('imageLightboxOverlay').classList.add('open');}
+function closeImageLightbox(){document.getElementById('imageLightboxOverlay').classList.remove('open');}
 function toCairo(iso){return new Date(new Date(iso).getTime()+3*60*60*1000);}
 function formatDateTime(iso){const d=toCairo(iso),pad=n=>String(n).padStart(2,'0');let h=d.getUTCHours();const m=pad(d.getUTCMinutes()),ampm=h>=12?'مساءً':'صباحاً';h=h%12||12;return pad(d.getUTCDate())+'-'+pad(d.getUTCMonth()+1)+'-'+d.getUTCFullYear()+' الساعة '+pad(h)+':'+m+' '+ampm;}
 function formatDate(iso){const d=toCairo(iso),pad=n=>String(n).padStart(2,'0');return pad(d.getUTCDate())+'-'+pad(d.getUTCMonth()+1)+'-'+d.getUTCFullYear();}
 function renderProductCard(variant){
   if(scanCountState.active)cancelScanCount();
-  currentVariant=variant;document.getElementById('productTitle').textContent=variant.product?.title||'—';document.getElementById('productSkuDisplay').textContent='SKU: '+(variant.sku||'—');
+  currentVariant=variant;
+  document.getElementById('productBrand').textContent=variant.product?.vendor||variant.product?.title||'—';
+  document.getElementById('productSkuDisplay').textContent=variant.sku||'—';
   const vid=(variant.id||'').split('/').pop(),pid=(variant.product?.id||'').split('/').pop();
   document.getElementById('productSkuLink').href=pid&&vid?'https://admin.shopify.com/store/6c7e1a-53/products/'+pid+'/variants/'+vid:'#';
   const iid=(variant.inventoryItem?.id||'').split('/').pop();if(iid)document.getElementById('historyLink').href='https://admin.shopify.com/store/6c7e1a-53/products/inventory/'+iid+'/inventory_history?location_id=98849620290';
-  const imgWrap=document.getElementById('productImgWrap'),imgUrl=variant.product?.featuredImage?.url;imgWrap.innerHTML=imgUrl?'<img src="'+imgUrl+'" alt="" />':'📦';
+  const imgWrap=document.getElementById('productImgWrap'),imgUrl=variant.product?.featuredImage?.url;
+  currentImgUrl=imgUrl||null;
+  imgWrap.innerHTML=imgUrl?'<img src="'+imgUrl+'" alt="" />':'📦';
+  imgWrap.style.cursor=imgUrl?'pointer':'default';
   const opts=variant.selectedOptions||[],sizeN=['shoe size','size','مقاس'],colorN=['color','colour','لون'];
-  document.getElementById('productOptions').innerHTML=opts.filter(o=>o.value!=='Default Title').map(o=>{const k=o.name.toLowerCase();let c='option-pill-other';if(sizeN.some(n=>k.includes(n)))c='option-pill-shoe';else if(colorN.some(n=>k.includes(n)))c='option-pill-color';return '<span class="option-pill '+c+'">'+o.name+': '+o.value+'</span>';}).join('');
+  const sizeOpt=opts.find(o=>o.value!=='Default Title'&&sizeN.some(n=>o.name.toLowerCase().includes(n)));
+  const colorOpt=opts.find(o=>o.value!=='Default Title'&&colorN.some(n=>o.name.toLowerCase().includes(n)));
+  const sizeEl=document.getElementById('productSizeVal');
+  if(sizeOpt){sizeEl.textContent=sizeOpt.value;sizeEl.style.display='inline-flex';}else{sizeEl.style.display='none';}
+  const colorEl=document.getElementById('productColorVal');
+  if(colorOpt){colorEl.textContent=colorOpt.value;colorEl.style.display='inline-flex';}else{colorEl.style.display='none';}
   const status=variant.product?.status||'',labels={ACTIVE:'Active ✓',DRAFT:'Draft',ARCHIVED:'Archived'};
   document.getElementById('productStatus').innerHTML='<span class="status-badge '+(status==='ACTIVE'?'status-ACTIVE':'status-OTHER')+'">'+(labels[status]||status)+'</span>';
   const topbar=document.getElementById('productTopbar');topbar.classList.remove('status-active','status-other');topbar.classList.add(status==='ACTIVE'?'status-active':'status-other');
@@ -1346,6 +1387,7 @@ function showAdjustPanel(prefillDelta){
 }
 function hideAdjustPanel(){document.getElementById('adjustPanel').classList.remove('visible');document.getElementById('scanSuggestNote').style.display='none';}
 function stepDelta(step){const inp=document.getElementById('deltaInput');inp.value=(parseInt(inp.value)||0)+step;updatePreview();}
+function stepManualCount(step){const inp=document.getElementById('scanCountManual');inp.value=Math.max(0,(parseInt(inp.value)||0)+step);updateScanCountTotal();}
 function updatePreview(){const delta=parseInt(document.getElementById('deltaInput').value)||0,current=parseInt((document.getElementById('adjustCurrentVal').textContent||'').replace(/,/g,''));const previewEl=document.getElementById('previewNew'),btnApply=document.getElementById('btnApplyAdjust');if(isNaN(current)||delta===0){previewEl.textContent=isNaN(current)?'—':current.toLocaleString('en-US');previewEl.className='preview-new zero';btnApply.disabled=true;return;}const newVal=current+delta;previewEl.textContent=newVal.toLocaleString('en-US');previewEl.className='preview-new '+(delta>0?'positive':'negative');btnApply.disabled=false;}
 function updateAuditInfo(isoString,employee,notes){document.getElementById('auditLastVal').textContent=formatDateTime(isoString);const empRow=document.getElementById('auditEmpRow');if(employee){document.getElementById('auditEmpVal').textContent=employee.replace(/_/g,' ');empRow.style.display='flex';}else empRow.style.display='none';const notesRow=document.getElementById('auditNotesRow');if(notes){document.getElementById('auditNotesVal').textContent=notes;notesRow.style.display='block';}else notesRow.style.display='none';document.getElementById('auditInfoBox').style.display='flex';}
 function openConfirm(headerHTML,bodyHTML,okLabel,okClass,onConfirm){
