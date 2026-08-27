@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<!-- skills: html-builder v1.0.0 · constants v1.2.0 — 27-08-2026 -->
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Inventory Audit v3.0.0</title>
+<title>Inventory Audit v4.0.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -147,11 +148,16 @@ details[open]>.about-summary{border-radius:8px 8px 0 0;border-bottom:none;}
 .btn-same-product{background:var(--accent-light);color:var(--accent);border-color:var(--accent);}
 .btn-next-priority{background:var(--green-light);color:var(--green);border-color:var(--green);}
 .post-audit-icon{font-size:20px;flex-shrink:0;}
+/* Priority Queue */
 .priority-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
 .priority-toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);flex-wrap:wrap;}
 .priority-refresh-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border:1px solid var(--green-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;font-weight:700;color:var(--green);background:var(--green-light);cursor:pointer;}
 .priority-refresh-btn:hover{background:var(--green);color:#fff;}
 .priority-refresh-btn:disabled{opacity:.5;cursor:not-allowed;}
+/* v3.1.0 Timestamp */
+.priority-ts-badge{display:none;align-items:center;gap:8px;padding:6px 14px;background:var(--accent-light);border:1px solid #bfdbfe;border-radius:var(--radius-sm);font-size:13px;font-weight:700;color:var(--text-primary);}
+.priority-ts-part{white-space:nowrap;}
+.priority-ts-relative{font-size:11px;font-weight:600;color:var(--accent);}
 .priority-threshold-wrap{display:flex;align-items:center;gap:6px;}
 .priority-threshold-label{font-size:11px;font-weight:700;color:var(--text-secondary);}
 .priority-threshold-sel{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:5px 8px;font-family:var(--font);font-size:12px;font-weight:600;color:var(--text-primary);background:var(--surface);cursor:pointer;outline:none;}
@@ -167,8 +173,7 @@ details[open]>.about-summary{border-radius:8px 8px 0 0;border-bottom:none;}
 .p-chip-p4{background:var(--accent-light);color:var(--accent);border-color:#bfdbfe;}
 .p-chip-p5{background:var(--bg);color:var(--text-secondary);border-color:var(--border);}
 .p-chip-p6{background:var(--green-light);color:var(--green);border-color:var(--green-border);}
-.priority-last-refresh{font-size:10px;color:var(--text-muted);margin-right:auto;}
-.priority-table-wrap{overflow-y:auto;max-height:650px;}
+.priority-table-wrap{overflow-y:auto;max-height:620px;}
 .priority-table{width:100%;border-collapse:collapse;}
 .priority-table th{padding:10px 14px;text-align:right;font-size:12px;font-weight:700;background:#e5e7eb;border-bottom:2px solid var(--border-strong);white-space:nowrap;position:sticky;top:0;z-index:1;}
 .priority-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
@@ -219,25 +224,25 @@ td.centered{text-align:center;}
 .barcode-icon{padding:0 14px;color:var(--text-muted);font-size:20px;}
 #results{display:none;}
 #results.visible{display:block;}
-.product-topbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;}
+.product-topbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;}
 .product-topbar.status-active{background:#f0fdf4;border-color:#86efac;}
 .product-topbar.status-other{background:#fef2f2;border-color:#fca5a5;}
-.product-img-wrap{width:165px;height:165px;border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:56px;color:var(--text-muted);}
+.product-main-stack{display:flex;flex-direction:column;align-items:center;gap:7px;flex-shrink:0;}
+.product-img-wrap{width:210px;height:210px;border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:64px;color:var(--text-muted);cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.product-img-wrap:hover{transform:scale(1.015);box-shadow:0 4px 16px rgba(0,0,0,.12);}
 .product-img-wrap img{width:100%;height:100%;object-fit:cover;}
-.product-main-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
-.product-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.product-links-row{display:flex;flex-direction:column;gap:3px;}
-.sku-link{display:inline-flex;align-items:center;gap:4px;text-decoration:none;width:fit-content;}
-.sku-pill{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:5px;padding:3px 9px;}
-.sku-arrow{font-size:11px;color:var(--text-muted);}
-.history-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:5px;padding:3px 9px;text-decoration:none;width:fit-content;}
-.product-right-info{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.product-brand-line{font-size:16px;font-weight:800;color:var(--text-primary);text-align:center;margin-top:2px;}
+.product-sku-line{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:5px;padding:3px 10px;}
+.product-size-line{font-size:16px;font-weight:800;color:var(--green);background:var(--green-light);border:1px solid var(--green-border);border-radius:6px;padding:3px 16px;}
+.product-color-line{font-size:11px;font-weight:600;color:var(--purple);background:var(--purple-light);border:1px solid var(--purple-border);border-radius:5px;padding:2px 9px;}
+.product-nav-col{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+.nav-link-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:6px;padding:6px 13px;text-decoration:none;white-space:nowrap;}
+.nav-link-btn:hover{background:var(--accent);color:#fff;}
 .status-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 .status-ACTIVE{background:var(--green-light);color:var(--green);}.status-OTHER{background:var(--red-light);color:var(--red);}
-.options-wrap{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
-.option-pill{border-radius:5px;padding:2px 9px;font-size:11px;font-weight:600;border:1px solid;}
-.option-pill-shoe{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}.option-pill-color{background:#fdf4ff;color:#7e22ce;border-color:#e9d5ff;}.option-pill-other{background:var(--bg);color:var(--text-secondary);border-color:var(--border);}
 .refresh-btn{display:none;align-items:center;gap:5px;padding:5px 11px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
+#imageLightboxOverlay{background:rgba(0,0,0,.85);cursor:zoom-out;}
+#imageLightboxOverlay img{max-width:92vw;max-height:92vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);cursor:default;}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;box-shadow:var(--shadow);}
 .stat-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
 .stat-value{font-size:28px;font-weight:700;line-height:1.1;margin:4px 0;font-variant-numeric:tabular-nums;}
@@ -253,17 +258,22 @@ td.centered{text-align:center;}
 .audit-info-val{font-size:15px;font-weight:700;}
 .audit-emp-badge{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:5px;padding:3px 11px;}
 .audit-notes-row{font-size:13px;color:var(--text-secondary);padding-top:6px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.audit-q-btns{display:flex;gap:8px;flex-shrink:0;}
+.audit-q-btns{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;}
 .btn-audit-ok{display:flex;align-items:center;gap:6px;padding:10px 22px;background:var(--green-light);color:var(--green);border:1.5px solid var(--green-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
 .btn-audit-ok:hover{background:var(--green);color:#fff;}
 .btn-audit-ok:disabled{opacity:.5;cursor:not-allowed;}
 .btn-want-adjust{display:flex;align-items:center;gap:6px;padding:10px 22px;background:var(--surface-2);color:var(--text-secondary);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
 .btn-want-adjust:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+.btn-want-adjust:disabled{opacity:.5;cursor:not-allowed;}
+.btn-start-scan{display:flex;align-items:center;gap:6px;padding:10px 22px;background:var(--purple-light);color:var(--purple);border:1.5px solid var(--purple-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-start-scan:hover{background:var(--purple);color:#fff;}
+.btn-start-scan:disabled{opacity:.5;cursor:not-allowed;}
 .adjust-panel{display:none;border-top:1px solid var(--border);margin-top:16px;padding-top:16px;}
 .adjust-panel.visible{display:block;}
 .adjust-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .adjust-panel-title{font-size:13px;font-weight:700;}
 .btn-back{display:flex;align-items:center;gap:4px;padding:4px 10px;background:transparent;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;color:var(--text-secondary);cursor:pointer;}
+.scan-suggest-note{display:none;font-size:12px;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-weight:600;}
 .adjust-body{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
 .adjust-field{display:flex;flex-direction:column;gap:5px;}
 .adjust-label{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;}
@@ -281,6 +291,29 @@ td.centered{text-align:center;}
 .notes-input:focus{border-color:var(--accent);}
 .btn-apply{display:flex;align-items:center;gap:6px;padding:11px 22px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
 .btn-apply:disabled{opacity:.5;cursor:not-allowed;}
+.scan-count-panel{display:none;border-top:1px solid var(--border);margin-top:16px;padding-top:16px;}
+.scan-count-panel.visible{display:block;}
+.scan-count-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.scan-count-title{font-size:13px;font-weight:700;}
+.scan-count-header-btns{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.btn-reset-count-sm{display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--red-light);color:var(--red);border:1px solid var(--red-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-reset-count-sm:hover{background:var(--red);color:#fff;}
+.scan-count-input-wrap{display:flex;align-items:center;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:18px;transition:all .15s;}
+.scan-count-input-wrap.scanning{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.1);}
+.scan-count-input-wrap.disabled-no-barcode{opacity:.5;pointer-events:none;background:var(--surface-2);}
+#scanCountInput{flex:1;border:none;outline:none;padding:10px 14px;font-family:var(--mono);font-size:14px;color:var(--text-primary);background:transparent;direction:rtl;}
+#scanCountInput::placeholder{font-family:var(--font);color:var(--text-muted);}
+.scan-count-live{text-align:center;margin-bottom:18px;}
+.scan-count-number{font-size:52px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums;line-height:1;transition:transform .15s;display:inline-block;}
+.scan-count-number.pulse{transform:scale(1.18);}
+.scan-count-label{font-size:12px;color:var(--text-muted);margin-top:4px;}
+.scan-count-manual{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px;}
+.scan-count-manual label{font-size:12px;font-weight:600;color:var(--text-secondary);}
+.scan-count-manual #scanCountManual{width:80px;border:none;outline:none;padding:8px 6px;font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text-primary);text-align:center;background:transparent;}
+.scan-count-total-row{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:20px;padding:10px;background:var(--surface-2);border-radius:var(--radius-sm);}
+.scan-count-total-row span:last-child{font-size:22px;color:var(--accent);font-family:var(--mono);}
+.btn-finish-count{display:block;width:100%;padding:14px 22px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:15px;font-weight:800;cursor:pointer;text-align:center;box-shadow:0 2px 8px rgba(22,163,74,.25);}
+.btn-finish-count:hover{filter:brightness(.93);}
 #warningBanner{display:none;background:#fef2f2;border:2px solid var(--red);border-radius:var(--radius-sm);padding:16px 20px;margin-bottom:10px;align-items:flex-start;gap:12px;}
 .warning-icon{font-size:22px;flex-shrink:0;}
 .warning-text{display:flex;flex-direction:column;gap:3px;}
@@ -387,7 +420,7 @@ td.centered{text-align:center;}
 .toast.error{background:var(--red);}.toast.success{background:var(--green);}
 </style>
 
-<!-- §SHELL — Modals -->
+<!-- §SHELL -->
 <div class="modal-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
   <div class="modal">
     <div class="modal-header">⚙️ الإعدادات<button class="modal-close-btn" onclick="closeSettings()">✕</button></div>
@@ -411,16 +444,38 @@ td.centered{text-align:center;}
   <div class="modal" style="max-width:500px;max-height:80vh;display:flex;flex-direction:column;">
     <div class="modal-header">📋 سجل التحديثات<button class="modal-close-btn" onclick="closeChangelog()">✕</button></div>
     <div class="changelog-body" style="flex:1;overflow-y:auto;">
-      <div class="cl-version"><span class="cl-ver-badge">v3.0.0</span><span class="cl-ver-date">31-05-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge">v4.0.1</span><span class="cl-ver-date">28-07-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>مسح الباركود لم يعد يبدّل تلقائياً لتاب "بحث بالـ SKU" — يفضل على وضع المسح لاستمرار السكانر</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>وضع العد بالسكانر: زرار "✅ إنهاء العد" أصبح CTA رئيسي بعرض كامل في المنتصف، وزرار "إعادة العد" انتقل لزرار صغير ثانوي بجانب الإلغاء</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>خانة "+ عدد إضافي يدوي" أصبحت بنفس تصميم الـ stepper (−/+) المستخدم في تعديل المخزون</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>إعادة تصميم بطاقة المنتج: صورة أكبر + اسم البراند (من Shopify vendor) + SKU + المقاس كل سطر بلون/حجم مستقل — وزرارا فتح صفحة الـ SKU وسجل التعديلات انتقلا للجهة المقابلة</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>الضغط على صورة المنتج يفتح Popup بحجم الشاشة كاملة</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>Worker: إضافة product.vendor لـ list_skus و lookup_barcode لعرض اسم البراند</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge" style="background:#f9fafb;color:#374151;border-color:#d1d5db;">v4.0.0</span><span class="cl-ver-date">28-07-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>عد الرف بالسكانر (📷 ابدأ العد بالسكانر) — كل مسح لباركود الـ SKU الحالي يزيد العداد الحي +1</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>إدخال يدوي اختياري يُجمع مع عدد السكانر (للقطع بدون باركود ظاهر)</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>باركود غير مطابق أثناء العد → رفض + صوت/اهتزاز خطأ + إعادة العد الكامل من الصفر تلقائياً</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>زرار "🔄 إعادة العد من الصفر" يدوي في أي وقت أثناء العد</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>"✅ إنهاء العد" يقارن الإجمالي بعدد القطع المتوقع تلقائياً: تطابق → يفتح تأكيد "الجرد مظبوط" مباشرة / فرق → يفتح تعديل الكمية مع الرقم معبأ تلقائياً وقابل للتعديل + ملاحظة تلقائية بتفاصيل العد</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>لا تغييرات في الـ Worker — الميزة بالكامل Frontend فقط، تعتمد على نفس الـ endpoints الحالية</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge" style="background:#f9fafb;color:#374151;border-color:#d1d5db;">v3.1.0</span><span class="cl-ver-date">31-05-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>فلاتر تاب أولويات الجرد — الأولوية / آخر جرد / بحث SKU اسم المنتج</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>Timestamp بجانب زرار التحديث — تاريخ + وقت + منذ (يُحدَّث كل دقيقة)</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>أيقونة تاب الأولويات: 📋 → 🎯</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>أسماء الأولويات: P0=خطأ محتمل / P1=محجوز بالكامل / P2=محجوز أقل من 3 / P3=1-3 قطع / P4=4-6 / P5=7-10 / P6=أكبر من 10</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>Worker: استثناء Inventory not tracked من Priority Queue (tracked field في GQL)</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>Worker: استثناء تاج Suspended من كل أماكن الأداة — Priority Queue + بحث + باركود</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge" style="background:#f9fafb;color:#374151;border-color:#d1d5db;">v3.0.0</span><span class="cl-ver-date">31-05-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>تاب أولويات الجرد — P0-P6 بترتيب ذكي (Available + Committed + تاريخ الجرد)</span></li>
-        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>P0 لـ Available سالب — أعلى أولوية</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>Popup بعد كل جرد — باقي المقاسات / التالي في الأولويات</span></li>
-        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>عتبة الجرد قابلة للضبط (15/30/60/90 يوم)</span></li>
-        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>فلتر ACTIVE فقط toggle</span></li>
-        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>إعادة كتابة شاشة الدخول — state machine + isLoginBusy + auto-submit + keyboard + shake</span></li>
-        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>إضافة apiPost/apiGet helpers — معيار المهارة</span></li>
-        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>ترتيب أزرار Header: extras → ℹ️ → vX.Y.Z → ⚙️</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>إعادة كتابة شاشة الدخول — state machine + isLoginBusy + auto-submit</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>Worker: جلب كل المنتجات من المتجر (بدون collection filter)</span></li>
       </ul>
       <div class="cl-version"><span class="cl-ver-badge" style="background:#f9fafb;color:#6b7280;border-color:#d1d5db;">v2.5.0</span><span class="cl-ver-date">30-05-2026</span></div>
@@ -431,27 +486,31 @@ td.centered{text-align:center;}
     </div>
   </div>
 </div>
+<!-- About Modal -->
 <div class="modal-overlay" id="aboutOverlay" onclick="if(event.target===this)closeAbout()">
-  <div class="modal" style="max-width:640px;max-height:88vh;display:flex;flex-direction:column;">
+  <div class="modal" style="max-width:660px;max-height:88vh;display:flex;flex-direction:column;">
     <div class="modal-header">ℹ️ عن الأداة — Inventory Audit<button class="modal-close-btn" onclick="closeAbout()">✕</button></div>
     <div class="modal-body-about">
       <details open style="margin-top:16px;">
         <summary class="about-summary">📋 وصف الأداة</summary>
         <div class="about-body">
-          <p class="about-desc">أداة مراجعة وضبط الجرد — تتيح عرض أولويات الجرد تلقائياً (P0–P6) بناءً على Available وCommitted وتاريخ آخر جرد، مع جرد متسلسل ذكي.</p>
+          <p class="about-desc">أداة مراجعة وضبط الجرد — تتيح عرض أولويات الجرد تلقائياً (P0–P6) مع فلاتر متقدمة وجرد متسلسل ذكي. تستثني تلقائياً المنتجات غير المتتبعة (Inventory not tracked) وكل المنتجات ذات تاج Suspended من Worker.</p>
           <div class="about-label">المستخدمون</div><p>موظفو المخزن — جرد المنتجات وضبط الكميات + متابعة الأولويات</p>
           <div class="about-label">كيف تعمل</div>
           <div class="about-steps">
-            <div class="about-step"><span class="about-num">1</span><span>تاب أولويات الجرد: يجلب كل المنتجات ويرتبها P0–P6 حسب Available وCommitted وتاريخ الجرد</span></div>
-            <div class="about-step"><span class="about-num">2</span><span>اضغط SKU في القائمة → ينتقل لتاب الجرد ويحمّل المنتج مباشرة</span></div>
-            <div class="about-step"><span class="about-num">3</span><span>بعد الجرد: popup يعرض "باقي مقاسات المنتج" و/أو "التالي في الأولويات"</span></div>
-            <div class="about-step"><span class="about-num">4</span><span>الجرد مظبوط → يُسجَّل التاريخ والموظف في Shopify + D1</span></div>
-            <div class="about-step"><span class="about-num">5</span><span>تعديل الكمية → يُطبَّق على Available في Shopify + تسجيل D1</span></div>
+            <div class="about-step"><span class="about-num">1</span><span>تاب أولويات الجرد (🎯): يجلب كل المنتجات المتتبعة ويرتبها P0–P6، مع استثناء Suspended تلقائياً</span></div>
+            <div class="about-step"><span class="about-num">2</span><span>الفلاتر: تصفية بالأولوية / حالة آخر جرد / بحث SKU أو اسم المنتج</span></div>
+            <div class="about-step"><span class="about-num">3</span><span>اضغط SKU في القائمة → ينتقل لتاب الجرد ويحمّل المنتج مباشرة</span></div>
+            <div class="about-step"><span class="about-num">4</span><span>عد الرف: يدوي (✅ الجرد مظبوط / 🔧 أريد التعديل) أو بالسكانر (📷 ابدأ العد بالسكانر)</span></div>
+            <div class="about-step"><span class="about-num">5</span><span>بعد الجرد: popup يعرض باقي المقاسات و/أو التالي في الأولويات</span></div>
+            <div class="about-step"><span class="about-num">6</span><span>الجرد مظبوط → يُسجَّل التاريخ والموظف في Shopify + D1</span></div>
+            <div class="about-step"><span class="about-num">7</span><span>تعديل الكمية → يُطبَّق على Available في Shopify + تسجيل D1</span></div>
           </div>
           <div class="about-label">الـ Endpoints</div>
           <div class="about-endpoints">
-            <div class="about-ep"><code>get_audit_priorities</code><span>جلب كل المنتجات للـ Priority Queue (v3.0)</span></div>
-            <div class="about-ep"><code>list_skus</code><span>بحث بالـ SKU أو اسم المنتج</span></div>
+            <div class="about-ep"><code>get_audit_priorities</code><span>جلب المنتجات للـ Priority Queue — يستثني Untracked + Suspended</span></div>
+            <div class="about-ep"><code>list_skus</code><span>بحث SKU / اسم المنتج — يستثني Suspended، يرجع product.vendor</span></div>
+            <div class="about-ep"><code>lookup_barcode</code><span>بحث بالباركود — يستثني Suspended، يرجع product.vendor</span></div>
             <div class="about-ep"><code>get_details</code><span>أوردرات Unfulfilled + حالة التغليف S1/S2</span></div>
             <div class="about-ep"><code>adjust_inventory</code><span>تعديل Available + تسجيل D1</span></div>
             <div class="about-ep"><code>set_audit_date</code><span>تسجيل جرد مظبوط بدون تعديل</span></div>
@@ -461,38 +520,78 @@ td.centered{text-align:center;}
       <details style="margin-top:8px;">
         <summary class="about-summary">🔧 تشريح الكود</summary>
         <div class="about-body">
-          <pre class="about-code">FEATURE MAP (v3.0.0)
-Feature                          │ File   │ §Section  │ fn / action
-─────────────────────────────────────────────────────────────
-Priority Queue — جلب             │ Worker │ §SHOPIFY  │ getAllVariantsForAudit
-Priority Queue — عرض             │ HTML   │ §TOOL-JS  │ loadPriorityData/renderPriorityTable
-Priority Queue — منطق            │ HTML   │ §TOOL-JS  │ getPriority/getDaysSince
-SKU click → Audit tab            │ HTML   │ §TOOL-JS  │ loadVariantFromPriority
-Post-Audit Popup                 │ HTML   │ §TOOL-JS  │ onAuditComplete/showPostAuditPopup
-Login — state machine            │ HTML   │ §AUTH-JS  │ renderLoginMode (4 states)
-Login — isLoginBusy              │ HTML   │ §AUTH-JS  │ setLoginBusy
-سجل العمليات                     │ HTML   │ §LOG-JS   │ loadLog/exportSelectedLog
+          <pre class="about-code">FEATURE MAP (v4.0.1)
+Feature                            | File   | §Section  | fn / action
+----------------------------------------------------------------------
+Priority Queue — جلب               | Worker | §SHOPIFY  | getAllVariantsForAudit
+Priority Queue — عرض               | HTML   | §TOOL-JS  | loadPriorityData/renderPriorityTable
+Priority Queue — فلاتر              | HTML   | §TOOL-JS  | togglePriorityFilters/applyPriorityFilters
+Priority Queue — Timestamp          | HTML   | §TOOL-JS  | updatePriorityTimestamp (interval 60s)
+Suspended Filter                    | Worker | §SHOPIFY  | getAllVariantsForAudit+listSkus+lookupBarcode
+Untracked Filter                    | Worker | §SHOPIFY  | getAllVariantsForAudit only
+SKU click to Audit tab              | HTML   | §TOOL-JS  | loadVariantFromPriority
+Post-Audit Popup                    | HTML   | §TOOL-JS  | onAuditComplete/showPostAuditPopup
+Scanner Piece Counting (v4.0)       | HTML   | §TOOL-JS  | scanCount* / §TOOL-JS::scanCount
+  - بدء/إلغاء وضع العد              |        |           | startScanCount/cancelScanCount
+  - مطابقة الباركود لكل مسحة        |        |           | processScanCountValue
+  - إعادة العد من الصفر             |        |           | resetScanCount
+  - إنهاء العد + مقارنة تلقائية     |        |           | finishScanCount
+  - تعبئة تلقائية لخانة التعديل     |        |           | showAdjustPanel(prefillDelta)
+Login — state machine               | HTML   | §AUTH-JS  | renderLoginMode (4 states)
+سجل العمليات                        | HTML   | §LOG-JS   | loadLog/exportSelectedLog
+Product Card v2 (v4.0.1)            | HTML   | §TOOL-JS  | renderProductCard (brand/SKU/size lines)
+Image Lightbox (v4.0.1)             | HTML   | §TOOL-JS  | openImageLightbox/closeImageLightbox
+Barcode no-tab-switch fix (v4.0.1)  | HTML   | §TOOL-JS  | lookupByBarcode
+Manual Count Stepper (v4.0.1)       | HTML   | §TOOL-JS  | stepManualCount
 
 KEY VARIABLES
-LS_URL_KEY   = 'stockaudit_worker_url'
-LS_SEC_KEY   = 'stockaudit_worker_secret'
-LS_ADMIN_URL = 'admin_worker_url' ← مشترك
-LS_FLOW_KEY  = 'stockaudit_flow_token'
-currentEmployee  ← JS memory only
-priorityData     ← null | [] | [...]
-priorityFiltered ← بعد الفلاتر
-priorityMode     ← {active, currentProductId}
+LS_URL_KEY            = 'stockaudit_worker_url'
+LS_SEC_KEY            = 'stockaudit_worker_secret'
+LS_ADMIN_URL          = 'admin_worker_url' (shared)
+LS_FLOW_KEY           = 'stockaudit_flow_token'
+currentEmployee       -- JS memory only
+priorityData          -- null | [{variantId,productId,sku,productTitle,...}]
+priorityFiltered      -- after filters
+lastPriorityRefreshTime -- Date | null
+priorityMode          -- {active, currentProductId}
+pfFiltersOpen         -- true (filter panel state)
+scanCountState        -- {active, scannerCount, targetBarcode} (v4.0 — piece counting mode)
 
 PRIORITY LOGIC
-P0: avail < 0              🚨 P1: avail=0 & comm>0    🔴
-P2: avail=1-3 & comm>0    🟠 P3: avail=1-3 & comm=0  🟡
-P4: avail=4-6              🔵 P5: avail=7-10          ⚪
-P6: avail>10               ✅</pre>
+P0: avail < 0             خطأ محتمل
+P1: avail=0 and comm>0   محجوز بالكامل
+P2: avail=1-3 and comm>0 محجوز أقل من 3 قطع
+P3: avail=1-3 and comm=0 من 1-3 قطع
+P4: avail=4-6            من 4-6 قطع
+P5: avail=7-10           من 7-10 قطع
+P6: avail>10             أكبر من 10 قطع
+
+SCANNER PIECE COUNTING (v4.0 — لا تغيير في الـ Worker)
+• كل مسح لباركود = currentVariant.barcode → scannerCount++
+• باركود مختلف أثناء العد → رفض + صوت/اهتزاز خطأ + إعادة العد الكامل لصفر
+• إدخال يدوي اختياري يُجمع مع عدد السكانر (الإجمالي = سكانر + يدوي)
+• "إنهاء العد" يقارن الإجمالي بـ currentShelfQty (نفس رقم الصندوق الأصفر):
+    - تطابق تام → يفتح نفس Confirm Modal بتاع "الجرد مظبوط" مباشرة
+    - فرق → يفتح adjust-panel مع delta معبأ تلقائياً (قابل للتعديل اليدوي) + ملاحظة تلقائية بتفاصيل العد
+• لا endpoints جديدة — نفس set_audit_date / adjust_inventory الحاليين
+
+PRODUCT CARD (v4.0.1)
+• البراند = product.vendor من Shopify — لو فاضي، يعرض اسم المنتج الكامل كـ fallback
+• الصورة قابلة للضغط → Popup بحجم الشاشة الكاملة (imageLightboxOverlay)
+• زرارا "صفحة الـ SKU" و"سجل التعديلات" في عمود منفصل (product-nav-col) بجانب الصورة
+
+EXCLUSIONS (Worker-side)
+• Inventory not tracked -> Priority Queue only
+• Tag: Suspended -> everywhere in tool</pre>
         </div>
       </details>
     </div>
     <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeAbout()">إغلاق</button></div>
   </div>
+</div>
+<!-- Image Lightbox — v4.0.1 -->
+<div class="modal-overlay" id="imageLightboxOverlay" onclick="closeImageLightbox()">
+  <img id="lightboxImg" src="" alt="" onclick="event.stopPropagation()" />
 </div>
 <!-- Post-Audit Popup -->
 <div class="modal-overlay" id="postAuditOverlay" onclick="if(event.target===this)closePostAuditPopup()">
@@ -509,18 +608,17 @@ P6: avail>10               ✅</pre>
 <div class="container">
 <div class="app-header">
   <div class="app-title"><div class="app-icon">📦</div><div class="app-title-text"><h1>Inventory Audit</h1><span>أداة مراجعة وضبط الجرد</span></div></div>
-  <!-- DOM order = RTL visual: extras|ℹ️|vX.Y.Z|⚙️ -->
   <div class="app-header-btns">
     <button class="hbtn" id="activeUserBtn" onclick="doLogout()">👤 —</button>
     <button class="hbtn" onclick="openAbout()">ℹ️ عن الأداة</button>
-    <button class="hbtn ver-btn" onclick="openChangelog()">v3.0.0 📋</button>
+    <button class="hbtn ver-btn" onclick="openChangelog()">v4.0.1 📋</button>
     <button class="hbtn" id="settingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
   </div>
 </div>
 <div class="main-tabs-wrap">
   <div class="main-seg">
     <button class="main-seg-btn active" id="mainTabAudit" onclick="switchMainTab('audit')"><span class="msb-icon">📦</span><span>الجرد</span></button>
-    <button class="main-seg-btn" id="mainTabPriority" onclick="switchMainTab('priority')"><span class="msb-icon">📋</span><span>أولويات الجرد</span></button>
+    <button class="main-seg-btn" id="mainTabPriority" onclick="switchMainTab('priority')"><span class="msb-icon">🎯</span><span>أولويات الجرد</span></button>
     <button class="main-seg-btn" id="mainTabLog" onclick="switchMainTab('log')"><span class="msb-icon">📜</span><span>سجل العمليات</span></button>
   </div>
 </div>
@@ -542,15 +640,19 @@ P6: avail>10               ✅</pre>
   </div>
   <div id="results">
     <div class="product-topbar" id="productTopbar">
-      <div class="product-img-wrap" id="productImgWrap">📦</div>
-      <div class="product-main-info">
-        <div class="product-name" id="productTitle">—</div>
-        <div class="product-links-row">
-          <a class="sku-link" id="productSkuLink" href="#" target="_blank"><span class="sku-pill" id="productSkuDisplay">SKU: —</span><span class="sku-arrow">↗</span></a>
-          <a class="history-link" id="historyLink" href="#" target="_blank">📋 سجل التعديلات ↗</a>
-        </div>
+      <div class="product-main-stack">
+        <div class="product-img-wrap" id="productImgWrap" onclick="openImageLightbox()">📦</div>
+        <div class="product-brand-line" id="productBrand">—</div>
+        <div class="product-sku-line" id="productSkuDisplay">—</div>
+        <div class="product-size-line" id="productSizeVal" style="display:none;"></div>
+        <div class="product-color-line" id="productColorVal" style="display:none;"></div>
       </div>
-      <div class="product-right-info"><div id="productStatus"></div><div class="options-wrap" id="productOptions"></div><button class="refresh-btn" id="refreshBtn" onclick="refreshCurrent()">↻ Refresh</button></div>
+      <div class="product-nav-col">
+        <div id="productStatus"></div>
+        <a class="nav-link-btn" id="productSkuLink" href="#" target="_blank">↗ صفحة الـ SKU</a>
+        <a class="nav-link-btn" id="historyLink" href="#" target="_blank">📋 سجل التعديلات</a>
+        <button class="refresh-btn" id="refreshBtn" onclick="refreshCurrent()">↻ Refresh</button>
+      </div>
     </div>
     <div style="display:flex;align-items:center;gap:0;margin-bottom:10px;">
       <div class="stat-card" style="flex:1.4;min-width:0;padding:16px 14px;border:2px solid #d97706;background:#fef9c3;"><div class="stat-label">عدد القطع على الرف</div><div class="stat-value val-shelf" id="qtyShelf">—</div><div class="stat-desc">المتوقع عند الجرد</div></div>
@@ -574,12 +676,41 @@ P6: avail>10               ✅</pre>
           </div>
         </div>
         <div class="audit-q-btns">
+          <button class="btn-start-scan" id="btnStartScanCount" onclick="startScanCount()">📷 ابدأ العد بالسكانر</button>
           <button class="btn-audit-ok" id="btnAuditOk" onclick="confirmAuditOk()">✅ الجرد مظبوط</button>
-          <button class="btn-want-adjust" onclick="showAdjustPanel()">🔧 أريد التعديل</button>
+          <button class="btn-want-adjust" id="btnWantAdjust" onclick="showAdjustPanel()">🔧 أريد التعديل</button>
         </div>
+      </div>
+      <div class="scan-count-panel" id="scanCountPanel">
+        <div class="scan-count-header">
+          <div class="scan-count-title">📷 وضع العد بالسكانر — امسح كل قطعة موجودة على الرف</div>
+          <div class="scan-count-header-btns">
+            <button class="btn-reset-count-sm" onclick="resetScanCount()">🔄 إعادة العد</button>
+            <button class="btn-back" onclick="cancelScanCount()">✕ إلغاء العد</button>
+          </div>
+        </div>
+        <div class="scan-count-input-wrap" id="scanCountInputWrap">
+          <span class="barcode-icon">🔫</span>
+          <input type="text" id="scanCountInput" placeholder="امسح القطعة هنا..." autocomplete="off" spellcheck="false" inputmode="numeric" />
+        </div>
+        <div class="scan-count-live">
+          <div class="scan-count-number" id="scanCountNumber">0</div>
+          <div class="scan-count-label">قطعة تم مسحها بالسكانر</div>
+        </div>
+        <div class="scan-count-manual">
+          <label for="scanCountManual">+ عدد إضافي يدوي (اختياري)</label>
+          <div class="delta-wrap">
+            <button class="delta-btn minus" onclick="stepManualCount(-1)">−</button>
+            <input type="number" id="scanCountManual" min="0" value="0" oninput="updateScanCountTotal()" />
+            <button class="delta-btn" onclick="stepManualCount(1)">+</button>
+          </div>
+        </div>
+        <div class="scan-count-total-row"><span>الإجمالي:</span><span id="scanCountTotal">0</span></div>
+        <button class="btn-finish-count" onclick="finishScanCount()">✅ إنهاء العد ومقارنة النتيجة</button>
       </div>
       <div class="adjust-panel" id="adjustPanel">
         <div class="adjust-panel-header"><div class="adjust-panel-title">🔧 تعديل المخزون</div><button class="btn-back" onclick="hideAdjustPanel()">← رجوع</button></div>
+        <div class="scan-suggest-note" id="scanSuggestNote">📷 تم تعبئة العدد تلقائياً من نتيجة العد بالسكانر — تقدر تعدله قبل التأكيد</div>
         <div class="adjust-body">
           <div class="adjust-field"><div class="adjust-label">عدد القطع على الرف</div><div class="adjust-current-val" id="adjustCurrentVal">—</div></div>
           <div class="adjust-field"><div class="adjust-label">&nbsp;</div><div class="delta-wrap"><button class="delta-btn minus" onclick="stepDelta(-1)">−</button><input type="number" id="deltaInput" value="0" min="-9999" max="9999" oninput="updatePreview()" /><button class="delta-btn" onclick="stepDelta(1)">+</button></div></div>
@@ -601,11 +732,16 @@ P6: avail>10               ✅</pre>
   </div>
 </div>
 
-<!-- Priority Tab -->
+<!-- §TOOL — Priority Tab -->
 <div id="priorityTabContent" style="display:none;">
   <div class="priority-wrap">
     <div class="priority-toolbar">
       <button class="priority-refresh-btn" id="priorityRefreshBtn" onclick="loadPriorityData()">↺ تحديث القائمة</button>
+      <div class="priority-ts-badge" id="priorityTimestamp">
+        <span class="priority-ts-part">📅 <span id="ptDate">—</span></span>
+        <span class="priority-ts-part">🕐 <span id="ptTime">—</span></span>
+        <span class="priority-ts-relative" id="ptRelative"></span>
+      </div>
       <div class="priority-threshold-wrap">
         <span class="priority-threshold-label">⏱ عتبة الجرد:</span>
         <select class="priority-threshold-sel" id="priorityThreshold" onchange="applyPriorityFilters()">
@@ -617,8 +753,46 @@ P6: avail>10               ✅</pre>
       </div>
       <label class="priority-active-toggle"><input type="checkbox" id="priorityActiveOnly" checked onchange="applyPriorityFilters()" /> ACTIVE فقط</label>
     </div>
+    <div style="border-bottom:1px solid var(--border);">
+      <div class="log-filters-header" onclick="togglePriorityFilters()">
+        <div class="log-filters-title"><span>🔽</span><span>الفلاتر</span></div>
+        <span class="log-filters-toggle open" id="pfFiltersToggle">▲</span>
+      </div>
+      <div class="log-filters-body" id="pfFiltersBody">
+        <div class="log-frow">
+          <div class="log-fg">
+            <span class="log-flabel">الأولوية</span>
+            <select class="log-fsel" style="width:210px;" id="pfPriority" onchange="applyPriorityFilters()">
+              <option value="">كل الأولويات</option>
+              <option value="0">🚨 خطأ محتمل</option>
+              <option value="1">🔴 محجوز بالكامل</option>
+              <option value="2">🟠 محجوز أقل من 3 قطع</option>
+              <option value="3">🟡 من 1-3 قطع</option>
+              <option value="4">🔵 من 4-6 قطع</option>
+              <option value="5">⚪ من 7-10 قطع</option>
+              <option value="6">✅ أكبر من 10 قطع</option>
+            </select>
+          </div>
+          <div class="log-fg">
+            <span class="log-flabel">آخر جرد</span>
+            <select class="log-fsel" style="width:160px;" id="pfAuditStatus" onchange="applyPriorityFilters()">
+              <option value="">الكل</option>
+              <option value="never">لم يُجرد قط</option>
+              <option value="audited">جُرد من قبل</option>
+            </select>
+          </div>
+          <div class="log-fg" style="flex:1;">
+            <span class="log-flabel">بحث SKU / اسم المنتج</span>
+            <input type="text" class="log-finput" style="width:100%;" id="pfSearch" placeholder="ابحث..." oninput="onPfSearchInput()" />
+          </div>
+          <div class="log-fg" style="align-self:flex-end;">
+            <button class="log-clear-btn" onclick="clearPriorityFilters()">✕ مسح</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="priority-stats-bar" id="priorityStatsBar" style="display:none;"><div id="priorityStatsContent" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;"></div></div>
-    <div id="priorityTableWrap"><div class="state-box"><div class="state-icon">📋</div><p>اضغط "تحديث القائمة" لتحميل أولويات الجرد</p></div></div>
+    <div id="priorityTableWrap"><div class="state-box"><div class="state-icon">🎯</div><p>اضغط "تحديث القائمة" لتحميل أولويات الجرد</p></div></div>
   </div>
 </div>
 
@@ -682,10 +856,7 @@ P6: avail>10               ✅</pre>
       <div class="pin-zone" id="pinZone">
         <div class="pin-label" id="pinLabel">أدخل الـ PIN</div>
         <div class="pin-slots" id="pinSlots">
-          <div class="pin-slot empty" id="pinSlot0"></div>
-          <div class="pin-slot empty" id="pinSlot1"></div>
-          <div class="pin-slot empty" id="pinSlot2"></div>
-          <div class="pin-slot empty" id="pinSlot3"></div>
+          <div class="pin-slot empty" id="pinSlot0"></div><div class="pin-slot empty" id="pinSlot1"></div><div class="pin-slot empty" id="pinSlot2"></div><div class="pin-slot empty" id="pinSlot3"></div>
         </div>
         <div class="pin-keypad" id="pinKeypad">
           <button class="pin-key" onclick="pressPinKey('1')">1</button><button class="pin-key" onclick="pressPinKey('2')">2</button><button class="pin-key" onclick="pressPinKey('3')">3</button>
@@ -702,7 +873,9 @@ P6: avail>10               ✅</pre>
 </div>
 <div class="toast" id="toast"></div>
 <script>
+// ══════════════════════════════════════════════════════
 // §CONFIG
+// ══════════════════════════════════════════════════════
 const SHOP_DOMAIN='6c7e1a-53.myshopify.com';
 const LS_URL_KEY='stockaudit_worker_url',LS_SEC_KEY='stockaudit_worker_secret',LS_ADMIN_URL='admin_worker_url',LS_FLOW_KEY='stockaudit_flow_token';
 function getConfig(){return{url:(localStorage.getItem(LS_URL_KEY)||'').replace(/\/$/,''),secret:localStorage.getItem(LS_SEC_KEY)||'',adminUrl:(localStorage.getItem(LS_ADMIN_URL)||'').replace(/\/$/,''),flowToken:localStorage.getItem(LS_FLOW_KEY)||''};}
@@ -721,7 +894,9 @@ async function apiPost(action,body={}){
   const data=await res.json();if(!res.ok||!data.ok)throw new Error(data.error||'خطأ في الاتصال');return data;
 }
 
+// ══════════════════════════════════════════════════════
 // §SHELL-JS
+// ══════════════════════════════════════════════════════
 function updateSettingsButtonsState(){const ok=isConfigured();document.getElementById('settingsBtn').classList.toggle('settings-configured',ok);updateLoginSettingsBtnState();}
 function updateLoginSettingsBtnState(){const btn=document.getElementById('loginSettingsBtn');if(!btn)return;btn.classList.toggle('ready',isConfigured());btn.classList.toggle('missing',!isConfigured());}
 function openSettings(){const c=getConfig();document.getElementById('cfWorkerUrl').value=c.url;document.getElementById('cfWorkerSecret').value=c.secret;document.getElementById('cfAdminUrl').value=c.adminUrl;document.getElementById('cfFlowToken').value=c.flowToken;document.getElementById('settingsOverlay').classList.add('open');}
@@ -751,12 +926,14 @@ function switchMainTab(tab){
   if(tab==='priority'&&priorityData===null)loadPriorityData();
 }
 
+// ══════════════════════════════════════════════════════
 // §AUTH-JS
+// ══════════════════════════════════════════════════════
 let currentEmployee=null,loginMode='employee',pinDigits=[],pendingNewPin='',isLoginBusy=false,autoLoginTimer=null;
 let _audioCtx=null;
 function _getACtx(){if(!_audioCtx)_audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(_audioCtx.state==='suspended')_audioCtx.resume();return _audioCtx;}
 function playBeep(type){try{const ctx=_getACtx();const run=()=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);if(type==='success'){o.frequency.setValueAtTime(880,ctx.currentTime);o.frequency.setValueAtTime(1100,ctx.currentTime+0.1);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.25);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.25);}else{o.frequency.setValueAtTime(300,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+0.15);g.gain.setValueAtTime(0.4,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.35);}};if(ctx.state==='suspended')ctx.resume().then(run);else run();}catch{}}
-
+function vibrateDevice(pattern){try{if(navigator.vibrate)navigator.vibrate(pattern);}catch{}}
 async function loadEmployeesList(){
   const sel=document.getElementById('loginSelect'),status=document.getElementById('loginStatus');
   clearLoginAlert();sel.innerHTML='<option value="">— اختر —</option>';sel.disabled=true;
@@ -874,59 +1051,151 @@ async function doLogout(){
   document.getElementById('activeUserBtn').textContent='👤 —';document.getElementById('activeUserBtn').classList.remove('active-user');
   renderPinSlots();renderLoginMode('employee');clearLoginAlert();
   currentSku=null;currentVariant=null;currentShelfQty=null;selectedOrderIds.clear();
+  cancelScanCount();
   document.getElementById('results').classList.remove('visible');
   document.getElementById('loginOverlay').classList.remove('hidden');
 }
 
+// ══════════════════════════════════════════════════════
 // §SCAN
+// ══════════════════════════════════════════════════════
 let _barcodeTimer=null,_lastKeyTime=0;
 const barcodeInput=document.getElementById('barcodeInput'),barcodeWrap=document.getElementById('barcodeWrap');
 barcodeInput.addEventListener('input',()=>{clearTimeout(_barcodeTimer);barcodeWrap.classList.add('scanning');const now=Date.now(),gap=now-_lastKeyTime;_lastKeyTime=now;_barcodeTimer=setTimeout(handleBarcodeScan,gap<80?150:400);});
 function handleBarcodeScan(){const val=barcodeInput.value.trim();barcodeInput.value='';barcodeInput.focus();barcodeWrap.classList.remove('scanning');if(!val)return;lookupByBarcode(val);}
 
+// scan count input — v4.0 — same scanner-gun timing pattern, routed only while scanCountState.active
+let _scanCountTimer=null,_scanCountLastKey=0;
+const scanCountInputEl=document.getElementById('scanCountInput');
+scanCountInputEl.addEventListener('input',()=>{
+  if(!scanCountState.active)return;
+  clearTimeout(_scanCountTimer);
+  document.getElementById('scanCountInputWrap').classList.add('scanning');
+  const now=Date.now(),gap=now-_scanCountLastKey;_scanCountLastKey=now;
+  _scanCountTimer=setTimeout(handleScanCountInput,gap<80?150:400);
+});
+function handleScanCountInput(){
+  const val=scanCountInputEl.value.trim();scanCountInputEl.value='';scanCountInputEl.focus();
+  document.getElementById('scanCountInputWrap').classList.remove('scanning');
+  if(!val)return;
+  processScanCountValue(val);
+}
+
+// ══════════════════════════════════════════════════════
 // §TOOL-JS
-let currentSku=null,currentVariant=null,currentShelfQty=null,selectedOrderIds=new Set(),_searchDebounce=null;
+// ══════════════════════════════════════════════════════
+let currentSku=null,currentVariant=null,currentShelfQty=null,selectedOrderIds=new Set(),_searchDebounce=null,currentImgUrl=null;
 let priorityData=null,priorityFiltered=[],priorityMode={active:false,currentProductId:null};
-const PRIORITY_CFG={0:{label:'🚨 P0',cls:'p0'},1:{label:'🔴 P1',cls:'p1'},2:{label:'🟠 P2',cls:'p2'},3:{label:'🟡 P3',cls:'p3'},4:{label:'🔵 P4',cls:'p4'},5:{label:'P5',cls:'p5'},6:{label:'✅ P6',cls:'p6'}};
+let lastPriorityRefreshTime=null,pfFiltersOpen=true,_pfSearchDebounce=null;
+let scanCountState={active:false,scannerCount:0,targetBarcode:null};
+
+// New Arabic priority names
+const PRIORITY_CFG={
+  0:{label:'\u{1F6A8} \u062e\u0637\u0623 \u0645\u062d\u062a\u0645\u0644',cls:'p0'},
+  1:{label:'\u{1F534} \u0645\u062d\u062c\u0648\u0632 \u0628\u0627\u0644\u0643\u0627\u0645\u0644',cls:'p1'},
+  2:{label:'\u{1F7E0} \u0645\u062d\u062c\u0648\u0632 \u0623\u0642\u0644 \u0645\u0646 3 \u0642\u0637\u0639',cls:'p2'},
+  3:{label:'\u{1F7E1} \u0645\u0646 1-3 \u0642\u0637\u0639',cls:'p3'},
+  4:{label:'\u{1F535} \u0645\u0646 4-6 \u0642\u0637\u0639',cls:'p4'},
+  5:{label:'\u26AA \u0645\u0646 7-10 \u0642\u0637\u0639',cls:'p5'},
+  6:{label:'\u2705 \u0623\u0643\u0628\u0631 \u0645\u0646 10 \u0642\u0637\u0639',cls:'p6'}
+};
+
 function getPriority(a,c){a=a??0;c=c??0;if(a<0)return 0;if(a===0&&c>0)return 1;if(a>=1&&a<=3&&c>0)return 2;if(a>=1&&a<=3&&c===0)return 3;if(a>=4&&a<=6)return 4;if(a>=7&&a<=10)return 5;return 6;}
 function getDaysSince(d){if(!d)return Infinity;return Math.floor((Date.now()-new Date(d).getTime())/86400000);}
 function needsAudit(d,t){return getDaysSince(d)>t;}
 
+// Update timestamp badge in toolbar
+function updatePriorityTimestamp(){
+  if(!lastPriorityRefreshTime)return;
+  const el=document.getElementById('priorityTimestamp');if(!el)return;
+  const d=lastPriorityRefreshTime,pad=n=>String(n).padStart(2,'0');
+  let h=d.getHours();const m=pad(d.getMinutes()),ampm=h>=12?'\u0645\u0633\u0627\u0621\u064b':'\u0635\u0628\u0627\u062d\u064b\u200f';h=h%12||12;
+  document.getElementById('ptDate').textContent=pad(d.getDate())+' / '+pad(d.getMonth()+1)+' / '+d.getFullYear();
+  document.getElementById('ptTime').textContent=pad(h)+':'+m+' '+ampm;
+  const diffSec=Math.floor((Date.now()-d.getTime())/1000);
+  let rel;
+  if(diffSec<60)rel='(\u0627\u0644\u0622\u0646)';
+  else if(diffSec<3600){const n=Math.floor(diffSec/60);rel='(\u0645\u0646\u0630 '+n+(n===1?' \u062f\u0642\u064a\u0642\u0629':' \u062f\u0642\u0627\u0626\u0642')+')';}
+  else if(diffSec<86400){const n=Math.floor(diffSec/3600);rel='(\u0645\u0646\u0630 '+n+(n===1?' \u0633\u0627\u0639\u0629':' \u0633\u0627\u0639\u0627\u062a')+')';}
+  else{const n=Math.floor(diffSec/86400);rel='(\u0645\u0646\u0630 '+n+(n===1?' \u064a\u0648\u0645':' \u0623\u064a\u0627\u0645')+')';}
+  document.getElementById('ptRelative').textContent=rel;
+  el.style.display='flex';
+}
+setInterval(()=>{if(lastPriorityRefreshTime)updatePriorityTimestamp();},60000);
+
+function togglePriorityFilters(){
+  pfFiltersOpen=!pfFiltersOpen;
+  document.getElementById('pfFiltersBody').classList.toggle('collapsed',!pfFiltersOpen);
+  document.getElementById('pfFiltersToggle').classList.toggle('open',pfFiltersOpen);
+}
+function onPfSearchInput(){clearTimeout(_pfSearchDebounce);_pfSearchDebounce=setTimeout(applyPriorityFilters,300);}
+function clearPriorityFilters(){
+  document.getElementById('pfPriority').value='';
+  document.getElementById('pfAuditStatus').value='';
+  document.getElementById('pfSearch').value='';
+  applyPriorityFilters();
+}
+
 async function loadPriorityData(){
   const wrap=document.getElementById('priorityTableWrap'),statsBar=document.getElementById('priorityStatsBar'),refreshBtn=document.getElementById('priorityRefreshBtn');
-  wrap.innerHTML='<div class="state-box"><div class="loading-spinner"></div><p style="margin-top:8px;font-size:12px;">جاري تحميل كل المنتجات من المتجر...</p></div>';
+  wrap.innerHTML='<div class="state-box"><div class="loading-spinner"></div><p style="margin-top:8px;font-size:12px;">\u062c\u0627\u0631\u064a \u062a\u062d\u0645\u064a\u0644 \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0645\u0646 \u0627\u0644\u0645\u062a\u062c\u0631...</p></div>';
   statsBar.style.display='none';if(refreshBtn)refreshBtn.disabled=true;
-  try{const data=await apiGet('get_audit_priorities');priorityData=data.variants||[];applyPriorityFilters();showToast('تم تحميل '+priorityData.length.toLocaleString('en-US')+' variant ✓','success');}
-  catch(e){wrap.innerHTML='<div class="state-box"><div class="state-icon">⚠️</div><p>'+e.message+'</p></div>';showToast('خطأ: '+e.message,'error');}
+  try{
+    const data=await apiGet('get_audit_priorities');
+    priorityData=data.variants||[];
+    lastPriorityRefreshTime=new Date();
+    updatePriorityTimestamp();
+    applyPriorityFilters();
+    showToast('\u062a\u0645 \u062a\u062d\u0645\u064a\u0644 '+priorityData.length.toLocaleString('en-US')+' variant \u2713','success');
+  }
+  catch(e){wrap.innerHTML='<div class="state-box"><div class="state-icon">\u26a0\ufe0f</div><p>'+e.message+'</p></div>';showToast('\u062e\u0637\u0623: '+e.message,'error');}
   finally{if(refreshBtn)refreshBtn.disabled=false;}
 }
+
 function applyPriorityFilters(){
   if(!priorityData)return;
   const threshold=parseInt(document.getElementById('priorityThreshold').value)||30;
+  const pfPriority=document.getElementById('pfPriority')?.value??'';
+  const pfAuditStatus=document.getElementById('pfAuditStatus')?.value??'';
+  const pfSearch=(document.getElementById('pfSearch')?.value||'').trim().toLowerCase();
+
   let filtered=priorityData.filter(v=>needsAudit(v.lastAuditDate,threshold));
-  filtered.sort((a,b)=>{const pa=getPriority(a.available,a.committed),pb=getPriority(b.available,b.committed);if(pa!==pb)return pa-pb;const da=getDaysSince(a.lastAuditDate),db=getDaysSince(b.lastAuditDate);if(da===Infinity&&db===Infinity)return 0;if(da===Infinity)return -1;if(db===Infinity)return 1;return db-da;});
+
+  if(pfPriority!=='')filtered=filtered.filter(v=>getPriority(v.available,v.committed)===parseInt(pfPriority));
+  if(pfAuditStatus==='never')filtered=filtered.filter(v=>!v.lastAuditDate);
+  else if(pfAuditStatus==='audited')filtered=filtered.filter(v=>!!v.lastAuditDate);
+  if(pfSearch)filtered=filtered.filter(v=>(v.sku||'').toLowerCase().includes(pfSearch)||(v.productTitle||'').toLowerCase().includes(pfSearch));
+
+  filtered.sort((a,b)=>{
+    const pa=getPriority(a.available,a.committed),pb=getPriority(b.available,b.committed);
+    if(pa!==pb)return pa-pb;
+    const da=getDaysSince(a.lastAuditDate),db=getDaysSince(b.lastAuditDate);
+    if(da===Infinity&&db===Infinity)return 0;
+    if(da===Infinity)return -1;if(db===Infinity)return 1;
+    return db-da;
+  });
   priorityFiltered=filtered;renderPriorityTable(filtered);renderPriorityStats(filtered);
 }
+
 function renderPriorityStats(filtered){
   const statsBar=document.getElementById('priorityStatsBar');statsBar.style.display='flex';
   const counts={};filtered.forEach(v=>{const p=getPriority(v.available,v.committed);counts[p]=(counts[p]||0)+1;});
-  let html='<span class="priority-stat-total">إجمالي: <strong>'+filtered.length.toLocaleString('en-US')+'</strong></span>';
+  let html='<span class="priority-stat-total">\u0625\u062c\u0645\u0627\u0644\u064a: <strong>'+filtered.length.toLocaleString('en-US')+'</strong></span>';
   [0,1,2,3,4,5,6].forEach(p=>{if(counts[p]){const cfg=PRIORITY_CFG[p];html+='<span class="priority-stat-chip p-chip-'+cfg.cls+'">'+cfg.label+': <strong>'+counts[p]+'</strong></span>';}});
-  const now=new Date(),pad=n=>String(n).padStart(2,'0');let h=now.getHours();const ampm=h>=12?'مساءً':'صباحاً';h=h%12||12;
-  html+='<span class="priority-last-refresh">آخر تحديث: '+pad(now.getDate())+'/'+pad(now.getMonth()+1)+'/'+now.getFullYear()+' '+pad(h)+':'+pad(now.getMinutes())+' '+ampm+'</span>';
   document.getElementById('priorityStatsContent').innerHTML=html;
 }
+
 function renderPriorityTable(variants){
   const wrap=document.getElementById('priorityTableWrap');
-  if(!variants.length){wrap.innerHTML='<div class="state-box"><div class="state-icon">🎉</div><p>تم جرد كل المنتجات ذات الأولوية — أو لا توجد منتجات تستوفي شروط الفلترة.</p></div>';return;}
+  if(!variants.length){wrap.innerHTML='<div class="state-box"><div class="state-icon">\u{1F389}</div><p>\u062a\u0645 \u062c\u0631\u062f \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u2014 \u0623\u0648 \u0644\u0627 \u062a\u0648\u062c\u062f \u0646\u062a\u0627\u0626\u062c.</p></div>';return;}
   const rows=variants.map(v=>{
     const p=getPriority(v.available,v.committed),cfg=PRIORITY_CFG[p],days=getDaysSince(v.lastAuditDate);
     let auditText,auditCls;
-    if(days===Infinity){auditText='لم يُجرد قط';auditCls='audit-age-never';}
-    else if(days>60){auditText='منذ '+days+' يوم';auditCls='audit-age-old';}
-    else if(days>30){auditText='منذ '+days+' يوم';auditCls='audit-age-medium';}
-    else{auditText='منذ '+days+' يوم';auditCls='audit-age-recent';}
-    const avail=v.available!=null?v.available.toLocaleString('en-US'):'—',comm=v.committed!=null?v.committed.toLocaleString('en-US'):'—';
+    if(days===Infinity){auditText='\u0644\u0645 \u064a\u064f\u062c\u0631\u062f \u0642\u0637';auditCls='audit-age-never';}
+    else if(days>60){auditText='\u0645\u0646\u0630 '+days+' \u064a\u0648\u0645';auditCls='audit-age-old';}
+    else if(days>30){auditText='\u0645\u0646\u0630 '+days+' \u064a\u0648\u0645';auditCls='audit-age-medium';}
+    else{auditText='\u0645\u0646\u0630 '+days+' \u064a\u0648\u0645';auditCls='audit-age-recent';}
+    const avail=v.available!=null?v.available.toLocaleString('en-US'):'\u2014',comm=v.committed!=null?v.committed.toLocaleString('en-US'):'\u2014';
     const neg=(v.available!=null&&v.available<0)?' val-negative':'';
     const vJson=JSON.stringify(v).replace(/"/g,'&quot;');
     return '<tr class="priority-row" onclick="loadVariantFromPriority('+vJson+')">'
@@ -936,16 +1205,23 @@ function renderPriorityTable(variants){
       +'<td class="centered">'+comm+'</td>'
       +'<td><span class="'+auditCls+'">'+auditText+'</span></td></tr>';
   }).join('');
-  wrap.innerHTML='<div class="priority-table-wrap"><table class="priority-table"><thead><tr><th>الأولوية</th><th>SKU</th><th style="text-align:center;">Available</th><th style="text-align:center;">Committed</th><th>آخر جرد</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  wrap.innerHTML='<div class="priority-table-wrap"><table class="priority-table"><thead><tr>'
+    +'<th>\u0627\u0644\u0623\u0648\u0644\u0648\u064a\u0629</th><th>SKU</th>'
+    +'<th style="text-align:center;">Available</th><th style="text-align:center;">Committed</th>'
+    +'<th>\u0622\u062e\u0631 \u062c\u0631\u062f</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
+
 async function loadVariantFromPriority(item){
-  priorityMode={active:true,currentProductId:item.productId};switchMainTab('audit');showToast('جاري تحميل '+item.sku+'...','');
+  priorityMode={active:true,currentProductId:item.productId};switchMainTab('audit');
+  showToast('\u062c\u0627\u0631\u064a \u062a\u062d\u0645\u064a\u0644 '+item.sku+'...','');
   try{
     const data=await apiGet('list_skus',{search:item.sku});
     const variant=(data.variants||[]).find(v=>v.id===item.variantId)||(data.variants||[])[0];
-    if(variant)selectVariant(variant);else{showToast('لم يتم العثور على الـ variant','error');priorityMode={active:false,currentProductId:null};}
-  }catch(e){showToast('خطأ: '+e.message,'error');priorityMode={active:false,currentProductId:null};}
+    if(variant)selectVariant(variant);else{showToast('\u0644\u0645 \u064a\u062a\u0645 \u0627\u0644\u0639\u062b\u0648\u0631 \u0639\u0644\u0649 \u0627\u0644\u0640 variant','error');priorityMode={active:false,currentProductId:null};}
+  }catch(e){showToast('\u062e\u0637\u0623: '+e.message,'error');priorityMode={active:false,currentProductId:null};}
 }
+
 function onAuditComplete(variantId,productId){
   if(priorityData){priorityData=priorityData.filter(v=>v.variantId!==variantId);applyPriorityFilters();}
   const sameProduct=(priorityFiltered||[]).filter(v=>v.productId===productId);
@@ -953,17 +1229,18 @@ function onAuditComplete(variantId,productId){
   priorityMode={active:false,currentProductId:null};
   if(fromPriority||(priorityData!==null&&sameProduct.length>0))showPostAuditPopup(sameProduct,fromPriority);
 }
+
 function showPostAuditPopup(sameProductVariants,fromPriority){
   const overlay=document.getElementById('postAuditOverlay');
   const btn1=document.getElementById('btnSameProduct'),btn1Text=document.getElementById('btnSameProductText');
   const btn2=document.getElementById('btnNextPriority'),btn2Text=document.getElementById('btnNextPriorityText');
   const hasSame=sameProductVariants.length>0,hasNext=fromPriority&&priorityFiltered&&priorityFiltered.length>0;
-  if(hasSame){btn1.style.display='flex';btn1Text.textContent='باقي مقاسات هذا المنتج ('+sameProductVariants.length+')';const nextSame=sameProductVariants[0];btn1.onclick=()=>{closePostAuditPopup();loadVariantFromPriority(nextSame);};}
+  if(hasSame){btn1.style.display='flex';btn1Text.textContent='\u0628\u0627\u0642\u064a \u0645\u0642\u0627\u0633\u0627\u062a \u0647\u0630\u0627 \u0627\u0644\u0645\u0646\u062a\u062c ('+sameProductVariants.length+')';const nextSame=sameProductVariants[0];btn1.onclick=()=>{closePostAuditPopup();loadVariantFromPriority(nextSame);};}
   else btn1.style.display='none';
   if(fromPriority){
     btn2.style.display='flex';
-    if(priorityFiltered.length>0){const next=priorityFiltered[0],p=getPriority(next.available,next.committed);btn2Text.textContent='← التالي ['+PRIORITY_CFG[p].label+'] '+next.sku;btn2.disabled=false;btn2.onclick=()=>{closePostAuditPopup();loadVariantFromPriority(next);};}
-    else{btn2Text.textContent='🎉 انتهت قائمة الأولويات!';btn2.disabled=true;btn2.onclick=null;}
+    if(priorityFiltered.length>0){const next=priorityFiltered[0],p=getPriority(next.available,next.committed);btn2Text.textContent='\u2190 \u0627\u0644\u062a\u0627\u0644\u064a ['+PRIORITY_CFG[p].label+'] '+next.sku;btn2.disabled=false;btn2.onclick=()=>{closePostAuditPopup();loadVariantFromPriority(next);};}
+    else{btn2Text.textContent='\u{1F389} \u0627\u0646\u062a\u0647\u062a \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0623\u0648\u0644\u0648\u064a\u0627\u062a!';btn2.disabled=true;btn2.onclick=null;}
   }else btn2.style.display='none';
   if(!hasSame&&!fromPriority)return;
   overlay.classList.add('open');
@@ -979,18 +1256,31 @@ async function loadSkus(search){dropdownList.innerHTML='<div class="dropdown-loa
 function renderDropdown(variants){if(!variants.length){dropdownList.innerHTML='<div class="dropdown-empty">لا توجد نتائج</div>';return;}dropdownList.innerHTML=variants.map(v=>'<div class="dropdown-item" onclick=\'selectVariant('+JSON.stringify(v).replace(/'/g,"&#39;")+')\' ><span class="item-sku">'+(v.sku||'—')+'</span><span class="item-name">'+(v.product?.title||'')+' '+(v.selectedOptions?.map(o=>o.value).join(' / ')||'')+'</span></div>').join('');dropdownList.classList.add('open');}
 function selectVariant(variant){currentSku=variant.sku;currentVariant=variant;skuSearch.value=variant.sku;clearBtn.classList.add('visible');dropdownList.classList.remove('open');renderProductCard(variant);loadOrders(variant);}
 function switchTab(tab){document.getElementById('tabSku').classList.toggle('active',tab==='sku');document.getElementById('tabBarcode').classList.toggle('active',tab==='barcode');document.getElementById('skuMode').style.display=tab==='sku'?'block':'none';document.getElementById('barcodeMode').classList.toggle('active',tab==='barcode');if(tab==='barcode')barcodeInput.focus();}
-async function lookupByBarcode(barcode){showToast('جاري البحث...','');try{const data=await apiGet('lookup_barcode',{barcode});if(!data.variant){showToast('لا يوجد منتج بهذا الباركود','error');return;}showToast('تم العثور على المنتج','success');selectVariant(data.variant);switchTab('sku');skuSearch.value=data.variant.sku;clearBtn.classList.add('visible');}catch(e){showToast(e.message,'error');}}
+async function lookupByBarcode(barcode){showToast('جاري البحث...','');try{const data=await apiGet('lookup_barcode',{barcode});if(!data.variant){showToast('لا يوجد منتج بهذا الباركود','error');return;}showToast('تم العثور على المنتج','success');selectVariant(data.variant);/* v4.0.1: لا تبديل تلقائي للتاب — يفضل على وضع مسح الباركود لاستمرار المسح */skuSearch.value=data.variant.sku;clearBtn.classList.add('visible');barcodeInput.focus();}catch(e){showToast(e.message,'error');}}
+function openImageLightbox(){if(!currentImgUrl)return;document.getElementById('lightboxImg').src=currentImgUrl;document.getElementById('imageLightboxOverlay').classList.add('open');}
+function closeImageLightbox(){document.getElementById('imageLightboxOverlay').classList.remove('open');}
 function toCairo(iso){return new Date(new Date(iso).getTime()+3*60*60*1000);}
 function formatDateTime(iso){const d=toCairo(iso),pad=n=>String(n).padStart(2,'0');let h=d.getUTCHours();const m=pad(d.getUTCMinutes()),ampm=h>=12?'مساءً':'صباحاً';h=h%12||12;return pad(d.getUTCDate())+'-'+pad(d.getUTCMonth()+1)+'-'+d.getUTCFullYear()+' الساعة '+pad(h)+':'+m+' '+ampm;}
 function formatDate(iso){const d=toCairo(iso),pad=n=>String(n).padStart(2,'0');return pad(d.getUTCDate())+'-'+pad(d.getUTCMonth()+1)+'-'+d.getUTCFullYear();}
 function renderProductCard(variant){
-  currentVariant=variant;document.getElementById('productTitle').textContent=variant.product?.title||'—';document.getElementById('productSkuDisplay').textContent='SKU: '+(variant.sku||'—');
+  if(scanCountState.active)cancelScanCount();
+  currentVariant=variant;
+  document.getElementById('productBrand').textContent=variant.product?.vendor||variant.product?.title||'—';
+  document.getElementById('productSkuDisplay').textContent=variant.sku||'—';
   const vid=(variant.id||'').split('/').pop(),pid=(variant.product?.id||'').split('/').pop();
   document.getElementById('productSkuLink').href=pid&&vid?'https://admin.shopify.com/store/6c7e1a-53/products/'+pid+'/variants/'+vid:'#';
   const iid=(variant.inventoryItem?.id||'').split('/').pop();if(iid)document.getElementById('historyLink').href='https://admin.shopify.com/store/6c7e1a-53/products/inventory/'+iid+'/inventory_history?location_id=98849620290';
-  const imgWrap=document.getElementById('productImgWrap'),imgUrl=variant.product?.featuredImage?.url;imgWrap.innerHTML=imgUrl?'<img src="'+imgUrl+'" alt="" />':'📦';
+  const imgWrap=document.getElementById('productImgWrap'),imgUrl=variant.product?.featuredImage?.url;
+  currentImgUrl=imgUrl||null;
+  imgWrap.innerHTML=imgUrl?'<img src="'+imgUrl+'" alt="" />':'📦';
+  imgWrap.style.cursor=imgUrl?'pointer':'default';
   const opts=variant.selectedOptions||[],sizeN=['shoe size','size','مقاس'],colorN=['color','colour','لون'];
-  document.getElementById('productOptions').innerHTML=opts.filter(o=>o.value!=='Default Title').map(o=>{const k=o.name.toLowerCase();let c='option-pill-other';if(sizeN.some(n=>k.includes(n)))c='option-pill-shoe';else if(colorN.some(n=>k.includes(n)))c='option-pill-color';return '<span class="option-pill '+c+'">'+o.name+': '+o.value+'</span>';}).join('');
+  const sizeOpt=opts.find(o=>o.value!=='Default Title'&&sizeN.some(n=>o.name.toLowerCase().includes(n)));
+  const colorOpt=opts.find(o=>o.value!=='Default Title'&&colorN.some(n=>o.name.toLowerCase().includes(n)));
+  const sizeEl=document.getElementById('productSizeVal');
+  if(sizeOpt){sizeEl.textContent=sizeOpt.value;sizeEl.style.display='inline-flex';}else{sizeEl.style.display='none';}
+  const colorEl=document.getElementById('productColorVal');
+  if(colorOpt){colorEl.textContent=colorOpt.value;colorEl.style.display='inline-flex';}else{colorEl.style.display='none';}
   const status=variant.product?.status||'',labels={ACTIVE:'Active ✓',DRAFT:'Draft',ARCHIVED:'Archived'};
   document.getElementById('productStatus').innerHTML='<span class="status-badge '+(status==='ACTIVE'?'status-ACTIVE':'status-OTHER')+'">'+(labels[status]||status)+'</span>';
   const topbar=document.getElementById('productTopbar');topbar.classList.remove('status-active','status-other');topbar.classList.add(status==='ACTIVE'?'status-active':'status-other');
@@ -1004,9 +1294,101 @@ function renderProductCard(variant){
   currentShelfQty=null;hideAdjustPanel();document.getElementById('auditInfoBox').style.display='none';
   document.getElementById('results').classList.add('visible');document.getElementById('ordersCard').style.display='none';document.getElementById('warningBanner').style.display='none';
 }
-function showAdjustPanel(){document.getElementById('adjustPanel').classList.add('visible');document.getElementById('adjustCurrentVal').textContent=currentShelfQty!=null?currentShelfQty.toLocaleString('en-US'):'—';document.getElementById('deltaInput').value='0';document.getElementById('adjustNotes').value='';updatePreview();}
-function hideAdjustPanel(){document.getElementById('adjustPanel').classList.remove('visible');}
+
+// ─── §TOOL-JS::scanCount (v4.0) ───
+function setPhase1ButtonsDisabled(disabled){
+  document.getElementById('btnAuditOk').disabled=disabled;
+  document.getElementById('btnWantAdjust').disabled=disabled;
+  document.getElementById('btnStartScanCount').disabled=disabled;
+}
+function startScanCount(){
+  if(!currentVariant){showToast('لم يتم اختيار منتج','error');return;}
+  if(currentShelfQty==null){showToast('جاري تحميل بيانات المنتج، حاول بعد لحظة','error');return;}
+  scanCountState.active=true;scanCountState.scannerCount=0;scanCountState.targetBarcode=currentVariant.barcode||null;
+  document.getElementById('scanCountManual').value='0';
+  updateScanCountDisplay();
+  const wrap=document.getElementById('scanCountInputWrap');
+  if(!scanCountState.targetBarcode){wrap.classList.add('disabled-no-barcode');showToast('⚠️ لا يوجد باركود مسجل لهذا الـ SKU — استخدم الإدخال اليدوي فقط','error');}
+  else wrap.classList.remove('disabled-no-barcode');
+  hideAdjustPanel();
+  document.getElementById('scanCountPanel').classList.add('visible');
+  setPhase1ButtonsDisabled(true);
+  setTimeout(()=>{if(scanCountState.targetBarcode)scanCountInputEl.focus();else document.getElementById('scanCountManual').focus();},50);
+}
+function cancelScanCount(){
+  scanCountState.active=false;scanCountState.scannerCount=0;scanCountState.targetBarcode=null;
+  document.getElementById('scanCountPanel').classList.remove('visible');
+  document.getElementById('scanCountInputWrap').classList.remove('disabled-no-barcode','scanning');
+  setPhase1ButtonsDisabled(false);
+}
+function resetScanCount(silent){
+  scanCountState.scannerCount=0;
+  document.getElementById('scanCountManual').value='0';
+  updateScanCountDisplay();
+  if(!silent)showToast('تم إعادة العد من الصفر','');
+}
+function updateScanCountDisplay(){
+  document.getElementById('scanCountNumber').textContent=scanCountState.scannerCount.toLocaleString('en-US');
+  updateScanCountTotal();
+}
+function updateScanCountTotal(){
+  const manual=parseInt(document.getElementById('scanCountManual').value)||0;
+  const total=scanCountState.scannerCount+manual;
+  document.getElementById('scanCountTotal').textContent=total.toLocaleString('en-US');
+}
+function animateScanCountPulse(){
+  const el=document.getElementById('scanCountNumber');
+  el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');
+  setTimeout(()=>el.classList.remove('pulse'),150);
+}
+function processScanCountValue(val){
+  if(!scanCountState.active)return;
+  if(!scanCountState.targetBarcode){showToast('لا يوجد باركود مسجل — استخدم الإدخال اليدوي','error');return;}
+  if(val===scanCountState.targetBarcode){
+    scanCountState.scannerCount++;playBeep('success');vibrateDevice(50);
+    updateScanCountDisplay();animateScanCountPulse();
+  }else{
+    playBeep('error');vibrateDevice([100,50,100]);
+    showToast('❌ باركود غير مطابق — تم إعادة العد من الصفر','error');
+    resetScanCount(true);
+  }
+}
+function finishScanCount(){
+  const manual=parseInt(document.getElementById('scanCountManual').value)||0;
+  const total=scanCountState.scannerCount+manual;
+  scanCountState.active=false;
+  document.getElementById('scanCountPanel').classList.remove('visible');
+  document.getElementById('scanCountInputWrap').classList.remove('disabled-no-barcode','scanning');
+  setPhase1ButtonsDisabled(false);
+  if(currentShelfQty==null){showToast('تعذر تحديد العدد المتوقع','error');return;}
+  const delta=total-currentShelfQty;
+  if(delta===0){
+    showToast('✅ العدد مطابق ('+total.toLocaleString('en-US')+' قطعة)','success');
+    confirmAuditOk();
+  }else{
+    showToast('🔧 فيه فرق في العدد — راجع التعديل المقترح قبل التأكيد','error');
+    showAdjustPanel(delta);
+    document.getElementById('adjustNotes').value='عدد بالسكانر: '+scanCountState.scannerCount.toLocaleString('en-US')+(manual>0?(' + يدوي: '+manual.toLocaleString('en-US')):'')+' = '+total.toLocaleString('en-US');
+  }
+}
+
+function showAdjustPanel(prefillDelta){
+  document.getElementById('adjustPanel').classList.add('visible');
+  document.getElementById('adjustCurrentVal').textContent=currentShelfQty!=null?currentShelfQty.toLocaleString('en-US'):'—';
+  const noteEl=document.getElementById('scanSuggestNote');
+  if(typeof prefillDelta==='number'&&prefillDelta!==0){
+    document.getElementById('deltaInput').value=prefillDelta;
+    noteEl.style.display='block';
+  }else{
+    document.getElementById('deltaInput').value='0';
+    document.getElementById('adjustNotes').value='';
+    noteEl.style.display='none';
+  }
+  updatePreview();
+}
+function hideAdjustPanel(){document.getElementById('adjustPanel').classList.remove('visible');document.getElementById('scanSuggestNote').style.display='none';}
 function stepDelta(step){const inp=document.getElementById('deltaInput');inp.value=(parseInt(inp.value)||0)+step;updatePreview();}
+function stepManualCount(step){const inp=document.getElementById('scanCountManual');inp.value=Math.max(0,(parseInt(inp.value)||0)+step);updateScanCountTotal();}
 function updatePreview(){const delta=parseInt(document.getElementById('deltaInput').value)||0,current=parseInt((document.getElementById('adjustCurrentVal').textContent||'').replace(/,/g,''));const previewEl=document.getElementById('previewNew'),btnApply=document.getElementById('btnApplyAdjust');if(isNaN(current)||delta===0){previewEl.textContent=isNaN(current)?'—':current.toLocaleString('en-US');previewEl.className='preview-new zero';btnApply.disabled=true;return;}const newVal=current+delta;previewEl.textContent=newVal.toLocaleString('en-US');previewEl.className='preview-new '+(delta>0?'positive':'negative');btnApply.disabled=false;}
 function updateAuditInfo(isoString,employee,notes){document.getElementById('auditLastVal').textContent=formatDateTime(isoString);const empRow=document.getElementById('auditEmpRow');if(employee){document.getElementById('auditEmpVal').textContent=employee.replace(/_/g,' ');empRow.style.display='flex';}else empRow.style.display='none';const notesRow=document.getElementById('auditNotesRow');if(notes){document.getElementById('auditNotesVal').textContent=notes;notesRow.style.display='block';}else notesRow.style.display='none';document.getElementById('auditInfoBox').style.display='flex';}
 function openConfirm(headerHTML,bodyHTML,okLabel,okClass,onConfirm){
@@ -1019,6 +1401,7 @@ function confirmAuditOk(){if(!currentVariant){showToast('لم يتم اختيا�
 async function doAuditOk(){const variantId=currentVariant.id,productId=currentVariant.product?.id,btn=document.getElementById('btnAuditOk');btn.disabled=true;btn.textContent='⏳ جاري التسجيل...';try{const data=await apiPost('set_audit_date',{variantId,employee:currentEmployee?.username||'',sku:currentVariant.sku||'',productTitle:currentVariant.product?.title||'',shelfQty:currentShelfQty||0});showToast('تم تسجيل الجرد ✓','success');if(data.auditDate)updateAuditInfo(data.auditDate,currentEmployee?.username||'','');onAuditComplete(variantId,productId);}catch(e){showToast('خطأ: '+e.message,'error');}finally{btn.disabled=false;btn.textContent='✅ الجرد مظبوط';}}
 function confirmAdjust(){const delta=parseInt(document.getElementById('deltaInput').value)||0,notes=document.getElementById('adjustNotes').value.trim();if(delta===0){showToast('التعديل يجب أن يكون غير صفر','error');return;}if(!currentVariant){showToast('لم يتم اختيار منتج','error');return;}const current=currentShelfQty!=null?currentShelfQty:0,newVal=current+delta,deltaStr=(delta>0?'+':'')+delta.toLocaleString('en-US'),deltaClass=delta>0?'green':'red';const body='<div class="confirm-detail-row"><span class="confirm-detail-label">SKU</span><span class="confirm-detail-val accent">'+currentVariant.sku+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الموظف</span><span class="confirm-detail-val accent">'+(currentEmployee?.displayName||'—')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">عدد القطع على الرف</span><span class="confirm-detail-val">'+current.toLocaleString('en-US')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">التعديل</span><span class="confirm-detail-val '+deltaClass+'">'+deltaStr+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الكمية الجديدة</span><span class="confirm-detail-val '+(delta>0?'green':'red')+'">'+newVal.toLocaleString('en-US')+'</span></div>'+(notes?'<div class="confirm-detail-row"><span class="confirm-detail-label">ملاحظات</span><span class="confirm-detail-val" style="font-size:12px;">'+notes+'</span></div>':'')+'<div class="confirm-note">سيتم تطبيق التعديل على Available في Shopify.</div>';openConfirm('🔧 تأكيد تعديل الكمية',body,'تطبيق التعديل','accent-btn',doApplyAdjust);}
 async function doApplyAdjust(){const delta=parseInt(document.getElementById('deltaInput').value)||0,notes=document.getElementById('adjustNotes').value.trim(),inventoryItemId=currentVariant.inventoryItem?.id,variantId=currentVariant.id,productId=currentVariant.product?.id;if(!inventoryItemId){showToast('لا يوجد inventoryItem ID','error');return;}const btn=document.getElementById('btnApplyAdjust'),btnAudit=document.getElementById('btnAuditOk');btn.disabled=true;btnAudit.disabled=true;btn.textContent='⏳ جاري التعديل...';try{const data=await apiPost('adjust_inventory',{inventoryItemId,variantId,delta,employee:currentEmployee?.username||'',notes,sku:currentVariant.sku||'',productTitle:currentVariant.product?.title||'',shelfBefore:currentShelfQty||0});showToast('تم التعديل بنجاح ('+(delta>0?'+':'')+delta+') ✓','success');if(data.auditDate)updateAuditInfo(data.auditDate,currentEmployee?.username||'',notes);onAuditComplete(variantId,productId);await refreshCurrent();hideAdjustPanel();}catch(e){showToast('خطأ: '+e.message,'error');btn.disabled=false;}finally{btnAudit.disabled=false;btn.textContent='✔ تعديل الكمية';}}
+
 let ordersCollapsed=false;
 function toggleOrders(){ordersCollapsed=!ordersCollapsed;document.getElementById('ordersBodyWrap').classList.toggle('collapsed',ordersCollapsed);document.getElementById('collapseIcon').classList.toggle('open',!ordersCollapsed);}
 async function refreshCurrent(){if(!currentSku)return;try{const data=await apiGet('list_skus',{search:currentSku});const variant=(data.variants||[]).find(v=>v.sku===currentSku);if(variant){currentVariant=variant;renderProductCard(variant);loadOrders(variant);}else showToast('لم يتم العثور على الـ SKU','error');}catch(e){showToast('خطأ: '+e.message,'error');}}
@@ -1040,7 +1423,9 @@ function toggleSelectAll(){const cbs=document.querySelectorAll('.order-checkbox'
 function confirmFulfill(){if(selectedOrderIds.size===0)return;const{flowToken}=getConfig();if(!flowToken){showToast('الرجاء إدخال Flow Token','error');openSettings();return;}const orderList=[...selectedOrderIds].map(id=>'<div style="font-family:monospace;font-size:12px;color:var(--accent);">#'+id+'</div>').join('');const body='<div class="confirm-detail-row"><span class="confirm-detail-label">عدد الأوردرات</span><span class="confirm-detail-val green">'+selectedOrderIds.size+'</span></div><div style="margin:10px 0 4px;font-size:11px;color:var(--text-secondary);font-weight:600;">الأوردرات:</div><div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;max-height:160px;overflow-y:auto;">'+orderList+'</div><div class="confirm-note">سيتم إرسال trigger لـ Flow Companion — specifier: FULFILL</div>';openConfirm('✅ تأكيد Fulfill Orders',body,'تأكيد وإرسال','green-btn',doFulfillOrders);}
 async function doFulfillOrders(){const{flowToken}=getConfig(),orderIds=[...selectedOrderIds],btn=document.getElementById('btnFulfill');btn.disabled=true;btn.textContent='⏳ جاري...';let s=0,f=0;for(const orderId of orderIds){try{const res=await fetch('https://flow-companion.mivicle.app/rest/1/flow/start/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bearerToken:flowToken,itemId:orderId,specifier:'FULFILL'})});if(res.ok)s++;else f++;}catch(e){f++;}}btn.disabled=false;updateFulfillBtn();if(f===0){showToast('تم إرسال '+s+' أوردر ✓','success');selectedOrderIds.clear();document.querySelectorAll('.order-checkbox').forEach(c=>c.checked=false);document.getElementById('btnSelectAll').textContent='تحديد الكل';updateFulfillBtn();}else showToast('نجح '+s+' / فشل '+f,'error');}
 
+// ══════════════════════════════════════════════════════
 // §LOG-JS
+// ══════════════════════════════════════════════════════
 let logLoaded=false,logAllData=[],logTotalAll=0,logSelectedIds=new Set(),logDebounce=null,logFiltersOpen=true;
 function toggleLogFilters(){logFiltersOpen=!logFiltersOpen;document.getElementById('logFiltersBody').classList.toggle('collapsed',!logFiltersOpen);document.getElementById('logFiltersToggleIcon').classList.toggle('open',logFiltersOpen);}
 let activePreset='';
