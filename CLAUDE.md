@@ -91,12 +91,13 @@ logout     : 4 صف   · آخر واحد 2026-07-28T07:47:39Z
 > ده بديل الـ tags — دفع الـ tags ممنوع من جلسات Claude Code السحابية.
 
 ```
-النسخ المرقّمة القديمة (2.1.html · 2.5.html · 3.html) محفوظة في تاريخ git
-قبل النقل — على فرع claude/migration-tool-transfer-5gmpwb.
-git show <commit-before-cleanup>:2.1.html
-git show <commit-before-cleanup>:2.5.html
-git show <commit-before-cleanup>:3.html
-git show <commit-before-cleanup>:Index.html   ← كان v3.1.0 قبل التحويل لصفحة تحويل
+النسخ المرقّمة القديمة (2.1.html · 2.5.html · 3.html · 4.html) و Index.html
+القديمة (v3.1.0) محفوظة في commit e33b484 (آخر commit قبل تنظيف الواجهة).
+git show e33b484:2.1.html
+git show e33b484:2.5.html
+git show e33b484:3.html
+git show e33b484:4.html        ← ده نفس محتوى index.html الحالي
+git show e33b484:Index.html    ← كان v3.1.0 قبل التحويل لصفحة تحويل
 ```
 
 ## بصمة المهارات
