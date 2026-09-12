@@ -1,40 +1,86 @@
 // ══════════════════════════════════════════════════════════════
-// §CONSTANTS
-// inventory-audit-updater-worker — EcomModa v4.0.0
+// §HEADER
+// inventory-audit-updater-worker — EcomModa v5.0.0
 // Account: ecommoda-dev (762c353004e8472b20261fba273bfe8d)
 // D1: DB → ecommoda-dev-logs
 //
+// skills: worker-builder v3.0.0 · constants v2.1.0 · shopify-graphql-helper v1.0.0 — 12-09-2026
+//
+// CHANGELOG v5.0.0 (12-09-2026) — مراجعة شاملة مقابل المهارات، التفاصيل في AUDIT-12-09-2026.md
+//   🔴 adjust_inventory: التسلسل بدل Promise.all + أربع حالات نتيجة
+//      * كان: Promise.all([adjustInventory, setAuditMetafields]) — فشل الميتافيلد
+//        بعد ما الكمية اتعدّلت كان بيرجّع 500، فالموظف يشوف أحمر ويعيد المحاولة
+//        و delta نسبي فالتعديل بيتطبّق مرتين. والـ writeLog ماكانش بيوصله التنفيذ
+//        أصلاً فالتعديل اللي حصل مالوش أي صف في D1.
+//      * بقى: الفعل اللي مالوش رجعة الأول، والخطوة التكميلية في try/catch → warning،
+//        و actions[] بتتملي أول بأول، و writeLog دايمًا بيتنفّذ (بـ logged:false لو فشل)
+//   🔴 shopifyGQL: النسخة الكاملة (res.ok · رد مش JSON · data.errors · data فاضية
+//      + backoff على THROTTLED) بدل `return res.json()`
+//   🔴 تاب السجل: Log Filter Model v2 — get_logs (100/صفحة) + get_logs_count
+//      + get_logs_export بـ {cap,total,truncated}، فلترة server-side بقوايم،
+//      ترتيب بقائمة بيضاء + كاسر تعادل، واستثناء login/logout في SQL
+//   🔴 التوقيت: Intl بـ Africa/Cairo بدل أي إزاحة ثابتة (constants §13)
+//   🟠 ?action=diag و ?action=get_config
+//   🟠 assertEnv + requireLocationId + حارس WORKER_SECRET الغايب
+//   🟠 get_details بيرجّع orderId الرقمي جنب اسم الأوردر
+//   🟠 get_audit_priorities: سقف صفحات + truncated بدل سحب مفتوح صامت
+//
 // CHANGELOG v4.0.0:
 //   - listSkus / lookupBarcode: إضافة product.vendor للـ GraphQL query
-//     * يُستخدم في الـ HTML الجديد لعرض اسم البراند بدل اسم المنتج الكامل
-//     * حقل String قياسي على Product object — لا تغيير في أي منطق آخر
-//
 // CHANGELOG v3.1.0:
-//   - getAllVariantsForAudit: إضافة inventoryItem.tracked + product.tags + product.title
-//     * استثناء: Inventory not tracked (tracked === false) من Priority Queue
-//     * استثناء: تاج Suspended من كل أماكن الأداة
-//     * إضافة productTitle للـ response (للبحث في Priority Queue filters)
-//   - listSkus: إضافة product.tags + فلتر Suspended client-side
-//   - lookupBarcode: إضافة product.tags + فلتر Suspended
-//
+//   - getAllVariantsForAudit: inventoryItem.tracked + product.tags + product.title
+//   - استثناء Inventory not tracked وتاج Suspended
 // CHANGELOG v3.0.0:
-//   - إضافة endpoint جديد: get_audit_priorities
-//     * يجلب كل productVariants من المتجر بدون collection filter
-//     * يفلتر ACTIVE products فقط server-side
-//     * يرجع: variantId, productId, sku, available, committed, onHand, lastAuditDate
-//     * يدعم أداة أولويات الجرد الجديدة في الـ HTML
-//
+//   - endpoint جديد: get_audit_priorities
 // CHANGELOG v2.5.0:
-//   - تحديث منطق تحديد حالة التغليف بالكامل (s1/s2_packed_by)
-//   - اكتشاف مرحلة الأوردر (S1/S2) عبر manual_status / status_2_r_e
-//   - S2 Exchange Items: fulfillableQuantity > 0
-//   - returnedIds: من returns.nodes[].returnLineItems
-//   - CORS: Strict origins (write tool)
+//   - منطق حالة التغليف (s1/s2_packed_by) + اكتشاف مرحلة الأوردر S1/S2
 // ══════════════════════════════════════════════════════════════
 
-const TOOL_NAME = 'inventory_audit';
+// ══════════════════════════════════════════════════════════════
+// §CONSTANTS
+// ══════════════════════════════════════════════════════════════
+
+const TOOL_NAME      = 'inventory_audit';
+const WORKER_VERSION = '5.0.0';
+
+// قيم `type` المسجّلة لهذه الأداة في ecommoda-constants §7:
+//   ok · adjustment · login · logout
+// ⛔ ممنوع أي writeLog بقيمة مش في السطر ده قبل ما تتسجّل هناك.
+// نتيجة العملية بتترحّل في extra.result (المفردات الرسمية → constants §12):
+//   success · warning · error   —   already/rejected مش منطبقين على الأداة دي
+//   (كل نداء كتابة هنا بيحاول فعل حقيقي؛ مفيش مسار بيتوقف قبل المحاولة).
+const LOG_TYPE_ADJUSTMENT = 'adjustment';
+const LOG_TYPE_OK         = 'ok';
 
 const S2_VALUES = ['Confirmed + RETURN', 'Confirmed + EXCHANGE', 'Printed', 'Ready'];
+
+// ─── سلسلة السقوف (worker-builder Step 5A ⑪) ────────────────────
+// ① الواجهة  CHUNK           = غير منطبق — الأداة دي بتكتب صنف واحد لكل نداء،
+//                              مفيش endpoint بياخد مصفوفة، فمفيش تقسيم دفعات.
+// ② الـ Worker MAX_BATCH      = غير منطبق لنفس السبب.
+// ③ شوبيفاي   VARIANTS_PER_PAGE = 250 — سقف `productVariants` نفسه. الاستعلام
+//                              خفيف (variant + مستوى مخزون واحد) فالتكلفة بعيدة
+//                              عن سقف الـ 1000 نقطة؛ الحد الفعلي هو عدد الصفحات.
+const VARIANTS_PER_PAGE = 250;
+// حارس على السحب المفتوح: 40 صفحة × 250 = 10,000 variant. لو المتجر عدّاها،
+// الرد بيرجع `truncated: true` — ممنوع نرجّع قايمة ناقصة في السكوت.
+const MAX_VARIANT_PAGES = 40;
+
+const LOG_EXPORT_MAX = 2000;   // سقف التصدير — بيرجع للواجهة كـ `cap`
+
+// ⚠️ قائمة **مقفولة** — القيمة جاية من العميل وبتتلزق في نص SQL مباشرةً
+//    (ORDER BY مابيقبلش bind). المفاتيح لازم تطابق `data-sort-key` في الواجهة حرفيًا.
+const LOG_SORT_COLUMNS = {
+  date:         'timestamp',
+  time:         'timestamp',
+  employee:     'employee',
+  sku:          'sku',
+  productTitle: 'product_title',
+  type:         'type',
+  delta:        'delta',
+  valueBefore:  'value_before',
+  valueAfter:   'value_after',
+};
 
 // ══════════════════════════════════════════════════════════════
 // §CORS — write tool → strict origins
@@ -67,9 +113,61 @@ function json(data, status = 200, request = null) {
   });
 }
 
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─── §HELPERS::time — توقيت القاهرة يتحسب، مايتكتبش ثابت ────────
+// نفس النسخة بالحرف في الواجهة (constants §13). نسختين مختلفتين = الشاشة
+// والسجل بيقولوا وقتين مختلفين لنفس الصف.
+const CAIRO_TZ  = 'Africa/Cairo';
+const _cairoFmt = new Intl.DateTimeFormat('en-CA', {
+  timeZone: CAIRO_TZ, hourCycle: 'h23',
+  year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', second: '2-digit',
+});
+function cairoParts(d) {
+  const o = {};
+  for (const p of _cairoFmt.formatToParts(d)) if (p.type !== 'literal') o[p.type] = p.value;
+  if (o.hour === '24') o.hour = '00';        // حارس: بعض المحركات بترجّع 24
+  return o;
+}
+function cairoDate(d = new Date()) {
+  const p = cairoParts(d);
+  return `${p.year}-${p.month}-${p.day}`;
+}
+
+// ─── §HELPERS::env — المتغيّر الناقص يوقف العملية باسمه ─────────
+function assertEnv(env, names) {
+  const missing = names.filter(n => {
+    const v = env[n];
+    return typeof v !== 'string' || !v.trim();
+  });
+  if (missing.length) {
+    throw new Error(
+      `متغيّرات ناقصة على الـ Worker: ${missing.join(' · ')} — ` +
+      `ضيفها في Settings → Variables and Secrets وبعدها Promote version`
+    );
+  }
+}
+
+// LOCATION_ID الناقص بيتحوّل لـ gid://shopify/Location/undefined وبيفشل جوّه
+// الميوتيشن — الأداة دي أداة مخزون فالحارس ده إلزامي قبل أي تعديل.
+function requireLocationId(env) {
+  assertEnv(env, ['LOCATION_ID']);
+  if (!/^\d+$/.test(String(env.LOCATION_ID).trim())) {
+    throw new Error(`LOCATION_ID لازم يكون رقم — القيمة الحالية غير صالحة`);
+  }
+  return `gid://shopify/Location/${String(env.LOCATION_ID).trim()}`;
+}
+
+// الـ GID بيتحوّل لرقم — الواجهة محتاجاه عشان تبني لينك صفحة الأوردر
+function numericId(gid) {
+  const n = String(gid || '').split('/').pop();
+  return /^\d+$/.test(n) ? n : null;
+}
+
 // ══════════════════════════════════════════════════════════════
 // §SHARED — copy verbatim — never modify
-// EcomModa D1 Pattern v1.2.0
+// EcomModa D1 Pattern v1.3.0
 // ══════════════════════════════════════════════════════════════
 
 async function verifyEmployee(db, username, pin) {
@@ -143,29 +241,140 @@ async function writeLog(db, entry) {
   ).run();
 }
 
-async function getLogs(db, {
-  tool     = null,
-  employee = null,
-  type     = null,
-  search   = null,
-  limit    = 200,
-  offset   = 0,
+// ⚠️ بنّاء الشرط الوحيد للتلات دوال — فمفيش endpoint بيفلتر بشكل مختلف عن
+//    اللي جنبه (وده بالظبط اللي بيخلي التصدير ينزّل غير المعروض).
+// ⚠️ أعمدة البحث مخصّصة للأداة دي: سجل الجرد مالوش `order_name` أصلاً،
+//    والموظف بيدوّر بالـ SKU أو باسم المنتج أو في الملاحظات.
+function buildLogFilterSQL(select, {
+  tool      = null,
+  employee  = null, employees = null,
+  type      = null, types     = null,
+  search    = null, searchNotes = null,
+  dateFrom  = null, dateTo    = null,
+  deltaDirs = null, auditCounts = null,
 } = {}) {
-  let sql = 'SELECT * FROM logs WHERE 1=1';
+  let sql = `${select} FROM logs WHERE type NOT IN ('login','logout')`;
   const b = [];
 
-  if (tool)     { sql += ' AND tool = ?';     b.push(tool); }
-  if (employee) { sql += ' AND employee = ?'; b.push(employee); }
-  if (type)     { sql += ' AND type = ?';     b.push(type); }
-  if (search) {
-    sql += ' AND (sku LIKE ? OR product_title LIKE ? OR order_name LIKE ? OR notes LIKE ?)';
-    b.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+  const emps = Array.isArray(employees) && employees.length ? employees : (employee ? [employee] : []);
+  const typs = Array.isArray(types)     && types.length     ? types     : (type     ? [type]     : []);
+
+  if (tool) { sql += ' AND tool = ?'; b.push(tool); }
+  if (emps.length) {
+    sql += ` AND employee IN (${emps.map(() => '?').join(',')})`; b.push(...emps);
   }
+  if (typs.length) {
+    sql += ` AND type IN (${typs.map(() => '?').join(',')})`; b.push(...typs);
+  }
+  if (search) {
+    sql += ' AND (sku LIKE ? OR product_title LIKE ?)';
+    b.push(`%${search}%`, `%${search}%`);
+  }
+  if (searchNotes) {
+    sql += ' AND notes LIKE ?';
+    b.push(`%${searchNotes}%`);
+  }
+  // اتجاه التعديل — كان فلتر client-side على `delta`، وبقى server-side عشان
+  // الصفحات والعدّ والتصدير يبقوا متسقين (Standards #31).
+  if (Array.isArray(deltaDirs) && deltaDirs.length) {
+    const parts = [];
+    if (deltaDirs.includes('pos')) parts.push('delta > 0');
+    if (deltaDirs.includes('neg')) parts.push('delta < 0');
+    if (deltaDirs.includes('zero')) parts.push('(delta = 0 OR delta IS NULL)');
+    if (parts.length) sql += ` AND (${parts.join(' OR ')})`;
+  }
+  // عدد مرات جرد الـ SKU — كان بيتحسب في المتصفح من الصفحة المحمّلة بس، فكان
+  // بيقلّل العدد الحقيقي. بقى من القاعدة كلها.
+  if (Array.isArray(auditCounts) && auditCounts.length) {
+    const exact = auditCounts.filter(c => c !== '10+').map(c => parseInt(c, 10)).filter(Number.isFinite);
+    const conds = [];
+    if (exact.length) {
+      conds.push(`cnt IN (${exact.map(() => '?').join(',')})`);
+    }
+    if (auditCounts.includes('10+')) conds.push('cnt > 10');
+    if (conds.length) {
+      sql += ` AND sku IN (
+        SELECT sku FROM (
+          SELECT sku, COUNT(*) AS cnt FROM logs
+          WHERE tool = ? AND type NOT IN ('login','logout') AND sku IS NOT NULL
+          GROUP BY sku
+        ) WHERE ${conds.join(' OR ')}
+      )`;
+      b.push(tool);
+      if (exact.length) b.push(...exact);
+    }
+  }
+  // ⚠️ `timestamp` مخزّن UTC والعرض بتوقيت القاهرة (+2/+3). فرق الساعتين/التلاتة
+  //    ممكن يحط عملية بعد ٩ مساءً بالقاهرة في يوم UTC اللي بعده. مقبول لفلتر
+  //    بالأيام — **بس مكتوب**، عشان مايتكتشفش كباج بعدين.
+  if (dateFrom) { sql += ' AND substr(timestamp, 1, 10) >= ?'; b.push(dateFrom); }
+  if (dateTo)   { sql += ' AND substr(timestamp, 1, 10) <= ?'; b.push(dateTo); }
 
-  sql += ' ORDER BY timestamp DESC LIMIT ? OFFSET ?';
-  b.push(Math.min(limit, 500), offset);
+  return { sql, b };
+}
 
-  return (await db.prepare(sql).bind(...b).all()).results;
+function orderByClause(sortBy, sortDir) {
+  const col = LOG_SORT_COLUMNS[String(sortBy || '')] || 'timestamp';
+  const dir = String(sortDir || '').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+  // 🔴 كاسر تعادل إلزامي: من غيره صفوف نفس القيمة بترتيب عشوائي بين الصفحات،
+  //    والصف الواحد ممكن يظهر في صفحتين **أو مايظهرش خالص**.
+  return col === 'timestamp' ? ` ORDER BY timestamp ${dir}`
+                             : ` ORDER BY ${col} ${dir}, timestamp DESC`;
+}
+
+const SELECT_WITH_COUNT = `SELECT *, (
+  SELECT COUNT(*) FROM logs l2
+   WHERE l2.tool = logs.tool AND l2.sku = logs.sku
+     AND l2.type NOT IN ('login','logout')
+) AS sku_audit_count`;
+
+/** صفحة واحدة للعرض — 100 صف كحد أقصى. ⚠️ ممنوع تستخدمها للتصدير. */
+async function getLogs(db, { limit = 100, offset = 0, sortBy, sortDir, ...filters } = {}) {
+  const { sql, b } = buildLogFilterSQL(SELECT_WITH_COUNT, filters);
+  const q = sql + orderByClause(sortBy, sortDir) + ' LIMIT ? OFFSET ?';
+  return (await db.prepare(q)
+    .bind(...b, Math.min(limit, 100), Math.max(offset, 0)).all()).results;
+}
+
+/** العدّ الكلي المطابق للفلاتر — بيتنادى بالتوازي مع getLogs و getLogsExport. */
+async function getLogsCount(db, filters = {}) {
+  const { sql, b } = buildLogFilterSQL('SELECT COUNT(*) as total', filters);
+  const row = await db.prepare(sql).bind(...b).first();
+  return row?.total ?? 0;
+}
+
+/**
+ * كل الصفوف المطابقة للتصدير — لحد LOG_EXPORT_MAX.
+ * ⚠️ الدالة دي **بتقص في السكوت** بطبيعتها، فالـ endpoint لازم يرجّع
+ *    cap و total و truncated كمان.
+ */
+async function getLogsExport(db, filters = {}) {
+  const { sql, b } = buildLogFilterSQL(SELECT_WITH_COUNT, filters);
+  // ⚠️ التصدير والعدّ بيتجاهلوا الترتيب عن قصد — تمريره ليهم بيفتح باب اختلاف
+  //    مصدر الباراميترات بين النداءات = تصدير مش مطابق للشاشة.
+  const q = sql + ' ORDER BY timestamp DESC LIMIT ?';
+  return (await db.prepare(q).bind(...b, LOG_EXPORT_MAX).all()).results;
+}
+
+/** مصدر واحد لقراءة فلاتر السجل من الـ query string — القوايم CSV. */
+function logParamsFrom(url, tool) {
+  const csv = (k) => (url.searchParams.get(k) || '')
+    .split(',').map(s => s.trim()).filter(Boolean);
+  const employees = csv('employees'), types = csv('types');
+  const deltaDirs = csv('deltaDirs'), auditCounts = csv('auditCounts');
+  return {
+    tool,
+    deltaDirs:   deltaDirs.length   ? deltaDirs   : null,
+    auditCounts: auditCounts.length ? auditCounts : null,
+    employees:   employees.length ? employees : null,
+    employee:    url.searchParams.get('employee') || null,
+    types:       types.length ? types : null,
+    type:        url.searchParams.get('type')        || null,
+    search:      url.searchParams.get('search')      || null,
+    searchNotes: url.searchParams.get('searchNotes') || null,
+    dateFrom:    url.searchParams.get('dateFrom')    || null,
+    dateTo:      url.searchParams.get('dateTo')      || null,
+  };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -177,30 +386,92 @@ async function getLogs(db, {
 // ══════════════════════════════════════════════════════════════
 
 async function getAccessToken(env) {
-  const res = await fetch(`https://${env.SHOP_DOMAIN}/admin/oauth/access_token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      client_id:     env.CLIENT_ID,
-      client_secret: env.CLIENT_SECRET,
-      grant_type:    'client_credentials',
-    }),
-  });
-  const data = await res.json();
-  if (!data.access_token) throw new Error('Failed to get access token');
+  assertEnv(env, ['SHOP_DOMAIN', 'CLIENT_ID', 'CLIENT_SECRET']);
+  let res;
+  try {
+    res = await fetch(`https://${env.SHOP_DOMAIN}/admin/oauth/access_token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id:     env.CLIENT_ID,
+        client_secret: env.CLIENT_SECRET,
+        grant_type:    'client_credentials',
+      }),
+    });
+  } catch (e) {
+    throw new Error(`تعذّر الوصول لشوبيفاي (شبكة): ${e.message}`);
+  }
+  const text = await res.text();
+  if (!res.ok) throw new Error(`فشل OAuth مع شوبيفاي — HTTP ${res.status}: ${text.slice(0, 200)}`);
+  let data;
+  try { data = JSON.parse(text); }
+  catch { throw new Error(`رد OAuth مش JSON — غالبًا SHOP_DOMAIN غلط: ${text.slice(0, 120)}`); }
+  if (!data.access_token) throw new Error('شوبيفاي ما رجّعتش access_token — راجع CLIENT_ID/CLIENT_SECRET');
   return data.access_token;
 }
 
-async function shopifyGQL(env, token, query, variables = {}) {
-  const res = await fetch(`https://${env.SHOP_DOMAIN}/admin/api/2026-01/graphql.json`, {
-    method: 'POST',
-    headers: {
-      'Content-Type':           'application/json',
-      'X-Shopify-Access-Token': token,
-    },
-    body: JSON.stringify({ query, variables }),
-  });
-  return res.json();
+// ─── §SHOPIFY::shopifyGQL — النسخة الكاملة (Step 5A ①) ──────────
+// بترمي على: فشل شبكة · HTTP status · رد مش JSON · data.errors · data فاضية.
+// + إعادة محاولة على THROTTLED. ⛔ `return res.json()` عطل مش اختصار.
+let lastThrottleStatus = null;   // بيتعرض في ?action=diag
+
+async function shopifyGQL(env, token, query, variables = {}, label = 'shopifyGQL') {
+  const RETRY_DELAYS = [600, 1400, 2600];
+  let attempt = 0;
+
+  for (;;) {
+    let res;
+    try {
+      res = await fetch(`https://${env.SHOP_DOMAIN}/admin/api/2026-01/graphql.json`, {
+        method: 'POST',
+        headers: {
+          'Content-Type':           'application/json',
+          'X-Shopify-Access-Token': token,
+        },
+        body: JSON.stringify({ query, variables }),
+      });
+    } catch (e) {
+      throw new Error(`${label}: تعذّر الوصول لشوبيفاي (شبكة) — ${e.message}`);
+    }
+
+    const text = await res.text();
+
+    if (!res.ok) {
+      // 429 = تجاوز حد المعدّل على مستوى HTTP — يستاهل إعادة محاولة
+      if (res.status === 429 && attempt < RETRY_DELAYS.length) {
+        await sleep(RETRY_DELAYS[attempt++]);
+        continue;
+      }
+      throw new Error(`${label}: شوبيفاي ردّت HTTP ${res.status} — ${text.slice(0, 200)}`);
+    }
+
+    let data;
+    try { data = JSON.parse(text); }
+    catch { throw new Error(`${label}: رد شوبيفاي مش JSON — ${text.slice(0, 160)}`); }
+
+    if (data?.extensions?.cost?.throttleStatus) {
+      lastThrottleStatus = data.extensions.cost.throttleStatus;
+    }
+
+    // data.errors ممكن تكون مصفوفة (أخطاء GraphQL) أو **نص** (401 مثلاً)
+    if (data.errors) {
+      const msgs = Array.isArray(data.errors)
+        ? data.errors.map(e => e?.message || JSON.stringify(e))
+        : [String(data.errors)];
+      const joined = msgs.join(' | ');
+      const throttled = Array.isArray(data.errors)
+        && data.errors.some(e => e?.extensions?.code === 'THROTTLED');
+      if (throttled && attempt < RETRY_DELAYS.length) {
+        await sleep(RETRY_DELAYS[attempt++]);
+        continue;
+      }
+      throw new Error(`${label}: ${joined}`);
+    }
+
+    if (!data.data) throw new Error(`${label}: شوبيفاي رجّعت رد فاضي (data = null)`);
+
+    return data;
+  }
 }
 
 // ── List SKUs ────────────────────────────────────────────────────────────────
@@ -241,8 +512,7 @@ async function listSkus(env, token, search = '') {
       }
     }
   `;
-  const data = await shopifyGQL(env, token, gql, { q: queryStr || null });
-  if (data.errors) throw new Error(data.errors[0].message);
+  const data = await shopifyGQL(env, token, gql, { q: queryStr || null }, 'listSkus');
 
   // v3.1.0: استثناء منتجات تاج Suspended من نتائج البحث
   return data.data.productVariants.nodes.filter(
@@ -251,8 +521,6 @@ async function listSkus(env, token, search = '') {
 }
 
 // ── Lookup by barcode ─────────────────────────────────────────────────────────
-// v4.0.0: إضافة product.vendor (اسم البراند)
-// v3.1.0: إضافة product.tags + فلتر Suspended
 async function lookupBarcode(env, token, barcode) {
   const gql = `
     query($q: String!) {
@@ -278,8 +546,7 @@ async function lookupBarcode(env, token, barcode) {
       }
     }
   `;
-  const data = await shopifyGQL(env, token, gql, { q: `barcode:${barcode}` });
-  if (data.errors) throw new Error(data.errors[0].message);
+  const data  = await shopifyGQL(env, token, gql, { q: `barcode:${barcode}` }, 'lookupBarcode');
   const nodes = data.data.productVariants.nodes;
   if (!nodes.length) return null;
   const variant = nodes[0];
@@ -288,22 +555,26 @@ async function lookupBarcode(env, token, barcode) {
   return variant;
 }
 
-// ── Get all variants for Priority Audit Queue — v3.1.0 ───────────────────────
+// ── Get all variants for Priority Audit Queue ────────────────────────────────
 // بدون collection filter — كل المنتجات من المتجر
-// يستثني:
-//   1. المنتجات غير ACTIVE
-//   2. المنتجات بدون SKU
-//   3. Inventory not tracked (inventoryItem.tracked === false)  ← v3.1.0
-//   4. منتجات تاج Suspended                                    ← v3.1.0
+// يستثني: غير ACTIVE · بدون SKU · Inventory not tracked · تاج Suspended
+// v5.0.0: سقف صفحات + truncated — السحب المفتوح كان ممكن يرجّع قايمة ناقصة
+//         (أو يستهلك وقت الطلب كله) من غير أي إشارة.
 async function getAllVariantsForAudit(env, token) {
   const allVariants = [];
   let cursor  = null;
   let hasNext = true;
+  let pages   = 0;
+  let scanned = 0;
 
   while (hasNext) {
+    if (pages >= MAX_VARIANT_PAGES) {
+      return { variants: allVariants, truncated: true, scanned, pages };
+    }
+
     const gql = `
-      query GetAllVariants($cursor: String) {
-        productVariants(first: 250, after: $cursor) {
+      query GetAllVariants($cursor: String, $n: Int!) {
+        productVariants(first: $n, after: $cursor) {
           nodes {
             id
             sku
@@ -325,19 +596,22 @@ async function getAllVariantsForAudit(env, token) {
       }
     `;
 
-    const data = await shopifyGQL(env, token, gql, { cursor });
-    if (data.errors) throw new Error(data.errors[0].message);
+    const data = await shopifyGQL(
+      env, token, gql, { cursor, n: VARIANTS_PER_PAGE }, 'getAllVariantsForAudit'
+    );
 
     const { nodes, pageInfo } = data.data.productVariants;
+    pages++;
+    scanned += nodes.length;
 
     for (const v of nodes) {
       // استثناء 1: غير ACTIVE
       if (v.product?.status !== 'ACTIVE') continue;
       // استثناء 2: بدون SKU
       if (!v.sku?.trim()) continue;
-      // استثناء 3 (v3.1.0): Inventory not tracked
+      // استثناء 3: Inventory not tracked
       if (!v.inventoryItem?.tracked) continue;
-      // استثناء 4 (v3.1.0): تاج Suspended
+      // استثناء 4: تاج Suspended
       if ((v.product?.tags || []).includes('Suspended')) continue;
 
       const levels = v.inventoryItem?.inventoryLevels?.nodes?.[0]?.quantities || [];
@@ -350,7 +624,7 @@ async function getAllVariantsForAudit(env, token) {
         variantId:     v.id,
         productId:     v.product.id,
         sku:           v.sku.trim(),
-        productTitle:  v.product.title || '',   // v3.1.0: للبحث في Priority Queue
+        productTitle:  v.product.title || '',
         available:     getQty('available'),
         committed:     getQty('committed'),
         onHand:        getQty('on_hand'),
@@ -362,10 +636,11 @@ async function getAllVariantsForAudit(env, token) {
     cursor  = pageInfo.endCursor;
   }
 
-  return allVariants;
+  return { variants: allVariants, truncated: false, scanned, pages };
 }
 
 // ── Get unfulfilled orders — v2.5.0 ──────────────────────────────────────────
+// v5.0.0: بيرجّع `orderId` الرقمي جنب `name` عشان الواجهة تبني لينك شوبيفاي
 async function getUnfulfilledOrders(env, token, variantId, productId) {
   const productIdNumeric = productId.split('/').pop();
   const allOrders = [];
@@ -377,7 +652,7 @@ async function getUnfulfilledOrders(env, token, variantId, productId) {
       query($q: String!, $after: String) {
         orders(first: 50, query: $q, after: $after, sortKey: CREATED_AT, reverse: true) {
           nodes {
-            id name createdAt tags cancelledAt
+            id legacyResourceId name createdAt tags cancelledAt
             manual_status: metafield(namespace: "custom", key: "manual_status") { value }
             status_2_r_e:  metafield(namespace: "custom", key: "status_2_r_e")  { value }
             s1_packed_by:         metafield(namespace: "custom", key: "s1_packed_by")         { value }
@@ -414,8 +689,7 @@ async function getUnfulfilledOrders(env, token, variantId, productId) {
     const data = await shopifyGQL(env, token, gql, {
       q: `product_id:${productIdNumeric} fulfillment_status:unfulfilled`,
       after: cursor,
-    });
-    if (data.errors) throw new Error(data.errors[0].message);
+    }, 'getUnfulfilledOrders');
     const { nodes, pageInfo } = data.data.orders;
 
     for (const order of nodes) {
@@ -450,6 +724,8 @@ async function getUnfulfilledOrders(env, token, variantId, productId) {
       if (matchingItems.length > 0) {
         allOrders.push({
           id:           order.id,
+          // ⚠️ المفتاح `orderId` موحّد في الستاك كله — الواجهة بتقرا الاسم ده
+          orderId:      order.legacyResourceId || numericId(order.id),
           name:         order.name,
           createdAt:    order.createdAt,
           tags:         order.tags || [],
@@ -488,8 +764,7 @@ async function getAuditMetafields(env, token, variantId) {
       }
     }
   `;
-  const data = await shopifyGQL(env, token, gql, { id: variantId });
-  if (data.errors) throw new Error(data.errors[0].message);
+  const data = await shopifyGQL(env, token, gql, { id: variantId }, 'getAuditMetafields');
   const v = data.data?.productVariant;
   return {
     auditDate:     v?.auditDate?.value     || null,
@@ -499,6 +774,7 @@ async function getAuditMetafields(env, token, variantId) {
 }
 
 // ── Set audit metafields ──────────────────────────────────────────────────────
+// الفحوصات التلاتة (Step 5A ②): top-level → userErrors → تأكيد الـ payload
 async function setAuditMetafields(env, token, variantId, employee, notes) {
   const now = new Date().toISOString();
 
@@ -535,16 +811,24 @@ async function setAuditMetafields(env, token, variantId, employee, notes) {
       }
     }
   `;
-  const data = await shopifyGQL(env, token, gql, { metafields });
-  if (data.errors) throw new Error(data.errors[0].message);
-  const userErrors = data.data?.metafieldsSet?.userErrors || [];
-  if (userErrors.length > 0) throw new Error(userErrors[0].message);
-  return { auditDate: now };
+  const data   = await shopifyGQL(env, token, gql, { metafields }, 'metafieldsSet');
+  const result = data.data?.metafieldsSet;
+
+  const userErrors = result?.userErrors || [];
+  if (userErrors.length > 0) {
+    throw new Error('metafieldsSet: ' + userErrors.map(e => e.message).join(' | '));
+  }
+  // ③ userErrors فاضية معناها «مفيش اعتراض» مش «اتنفّذت»
+  if (!result?.metafields?.length) {
+    throw new Error('metafieldsSet: شوبيفاي ما أكدتش كتابة الميتافيلد');
+  }
+  return { auditDate: now, written: result.metafields.length };
 }
 
 // ── Adjust inventory ──────────────────────────────────────────────────────────
+// ⚠️ الفعل ده **مالوش رجعة** — أي تحقق ممكن يتعمل بيتعمل قبله (Step 5A ⑩①)
 async function adjustInventory(env, token, inventoryItemId, delta) {
-  const locationId   = `gid://shopify/Location/${env.LOCATION_ID}`;
+  const locationId   = requireLocationId(env);
   const now          = new Date().toISOString();
   const referenceUri = `gid://Stock-Audit-Tool/StockCount/${now}`;
 
@@ -564,13 +848,21 @@ async function adjustInventory(env, token, inventoryItemId, delta) {
       reason:               'correction',
       name:                 'available',
       referenceDocumentUri: referenceUri,
-      changes: [{ delta: parseInt(delta), inventoryItemId, locationId }],
+      changes: [{ delta: parseInt(delta, 10), inventoryItemId, locationId }],
     },
-  });
-  if (adjustData.errors) throw new Error(adjustData.errors[0].message);
-  const userErrors = adjustData.data?.inventoryAdjustQuantities?.userErrors || [];
-  if (userErrors.length > 0) throw new Error(userErrors[0].message);
-  return adjustData.data.inventoryAdjustQuantities.inventoryAdjustmentGroup;
+  }, 'inventoryAdjustQuantities');
+
+  const result     = adjustData.data?.inventoryAdjustQuantities;
+  const userErrors = result?.userErrors || [];
+  if (userErrors.length > 0) {
+    throw new Error('inventoryAdjustQuantities: ' + userErrors.map(e => e.message).join(' | '));
+  }
+  // ③ تأكيد الـ payload — مجموعة تعديل فاضية معناها إن حاجة ما حصلتش
+  const group = result?.inventoryAdjustmentGroup;
+  if (!group?.changes?.length) {
+    throw new Error('inventoryAdjustQuantities: شوبيفاي ما أكدتش تعديل الكمية');
+  }
+  return group;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -581,6 +873,12 @@ export default {
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: getCORS(request) });
+    }
+
+    // 🔴 حارس السر الغايب — قبل فحص الـ auth (Step 8)
+    // السر الناقص لازم يدّي رسالة باسمه، مش 401 غامضة على كل نداء.
+    if (typeof env.WORKER_SECRET !== 'string' || !env.WORKER_SECRET.trim()) {
+      return json({ ok: false, error: 'WORKER_SECRET غير مضبوط على الـ Worker', step: 'env' }, 500, request);
     }
 
     const authHeader = request.headers.get('Authorization') || '';
@@ -649,18 +947,131 @@ export default {
         return json({ ok: true, employees: results }, 200, request);
       }
 
+      // ─── §DIAG — فحص ذاتي + النسخة ─────────────────────────
+
+      if (action === 'get_config') {
+        return json({ ok: true, version: WORKER_VERSION, tool: TOOL_NAME }, 200, request);
+      }
+
+      if (action === 'diag') {
+        // ⚠️ ممنوع يعرض قيمة أي سر — الأسماء والأطوال بس.
+        // الشكل المعتمد للجديد: مصفوفة [{ ok, label, detail }] بـ ok صريحة.
+        const checks = [];
+        const push = (ok, label, detail) => checks.push({ ok, label, detail: String(detail) });
+
+        // ① المتغيّرات — الطول بيكشف المسافة المخفية في الاسم أو القيمة
+        const envNames = ['WORKER_SECRET', 'CLIENT_ID', 'CLIENT_SECRET', 'SHOP_DOMAIN', 'LOCATION_ID'];
+        for (const n of envNames) {
+          const v = env[n];
+          const present = typeof v === 'string' && v.trim().length > 0;
+          push(present, `env: ${n}`, present ? `موجود — الطول ${v.length}` : 'ناقص');
+        }
+        push(
+          Object.keys(env).length > 0,
+          'env: كل المفاتيح',
+          Object.keys(env).sort().join(' · ')
+        );
+
+        // ② D1
+        try {
+          const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM logs WHERE tool = ?')
+            .bind(TOOL_NAME).first();
+          push(true, 'D1: ecommoda-dev-logs', `متصلة — ${row?.n ?? 0} صف لهذه الأداة`);
+        } catch (e) {
+          push(false, 'D1: ecommoda-dev-logs', `FAILED: ${e.message}`);
+        }
+
+        // ③ OAuth + صلاحيات التطبيق
+        let diagToken = null;
+        try {
+          diagToken = await getAccessToken(env);
+          push(true, 'شوبيفاي: OAuth', 'اتحصل على access_token');
+        } catch (e) {
+          push(false, 'شوبيفاي: OAuth', `FAILED: ${e.message}`);
+        }
+
+        if (diagToken) {
+          try {
+            const d = await shopifyGQL(env, diagToken,
+              `{ currentAppInstallation { accessScopes { handle } } }`, {}, 'diag:scopes');
+            const scopes = (d.data?.currentAppInstallation?.accessScopes || []).map(s => s.handle);
+            const needed = ['read_products', 'write_inventory', 'read_orders'];
+            const missing = needed.filter(s => !scopes.includes(s));
+            push(missing.length === 0, 'شوبيفاي: الصلاحيات',
+              missing.length ? `ناقصة: ${missing.join(' · ')} — المتاح: ${scopes.join(' · ')}`
+                             : scopes.join(' · '));
+          } catch (e) {
+            push(false, 'شوبيفاي: الصلاحيات', `FAILED: ${e.message}`);
+          }
+
+          // ④ الـ LOCATION_ID بيتحل لموقع حقيقي؟
+          try {
+            const gid = requireLocationId(env);
+            const d = await shopifyGQL(env, diagToken,
+              `query($id: ID!) { location(id: $id) { id name isActive } }`, { id: gid }, 'diag:location');
+            const loc = d.data?.location;
+            push(!!loc, 'شوبيفاي: LOCATION_ID',
+              loc ? `${loc.name} — ${loc.isActive ? 'نشط' : 'غير نشط'}`
+                  : 'الـ ID مش بيتحل لموقع حقيقي — الميوتيشن هترمي userError');
+          } catch (e) {
+            push(false, 'شوبيفاي: LOCATION_ID', `FAILED: ${e.message}`);
+          }
+        }
+
+        // ⑤ تكلفة الاستعلام — الاقتراب من السقف مابيبانش غير بانفجار دفعة
+        push(true, 'شوبيفاي: throttleStatus',
+          lastThrottleStatus
+            ? `متاح ${lastThrottleStatus.currentlyAvailable} من ${lastThrottleStatus.maximumAvailable} · استرجاع ${lastThrottleStatus.restoreRate}/ث`
+            : 'لسه مفيش استعلام في الطلب ده');
+
+        // ⑥ الساعة — بيكشف عيلة «كل الأوقات غلط بساعة» فورًا بدل ما تتكتشف من الشاشة
+        const nowUtc = new Date();
+        push(true, 'التوقيت: Africa/Cairo',
+          `القاهرة ${cairoDate(nowUtc)} — UTC ${nowUtc.toISOString().slice(0, 10)} (محسوب بـ Intl، مفيش إزاحة ثابتة)`);
+
+        // ⑦ الـ Origin
+        const origin = request.headers.get('Origin') || '(بدون Origin)';
+        push(ALLOWED_ORIGINS.includes(origin) || origin === '(بدون Origin)',
+          'CORS: Origin', `${origin} — المسموح: ${ALLOWED_ORIGINS.join(' · ')}`);
+
+        return json({ ok: true, version: WORKER_VERSION, tool: TOOL_NAME, checks }, 200, request);
+      }
+
       // ─── §LOG-ENDPOINTS ───────────────────────────────────
 
       if (action === 'get_logs') {
+        const p = logParamsFrom(url, TOOL_NAME);
+        // 🔴 parseInt('abc') → NaN · Math.min(NaN,100) → NaN → بيوصل لـ D1 كـ bind
+        //    ويرجّع خطأ غامض. الحراسة إلزامية، مش تجميل.
+        const limitRaw  = parseInt(url.searchParams.get('limit')  || '100', 10);
+        const offsetRaw = parseInt(url.searchParams.get('offset') || '0',   10);
+        const limit  = Number.isFinite(limitRaw)  ? Math.min(Math.max(limitRaw, 1), 100) : 100;
+        const offset = Number.isFinite(offsetRaw) ? Math.max(offsetRaw, 0) : 0;
+
         const entries = await getLogs(env.DB, {
-          tool:     TOOL_NAME,
-          employee: url.searchParams.get('employee') || null,
-          type:     url.searchParams.get('type')     || null,
-          search:   url.searchParams.get('search')   || null,
-          limit:    parseInt(url.searchParams.get('limit')  || '200'),
-          offset:   parseInt(url.searchParams.get('offset') || '0'),
+          ...p, limit, offset,
+          sortBy:  url.searchParams.get('sortBy'),
+          sortDir: url.searchParams.get('sortDir'),
         });
         return json({ ok: true, entries }, 200, request);
+      }
+
+      if (action === 'get_logs_count') {
+        const total = await getLogsCount(env.DB, logParamsFrom(url, TOOL_NAME));
+        return json({ ok: true, total }, 200, request);
+      }
+
+      if (action === 'get_logs_export') {
+        const p = logParamsFrom(url, TOOL_NAME);
+        const [entries, total] = await Promise.all([
+          getLogsExport(env.DB, p),
+          getLogsCount(env.DB, p),          // العدّ الحقيقي جنب الصفوف
+        ]);
+        return json({
+          ok: true, entries,
+          cap: LOG_EXPORT_MAX, total,
+          truncated: total > LOG_EXPORT_MAX,
+        }, 200, request);
       }
 
       // ─── §AUDIT — Shopify endpoints (need token) ──────────
@@ -700,9 +1111,23 @@ export default {
       // ─── §AUDIT — Priority Queue ──────────────────────────
 
       if (action === 'get_audit_priorities') {
-        const variants = await getAllVariantsForAudit(env, token);
-        return json({ ok: true, variants, count: variants.length }, 200, request);
+        const { variants, truncated, scanned, pages } = await getAllVariantsForAudit(env, token);
+        return json({
+          ok: true, variants, count: variants.length,
+          truncated, scanned, pages,
+          cap: MAX_VARIANT_PAGES * VARIANTS_PER_PAGE,
+        }, 200, request);
       }
+
+      // ─── §AUDIT — Write endpoints ─────────────────────────
+      //
+      // العقد الموحّد للنداءين دول (worker-builder Step 5A ④ · constants §12):
+      //   { ok, status, actions[], warnings[], logged, ... }
+      //   status: success = الفعل تم واتأكد
+      //           warning = الفعل الأساسي تم، وخطوة تكميلية فشلت أو ما اتأكدتش
+      //           error   = الفعل الأساسي نفسه فشل — مفيش أي أثر على شوبيفاي
+      // ⚠️ `warning` ممنوع تتحسب نجاح، و`error` هنا معناها إن النداء وصل
+      //    لشوبيفاي واترفض — فبيتسجّل في D1 برضه بـ extra.result='error'.
 
       if (action === 'adjust_inventory') {
         if (request.method !== 'POST') return json({ error: 'POST required' }, 405, request);
@@ -710,40 +1135,78 @@ export default {
 
         const inventoryItemId = body.inventoryItemId || '';
         const variantId       = body.variantId       || '';
-        const delta           = body.delta;
-        const employee        = body.employee         || '';
-        const notes           = body.notes            || '';
-        const sku             = body.sku              || '';
-        const productTitle    = body.productTitle     || '';
-        const shelfBefore     = parseInt(body.shelfBefore ?? 0);
+        const employee        = body.employee        || '';
+        const notes           = body.notes           || '';
+        const sku             = body.sku             || '';
+        const productTitle    = body.productTitle    || '';
 
+        // ⑩① كل تحقق ممكن يتعمل — يتعمل **قبل** أول فعل لا رجعة فيه
         if (!inventoryItemId || !variantId) {
           return json({ error: 'Missing inventoryItemId or variantId' }, 400, request);
         }
-        const deltaInt = parseInt(delta);
-        if (isNaN(deltaInt) || deltaInt === 0) {
-          return json({ error: 'delta must be non-zero integer' }, 400, request);
+        const deltaInt = parseInt(body.delta, 10);
+        if (!Number.isFinite(deltaInt) || deltaInt === 0) {
+          return json({ error: 'delta must be a non-zero integer' }, 400, request);
+        }
+        const shelfRaw    = parseInt(body.shelfBefore ?? 0, 10);
+        const shelfBefore = Number.isFinite(shelfRaw) ? shelfRaw : 0;
+        requireLocationId(env);          // بيرمي قبل أي كتابة لو ناقص
+
+        // ⑤ الأكشنز بتتملي أول بأول — لو رمى استثناء في النص، اللي حصل بيفضل مسجّل
+        const actions  = [];
+        const warnings = [];
+        let status     = 'success';
+        let errorMsg   = null;
+        let auditDate  = null;
+        let adjustment = null;
+
+        try {
+          adjustment = await adjustInventory(env, token, inventoryItemId, deltaInt);
+          actions.push(`inventoryAdjustQuantities: ${deltaInt > 0 ? '+' : ''}${deltaInt}`);
+        } catch (e) {
+          status   = 'error';
+          errorMsg = e.message;
         }
 
-        const [adjustResult, auditResult] = await Promise.all([
-          adjustInventory(env, token, inventoryItemId, deltaInt),
-          setAuditMetafields(env, token, variantId, employee, notes),
-        ]);
+        // ⑩② الفشل **بعد** الفعل الأساسي = warning مش error، ومعاه إجراء الإصلاح
+        if (status !== 'error') {
+          try {
+            const meta = await setAuditMetafields(env, token, variantId, employee, notes);
+            auditDate = meta.auditDate;
+            actions.push(`metafieldsSet×${meta.written}`);
+          } catch (e) {
+            status = 'warning';
+            warnings.push(
+              `الكمية اتعدّلت فعلاً على شوبيفاي، لكن تاريخ الجرد ما اتكتبش (${e.message}) — ` +
+              `سجّل الجرد يدويًا على الصنف ده، ومتعيدش التعديل`
+            );
+          }
+        }
 
-        await writeLog(env.DB, {
-          tool:         TOOL_NAME,
-          type:         'adjustment',
-          timestamp:    auditResult.auditDate,
-          employee:     employee     || null,
-          sku:          sku          || null,
-          productTitle: productTitle || null,
-          delta:        deltaInt,
-          valueBefore:  shelfBefore,
-          valueAfter:   shelfBefore + deltaInt,
-          notes:        notes        || null,
-        });
+        // ⑦ فشل D1 يبان — العملية حصلت بس مفيش سجل
+        let logged = true, logError = null;
+        try {
+          await writeLog(env.DB, {
+            tool:         TOOL_NAME,
+            type:         LOG_TYPE_ADJUSTMENT,
+            timestamp:    auditDate || new Date().toISOString(),
+            employee:     employee     || null,
+            sku:          sku          || null,
+            productTitle: productTitle || null,
+            delta:        deltaInt,
+            valueBefore:  shelfBefore,
+            valueAfter:   shelfBefore + deltaInt,
+            notes:        notes        || null,
+            extra:        { result: status, actions, warnings, error: errorMsg },
+          });
+        } catch (e) { logged = false; logError = e.message; }
 
-        return json({ ok: true, adjustment: adjustResult, auditDate: auditResult.auditDate }, 200, request);
+        return json({
+          ok: status !== 'error',
+          status, actions, warnings, logged, logError,
+          error: errorMsg,
+          adjustment, auditDate,
+        }, 200, request);
       }
 
       if (action === 'set_audit_date') {
@@ -754,33 +1217,56 @@ export default {
         const employee     = body.employee     || '';
         const sku          = body.sku          || '';
         const productTitle = body.productTitle || '';
-        const shelfQty     = parseInt(body.shelfQty ?? 0);
+        const shelfRaw     = parseInt(body.shelfQty ?? 0, 10);
+        const shelfQty     = Number.isFinite(shelfRaw) ? shelfRaw : 0;
         const notes        = 'تم المراجعة والتأكد من الجرد مظبوط في المخزن';
 
         if (!variantId) return json({ error: 'Missing variantId' }, 400, request);
 
-        const result = await setAuditMetafields(env, token, variantId, employee, notes);
+        const actions  = [];
+        const warnings = [];
+        let status    = 'success';
+        let errorMsg  = null;
+        let auditDate = null;
 
-        await writeLog(env.DB, {
-          tool:         TOOL_NAME,
-          type:         'ok',
-          timestamp:    result.auditDate,
-          employee:     employee     || null,
-          sku:          sku          || null,
-          productTitle: productTitle || null,
-          delta:        0,
-          valueBefore:  shelfQty,
-          valueAfter:   shelfQty,
-          notes,
-        });
+        try {
+          const meta = await setAuditMetafields(env, token, variantId, employee, notes);
+          auditDate = meta.auditDate;
+          actions.push(`metafieldsSet×${meta.written}`);
+        } catch (e) {
+          status   = 'error';
+          errorMsg = e.message;
+        }
 
-        return json({ ok: true, ...result }, 200, request);
+        let logged = true, logError = null;
+        try {
+          await writeLog(env.DB, {
+            tool:         TOOL_NAME,
+            type:         LOG_TYPE_OK,
+            timestamp:    auditDate || new Date().toISOString(),
+            employee:     employee     || null,
+            sku:          sku          || null,
+            productTitle: productTitle || null,
+            delta:        0,
+            valueBefore:  shelfQty,
+            valueAfter:   shelfQty,
+            notes,
+            extra:        { result: status, actions, warnings, error: errorMsg },
+          });
+        } catch (e) { logged = false; logError = e.message; }
+
+        return json({
+          ok: status !== 'error',
+          status, actions, warnings, logged, logError,
+          error: errorMsg,
+          auditDate,
+        }, 200, request);
       }
 
       return json({ error: 'Unknown action' }, 400, request);
 
     } catch (err) {
-      return json({ error: err.message }, 500, request);
+      return json({ ok: false, status: 'error', error: err.message }, 500, request);
     }
   },
 };
