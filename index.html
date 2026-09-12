@@ -374,12 +374,6 @@ td.centered{text-align:center;}
 .state-box p{font-size:12px;}
 .loading-spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.order-checkbox{width:16px;height:16px;cursor:pointer;accent-color:var(--accent);}
-.btn-fulfill{display:none;align-items:center;gap:6px;padding:5px 14px;background:var(--green);color:var(--on-accent);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
-.btn-fulfill.visible{display:flex;}
-.btn-select-all{display:flex;align-items:center;gap:5px;padding:4px 10px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
-.selected-count{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:2px 8px;border-radius:10px;display:none;}
-.selected-count.visible{display:inline-block;}
 .log-filters-header{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;background:var(--surface-2);cursor:pointer;user-select:none;}
 .log-filters-title{font-size:12px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px;}
 .log-filters-toggle{font-size:13px;color:var(--text-muted);transition:transform .25s;}
@@ -501,7 +495,6 @@ td.centered{text-align:center;}
       <!-- Standards #28: WORKER URL و ADMIN WORKER URL بقوا constants في §CONFIG.
            WORKER SECRET هو السر الوحيد اللي بيتخزّن جهة العميل. -->
       <div class="field-group"><label class="field-label">WORKER SECRET</label><input type="password" class="field-input" id="cfWorkerSecret" /></div>
-      <div class="field-group"><label class="field-label">FLOW COMPANION TOKEN</label><input type="password" class="field-input" id="cfFlowToken" /></div>
       <div class="field-group" style="border-top:1.5px solid var(--border);padding-top:12px;">
         <label class="field-label">فحص النظام</label>
         <button class="log-refresh-btn" id="diagBtn" onclick="runDiag()">🩺 افحص الأداة والاتصالات</button>
@@ -522,7 +515,12 @@ td.centered{text-align:center;}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v5.0.0</span><span class="cl-ver-date">12-09-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v5.1.0</span><span class="cl-ver-date">12-09-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>اتشال زرار «✅ Fulfill Orders» وخانات تحديد الأوردرات من كارت الأوردرات غير المشحونة — الأداة دي أداة جرد، والـ fulfillment مالوش مكان فيها. الميزة مكانتش بتتستخدم، وكانت بتبعت من متصفح الموظف لخدمة خارجية من غير أي تسجيل في السجل</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>اتشال حقل «FLOW COMPANION TOKEN» من الإعدادات، والتوكن القديم بيتمسح تلقائيًا من متصفح كل موظف</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v5.0.0</span><span class="cl-ver-date">12-09-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>تعديل الكمية كان ممكن يتنفّذ على شوبيفاي والأداة تقول «خطأ» — فالموظف يعيد المحاولة والتعديل يتطبّق مرتين. دلوقتي الفعل بيتسجّل دايمًا وبيتعرض «⚠ تم جزئيًا» مع اللي تم فعليًا</span></li>
         <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>تاب السجل كان بيعرض آخر ٥٠٠ عملية بس ويقول إنها الإجمالي، والتصدير كان بيطلع مقصوص بعلامة ✓ خضرا. دلوقتي فلترة وعدّ وترتيب على القاعدة كلها، بصفحات، والتصدير بيحذّر لو اتقص</span></li>
@@ -637,14 +635,13 @@ td.centered{text-align:center;}
             <li><code>§SHELL-JS</code> — الإعدادات · التوست (٤ أنواع) · <code>renderVersionUI</code> · <code>checkWorkerVersion</code> · <code>runDiag</code></li>
             <li><code>§AUTH-JS</code> — <code>renderLoginMode</code> (٤ حالات) · <code>loadEmployeesList</code> · <code>finishLogin</code></li>
             <li><code>§SCAN</code> — <code>handleBarcodeScan</code> · <code>handleScanCountInput</code> · <code>§SCAN::plausibility</code></li>
-            <li><code>§TOOL-JS</code> — الأولويات · بطاقة المنتج · لوحة التعديل · العد بالسكانر</li>
+            <li><code>§TOOL-JS</code> — الأولويات · بطاقة المنتج · لوحة التعديل · العد بالسكانر · كارت الأوردرات غير المشحونة (<b>عرض فقط</b> — مفيش أي فعل عليها من الأداة دي)</li>
             <li><code>§LOG-JS</code> — <code>logParams</code> · <code>fetchLog</code> · <code>renderLogTable</code> · <code>applySort</code> · <code>exportLogXLSX</code></li>
           </ul>
 
           <h4>KEY VARIABLES</h4>
           <ul>
             <li><code>LS_SECRET = 'stockaudit_worker_secret'</code> — السر الوحيد في localStorage</li>
-            <li><code>LS_FLOW_KEY = 'stockaudit_flow_token'</code> — 🔴 معلّق: مفروض ينتقل للـ Worker كسر</li>
             <li><code>WORKER_URL</code> — constant مش حقل إعدادات (Standards #28)</li>
             <li><code>TOOL_VERSION</code> / <code>MIN_WORKER_VERSION</code> — مصدر واحد لرقم النسخة وحارس نسخة الـ Worker</li>
             <li><code>currentEmployee</code> — في الذاكرة بس، عمره ما يدخل localStorage</li>
@@ -803,7 +800,7 @@ td.centered{text-align:center;}
     <div class="orders-card" id="ordersCard" style="display:none;">
       <div class="orders-card-header" onclick="toggleOrders()">
         <div class="orders-header-right"><div class="orders-card-title">الأوردرات غير المشحونة (Unfulfilled)</div><div class="orders-count-badge" id="ordersCountBadge">0</div></div>
-        <div class="orders-header-left"><span class="selected-count" id="selectedCount">0 محدد</span><button class="btn-select-all" id="btnSelectAll" onclick="event.stopPropagation();toggleSelectAll()" style="display:none;">تحديد الكل</button><button class="btn-fulfill" id="btnFulfill" onclick="event.stopPropagation();confirmFulfill()">✅ Fulfill Orders</button><span class="orders-collapse-icon" id="collapseIcon">▼</span></div>
+        <div class="orders-header-left"><span class="orders-collapse-icon" id="collapseIcon">▼</span></div>
       </div>
       <div class="orders-body-wrap collapsed" id="ordersBodyWrap"><div id="ordersBody"></div></div>
     </div>
@@ -1030,20 +1027,23 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '5.0.0';
+const TOOL_VERSION = '5.1.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. الواجهة بتقرا get_config/diag و
 // get_logs_count/get_logs_export و status/actions و orderId — كلهم اتضافوا في 5.0.0.
 const MIN_WORKER_VERSION = '5.0.0';
 
-// السر الوحيد اللي بيتخزّن جهة العميل. (FLOW لسه هنا — 🔴 معلّق، شوف CLAUDE.md)
-const LS_SECRET   = 'stockaudit_worker_secret';
-const LS_FLOW_KEY = 'stockaudit_flow_token';
+// السر الوحيد اللي بيتخزّن جهة العميل.
+const LS_SECRET = 'stockaudit_worker_secret';
+
+// v5.1.0: ميزة Flow Companion اتشالت بالكامل (مكانتش بتتستخدم ومكانش المفروض
+// تكون في أداة جرد أصلاً). المفتاح القديم بيتمسح من متصفح كل موظف — توكن
+// مالوش أي استخدام مايفضلش متخزّن.
+try { localStorage.removeItem('stockaudit_flow_token'); } catch { /* متصفح مقفول */ }
 
 function getConfig(){
   return {
     url:       WORKER_URL.replace(/\/$/,''),
-    secret:    localStorage.getItem(LS_SECRET)   || '',
-    flowToken: localStorage.getItem(LS_FLOW_KEY) || '',
+    secret: localStorage.getItem(LS_SECRET) || '',
   };
 }
 function isConfigured(){ return getConfig().secret.length > 0; }
@@ -1172,16 +1172,13 @@ function updateLoginSettingsBtn(){
 function openSettings(){
   const c = getConfig();
   document.getElementById('cfWorkerSecret').value = c.secret;
-  document.getElementById('cfFlowToken').value    = c.flowToken;
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettings(){ document.getElementById('settingsOverlay').classList.remove('open'); }
 function saveSettings(){
-  const secret    = document.getElementById('cfWorkerSecret').value.trim();
-  const flowToken = document.getElementById('cfFlowToken').value.trim();
+  const secret = document.getElementById('cfWorkerSecret').value.trim();
   if (!secret) { showToast('الرجاء إدخال الـ Worker Secret', 'error'); return; }
   localStorage.setItem(LS_SECRET, secret);
-  if (flowToken) localStorage.setItem(LS_FLOW_KEY, flowToken);
   updateSettingsButtonsState(); closeSettings();
   showToast('تم حفظ الإعدادات ✓', 'success');
   loadEmployeesList(); checkWorkerVersion();
@@ -1399,7 +1396,7 @@ async function doLogout(){
   document.getElementById('pinSlots').classList.remove('shake');
   document.getElementById('activeUserBtn').textContent='👤 —';document.getElementById('activeUserBtn').classList.remove('active-user');
   renderPinSlots();renderLoginMode('employee');clearLoginAlert();
-  currentSku=null;currentVariant=null;currentShelfQty=null;selectedOrderIds.clear();
+  currentSku=null;currentVariant=null;currentShelfQty=null;
   cancelScanCount();
   document.getElementById('results').classList.remove('visible');
   document.getElementById('loginOverlay').classList.remove('hidden');
@@ -1475,7 +1472,7 @@ function handleScanCountInput(){
 // ══════════════════════════════════════════════════════
 // §TOOL-JS
 // ══════════════════════════════════════════════════════
-let currentSku=null,currentVariant=null,currentShelfQty=null,selectedOrderIds=new Set(),_searchDebounce=null,currentImgUrl=null;
+let currentSku=null,currentVariant=null,currentShelfQty=null,_searchDebounce=null,currentImgUrl=null;
 let priorityData=null,priorityFiltered=[],priorityMode={active:false,currentProductId:null};
 let lastPriorityRefreshTime=null,pfFiltersOpen=true,_pfSearchDebounce=null;
 let scanCountState={active:false,scannerCount:0,targetBarcode:null};
@@ -1884,103 +1881,15 @@ async function loadOrders(variant){document.getElementById('ordersLoading').styl
 async function loadAuditDate(){if(!currentVariant)return;try{const data=await apiGet('get_audit_date',{variantId:currentVariant.id});if(data.auditDate)updateAuditInfo(data.auditDate,data.auditEmployee||'',data.auditNotes||'');else{document.getElementById('auditLastVal').textContent='لا يوجد تاريخ مسجّل';document.getElementById('auditInfoBox').style.display='flex';document.getElementById('auditEmpRow').style.display='none';document.getElementById('auditNotesRow').style.display='none';}}catch{document.getElementById('auditLastVal').textContent='—';document.getElementById('auditInfoBox').style.display='flex';}}
 function renderOrders(orders){
   document.getElementById('ordersLoading').style.display='none';const card=document.getElementById('ordersCard');card.style.display='block';document.getElementById('ordersCountBadge').textContent=orders.length;
-  const body=document.getElementById('ordersBody');selectedOrderIds.clear();updateFulfillBtn();
-  if(!orders.length){body.innerHTML='<div class="state-box"><div class="state-icon">✅</div><p>لا توجد أوردرات Unfulfilled لهذا الـ SKU</p></div>';document.getElementById('warningBanner').style.display='none';document.getElementById('btnSelectAll').style.display='none';const avail=parseInt(document.getElementById('qtyAvailable').textContent.replace(/,/g,''))||0;currentShelfQty=avail;document.getElementById('qtyShelf').textContent=avail.toLocaleString('en-US');document.getElementById('qtyPacked').textContent='0';return;}
-  document.getElementById('btnSelectAll').style.display='flex';
+  const body=document.getElementById('ordersBody');
+  if(!orders.length){body.innerHTML='<div class="state-box"><div class="state-icon">✅</div><p>لا توجد أوردرات Unfulfilled لهذا الـ SKU</p></div>';document.getElementById('warningBanner').style.display='none';const avail=parseInt(document.getElementById('qtyAvailable').textContent.replace(/,/g,''))||0;currentShelfQty=avail;document.getElementById('qtyShelf').textContent=avail.toLocaleString('en-US');document.getElementById('qtyPacked').textContent='0';return;}
   let totalUnfulfilled=0,packedQty=0,unpackedCommitted=0;
   const rows=orders.map(order=>{const unf=order.items.reduce((s,i)=>s+i.unfulfilledQuantity,0);totalUnfulfilled+=unf;const isPacked=!!order.packedBy;if(isPacked)packedQty+=unf;else unpackedCommitted+=unf;const date=formatDate(order.createdAt),isS2=order.orderStage==='S2';
     // ⚠️ الـ ID الرقمي بييجي من الـ Worker دلوقتي — الاشتقاق من الـ GID fallback بس
-    const orderId=String(order.orderId||order.id.split('/').pop()).replace(/\D/g,'');const stageHtml=isS2?'<span class="stage-pill stage-s2">S2 — استبدال</span>':'<span class="stage-pill stage-s1">S1 — عادي</span>';const packHtml=isPacked?'<span class="pack-status pack-done">🔴 مغلَّف · '+esc(order.packedBy)+'</span>':'<span class="pack-status pack-shelf">🟢 على الرف</span>';return '<tr><td style="text-align:center;padding:10px;"><input type="checkbox" class="order-checkbox" data-orderid="'+orderId+'" onchange="onCheckboxChange(this)" /></td><td><a class="order-name-link" href="https://'+SHOP_DOMAIN+'/admin/orders/'+orderId+'" target="_blank" rel="noopener">'+esc(order.name)+'</a></td><td><span class="order-date">'+date+'</span></td><td style="text-align:center;"><span class="qty-badge qty-unfulfilled">'+unf.toLocaleString('en-US')+'</span></td><td>'+stageHtml+'</td><td>'+packHtml+'</td></tr>';}).join('');
-  body.innerHTML='<table class="orders-table"><thead><tr><th style="width:40px;"></th><th>رقم الأوردر</th><th>التاريخ</th><th style="text-align:center;">القطع غير مشحونة</th><th>نوع الأوردر</th><th>حالة التغليف</th></tr></thead><tbody>'+rows+'<tr class="summary-row"><td></td><td colspan="4">الإجمالي ('+orders.length+' أوردر)</td><td style="text-align:center;"><span class="qty-badge qty-unfulfilled">'+totalUnfulfilled.toLocaleString('en-US')+'</span></td></tr></tbody></table>';
+    const orderId=String(order.orderId||order.id.split('/').pop()).replace(/\D/g,'');const stageHtml=isS2?'<span class="stage-pill stage-s2">S2 — استبدال</span>':'<span class="stage-pill stage-s1">S1 — عادي</span>';const packHtml=isPacked?'<span class="pack-status pack-done">🔴 مغلَّف · '+esc(order.packedBy)+'</span>':'<span class="pack-status pack-shelf">🟢 على الرف</span>';return '<tr><td><a class="order-name-link" href="https://'+SHOP_DOMAIN+'/admin/orders/'+orderId+'" target="_blank" rel="noopener">'+esc(order.name)+'</a></td><td><span class="order-date">'+date+'</span></td><td style="text-align:center;"><span class="qty-badge qty-unfulfilled">'+unf.toLocaleString('en-US')+'</span></td><td>'+stageHtml+'</td><td>'+packHtml+'</td></tr>';}).join('');
+  body.innerHTML='<table class="orders-table"><thead><tr><th>رقم الأوردر</th><th>التاريخ</th><th style="text-align:center;">القطع غير مشحونة</th><th>نوع الأوردر</th><th>حالة التغليف</th></tr></thead><tbody>'+rows+'<tr class="summary-row"><td colspan="4">الإجمالي ('+orders.length+' أوردر)</td><td style="text-align:center;"><span class="qty-badge qty-unfulfilled">'+totalUnfulfilled.toLocaleString('en-US')+'</span></td></tr></tbody></table>';
   const avail=parseInt(document.getElementById('qtyAvailable').textContent.replace(/,/g,''))||0;currentShelfQty=avail+unpackedCommitted;document.getElementById('qtyShelf').textContent=currentShelfQty.toLocaleString('en-US');document.getElementById('qtyPacked').textContent=packedQty>0?'-'+packedQty.toLocaleString('en-US'):'0';document.getElementById('warningBanner').style.display='flex';
 }
-function onCheckboxChange(cb){const oid=cb.dataset.orderid;if(cb.checked)selectedOrderIds.add(oid);else selectedOrderIds.delete(oid);updateFulfillBtn();}
-function updateFulfillBtn(){const count=selectedOrderIds.size;document.getElementById('btnFulfill').classList.toggle('visible',count>0);document.getElementById('selectedCount').classList.toggle('visible',count>0);if(count>0){document.getElementById('selectedCount').textContent=count+' محدد';document.getElementById('btnFulfill').textContent='✅ Fulfill ('+count+')';}}
-function toggleSelectAll(){const cbs=document.querySelectorAll('.order-checkbox');const allChecked=[...cbs].every(c=>c.checked);cbs.forEach(c=>{c.checked=!allChecked;const oid=c.dataset.orderid;if(!allChecked)selectedOrderIds.add(oid);else selectedOrderIds.delete(oid);});document.getElementById('btnSelectAll').textContent=allChecked?'تحديد الكل':'إلغاء التحديد';updateFulfillBtn();}
-// ─── §TOOL-JS::fulfill — Flow Companion ───
-// 🔴 معلّق (AUDIT-12-09-2026 بند ٦): النداء ده لسه **بيخرج من المتصفح مباشرةً**
-//    والتوكن لسه في localStorage، وما بيتسجّلش في D1. نقله للـ Worker محتاج
-//    قيمة `type` جديدة تتسجّل في `ecommoda-constants` §7 الأول — قرار أحمد.
-//    اللي اتصلّح هنا دلوقتي: التهريب · القفل واللقطة · الدليل بدل res.ok ·
-//    وأنواع التوست. اللي لسه مفتوح: السر والتسجيل والوسيط.
-let isFulfilling = false;
-
-function confirmFulfill(){
-  if (selectedOrderIds.size === 0 || isFulfilling) return;
-  const { flowToken } = getConfig();
-  if (!flowToken) { showToast('الرجاء إدخال Flow Token', 'warning'); openSettings(); return; }
-  const ids = [...selectedOrderIds];
-  const orderList = ids.map(id =>
-    `<div style="font-family:var(--font-mono);font-size:12px;color:var(--accent);">#${esc(id)}</div>`).join('');
-  const body =
-    `<div class="confirm-detail-row"><span class="confirm-detail-label">عدد الأوردرات</span><span class="confirm-detail-val green">${ids.length}</span></div>`
-  + `<div style="margin:10px 0 4px;font-size:11px;color:var(--text-secondary);font-weight:600;">الأوردرات:</div>`
-  + `<div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;max-height:160px;overflow-y:auto;">${orderList}</div>`
-  + `<div class="confirm-note">هيتبعت trigger لـ Flow Companion (specifier: FULFILL) على ${ids.length} أوردر — الفعل ده مفيش رجوع فيه من الأداة.</div>`;
-  openConfirm('✅ تأكيد Fulfill Orders', body, `تأكيد — نفّذ على ${ids.length} أوردر`, 'btn-red', doFulfillOrders);
-}
-
-async function doFulfillOrders(){
-  const { flowToken } = getConfig();
-  // ⚠️ لقطة قبل اللوب — لو المستخدم غيّر الاختيار أثناء التنفيذ، عنصر على
-  //    الحدود كان بيتبعت مرتين واللي بعده بيتخطّى بلا أي رسالة (Standards #43)
-  const batch = [...selectedOrderIds];
-  const btn = document.getElementById('btnFulfill');
-  isFulfilling = true;
-  btn.disabled = true; btn.textContent = `⏳ 0 / ${batch.length}`;
-  document.querySelectorAll('.order-checkbox').forEach(c => c.disabled = true);
-
-  let ok = 0; const failed = [];
-  try {
-    for (let i = 0; i < batch.length; i++){
-      const orderId = batch[i];
-      try {
-        const res = await fetch('https://flow-companion.mivicle.app/rest/1/flow/start/order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bearerToken: flowToken, itemId: orderId, specifier: 'FULFILL' }),
-        });
-        const text = await res.text();
-        // ⚠️ `res.ok` لوحدها مش دليل — بعض الأخطاء بترجع 200 بجسم فيه error
-        if (!res.ok) throw new Error(`HTTP ${res.status} — ${text.slice(0,120)}`);
-        let payload = null; try { payload = JSON.parse(text); } catch { /* رد نصي مقبول */ }
-        if (payload && (payload.error || payload.success === false))
-          throw new Error(String(payload.error || 'الـ Flow رفض الطلب'));
-        ok++;
-      } catch (e) { failed.push({ orderId, reason: e.message }); }
-      btn.textContent = `⏳ ${i + 1} / ${batch.length}`;   // تقدّم حقيقي، مش حلقة بعد الرد
-    }
-  } finally {
-    isFulfilling = false;
-    document.querySelectorAll('.order-checkbox').forEach(c => c.disabled = false);
-    btn.disabled = false; updateFulfillBtn();
-  }
-
-  // الصفوف اللي نجحت بتتنزع سلاحها — الشاشة بعد النجاح ماتفضلش زي قبل الضغط
-  if (ok) {
-    batch.filter(id => !failed.some(f => f.orderId === id)).forEach(id => selectedOrderIds.delete(id));
-    document.querySelectorAll('.order-checkbox').forEach(c => { if (!selectedOrderIds.has(c.dataset.orderid)) c.checked = false; });
-    document.getElementById('btnSelectAll').textContent = 'تحديد الكل';
-    updateFulfillBtn();
-  }
-
-  if (!failed.length) {
-    showToast(`تم إرسال ${ok} أوردر ✓`, 'success');
-  } else {
-    // نافذة ملخّص — التوست بيختفي في ثواني وفي مخزن دي مدة كافية إن النتيجة تضيع
-    const rows = failed.slice(0, 12).map(f =>
-      `<div class="confirm-detail-row"><span class="confirm-detail-label">#${esc(f.orderId)}</span><span class="confirm-detail-val red" style="font-size:12px;">${esc(f.reason)}</span></div>`).join('');
-    openConfirm('⚠️ نتيجة الإرسال',
-      `<div class="confirm-detail-row"><span class="confirm-detail-label">تم</span><span class="confirm-detail-val green">${ok}</span></div>`
-      + `<div class="confirm-detail-row"><span class="confirm-detail-label">فشل</span><span class="confirm-detail-val red">${failed.length}</span></div>`
-      + rows
-      + (failed.length > 12 ? `<div class="confirm-note">و${failed.length - 12} غيرهم…</div>` : '')
-      + `<div class="confirm-note">الأوردرات اللي فشلت لسه محدّدة — تقدر تعيد المحاولة عليها.</div>`,
-      'تمام', 'btn-red', () => {});
-    showToast(`تم ${ok} · فشل ${failed.length}`, 'warning', 7000);
-  }
-}
-
 // ══════════════════════════════════════════════════════
 // §LOG-JS — Log Filter Model v2 (كل الفلترة والعدّ والترتيب server-side)
 // ══════════════════════════════════════════════════════
