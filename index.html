@@ -1,40 +1,58 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<!-- skills: html-builder v1.0.0 · constants v1.2.0 — 27-08-2026 -->
+<!-- skills: html-builder v7.0.0 · worker-builder v3.0.0 · constants v2.1.0 — 12-09-2026 -->
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Inventory Audit v4.0.1</title>
+<title>Inventory Audit</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
 </head>
 <body>
 <style>
 :root{
-  --bg:#f3f4f6;--surface:#fff;--surface-2:#f9fafb;
+  /* Backgrounds */
+  --bg:#f3f4f6;--surface:#ffffff;--surface-2:#f9fafb;
+  /* Borders */
   --border:#e5e7eb;--border-strong:#d1d5db;
-  --text-primary:#111827;--text-secondary:#6b7280;--text-muted:#9ca3af;
+  /* Text */
+  --text-primary:#111827;--text-secondary:#6b7280;--text-muted:#6b7280;--text-mid:#374151;
+  /* Blue (accent) */
   --accent:#2563eb;--accent-light:#eff6ff;--accent-dark:#1d4ed8;
+  /* Green */
   --green:#16a34a;--green-light:#f0fdf4;--green-border:#86efac;
+  /* Red */
   --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  /* Amber */
   --amber:#d97706;--amber-light:#fffbeb;--amber-border:#fde68a;
-  --purple:#7e22ce;--purple-light:#fdf4ff;--purple-border:#e9d5ff;
-  --orange-light:#fff7ed;--orange-border:#fed7aa;--orange:#c2410c;
+  /* Purple */
+  --purple:#7c3aed;--purple-light:#f5f3ff;--purple-border:#c4b5fd;
+  /* Extras (design-system.md 02-09-2026) */
+  --surface-hover:#f0f4f8;--neutral-dark:#1a1d27;--on-accent:#ffffff;
+  --accent-border:#bfdbfe;--accent-hover:#dbeafe;--accent-hover-border:#93c5fd;
+  --green-dark:#15803d;--red-dark:#b91c1c;--amber-dark:#92400e;--purple-dark:#4c1d95;
+  /* Tool-specific — كل hex في الأداة عايش هنا (Standards #35) */
+  --yellow-light:#fef9c3;--red-darker:#991b1b;--red-darkest:#7f1d1d;--red-lighter:#fff0f0;
+  --orange:#c2410c;--orange-light:#fff7ed;--orange-border:#fed7aa;
+  /* Shape */
   --radius:12px;--radius-sm:8px;
   --shadow:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
-  --font:'Noto Sans Arabic',sans-serif;
-  --mono:'IBM Plex Mono',monospace;
+  /* Layout — Tier L: الأداة فيها جدول أولويات كثيف + تاب سجل بجدول */
+  --container-max:1400px;
+  /* Typography — خط واحد فقط؛ خط الكود القديم أُلغي (19-08-2026) */
+  --font-body:'Noto Sans Arabic',-apple-system,sans-serif;
+  --font-mono:'Noto Sans Arabic',-apple-system,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-height:100vh;padding:20px 24px;font-size:14px;line-height:1.5;}
-.container{max-width:1100px;margin:0 auto;}
-.login-overlay{position:fixed;inset:0;background:var(--bg);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary);min-height:100vh;padding:20px 24px;font-size:14px;line-height:1.5;}
+.container{max-width:var(--container-max);margin:0 auto;}
+.login-overlay{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
 .login-overlay.hidden{display:none;}
 .login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 22px 70px rgba(0,0,0,.22);width:100%;max-width:420px;padding:28px 26px 24px;position:relative;animation:loginIn .18s ease;}
 @keyframes loginIn{from{transform:translateY(6px) scale(.985);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
-.login-settings-btn{position:absolute;top:16px;left:16px;display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:8px 12px;border-radius:9px;border:1.5px solid;background:var(--surface);font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.login-settings-btn{position:absolute;top:16px;left:16px;display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:8px 12px;border-radius:9px;border:1.5px solid;background:var(--surface);font-family:var(--font-body);font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .login-settings-btn.ready{border-color:var(--green);color:var(--green);background:var(--green-light);}
+.login-version{position:absolute;top:58px;left:18px;font-size:11px;font-weight:700;color:var(--text-muted);}
 .login-settings-btn.missing{border-color:var(--red);color:var(--red);background:var(--red-light);}
 .login-top{padding-top:12px;display:flex;flex-direction:column;align-items:center;text-align:center;}
 .login-icon{font-size:34px;line-height:1;margin-bottom:14px;}
@@ -44,7 +62,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-
 .login-body{margin-top:22px;display:flex;flex-direction:column;gap:14px;}
 .login-field{display:flex;flex-direction:column;gap:7px;}
 .login-field label{display:block;font-size:11px;font-weight:800;color:var(--text-secondary);letter-spacing:.3px;}
-.login-field select{width:100%;height:58px;border:1.5px solid var(--border-strong);border-radius:10px;background:var(--surface);color:var(--text-primary);font-family:var(--font);font-size:14px;font-weight:600;outline:none;padding:0 14px;transition:border-color .15s,box-shadow .15s;}
+.login-field select{width:100%;height:58px;border:1.5px solid var(--border-strong);border-radius:10px;background:var(--surface);color:var(--text-primary);font-family:var(--font-body);font-size:14px;font-weight:600;outline:none;padding:0 14px;transition:border-color .15s,box-shadow .15s;}
 .login-field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
 .login-field select:disabled{opacity:.68;cursor:not-allowed;background:var(--surface-2);}
 .login-status{min-height:18px;font-size:12px;font-weight:700;color:var(--text-muted);line-height:1.5;}
@@ -54,7 +72,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-
 @keyframes pinZoneIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
 .pin-label{font-size:12px;font-weight:800;color:var(--text-secondary);text-align:right;margin-top:2px;}
 .pin-slots{display:flex;justify-content:center;gap:9px;direction:ltr;}
-.pin-slot{width:48px;height:48px;border-radius:10px;border:1.5px solid var(--border-strong);background:var(--surface-2);display:grid;place-items:center;font-family:var(--mono);font-size:22px;font-weight:800;color:var(--accent);transition:all .15s;user-select:none;}
+.pin-slot{width:48px;height:48px;border-radius:10px;border:1.5px solid var(--border-strong);background:var(--surface-2);display:grid;place-items:center;font-family:var(--font-mono);font-size:22px;font-weight:800;color:var(--accent);transition:all .15s;user-select:none;}
 .pin-slot.empty::before{content:'_';transform:translateY(-2px);color:var(--accent);opacity:.75;font-size:18px;}
 .pin-slot.filled{background:var(--accent-light);border-color:var(--accent);}
 .pin-slot.filled::before{content:'●';font-size:17px;transform:translateY(-1px);color:var(--accent);}
@@ -63,20 +81,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-
 .pin-slots.shake{animation:pinShake .34s ease;}
 @keyframes pinShake{0%,100%{transform:translateX(0);}22%{transform:translateX(-5px);}44%{transform:translateX(5px);}66%{transform:translateX(-3px);}88%{transform:translateX(3px);};}
 .pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:1px 0 0;}
-.pin-key{min-height:49px;border-radius:10px;border:1.5px solid var(--border-strong);background:var(--surface);color:var(--text-primary);font-family:var(--mono);font-size:18px;font-weight:800;cursor:pointer;transition:background .12s,color .12s,border-color .12s,transform .06s;display:flex;align-items:center;justify-content:center;}
+.pin-key{min-height:49px;border-radius:10px;border:1.5px solid var(--border-strong);background:var(--surface);color:var(--text-primary);font-family:var(--font-mono);font-size:18px;font-weight:800;cursor:pointer;transition:background .12s,color .12s,border-color .12s,transform .06s;display:flex;align-items:center;justify-content:center;}
 .pin-key:hover:not(:disabled){background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
 .pin-key:active:not(:disabled){transform:translateY(1px);}
-.pin-key.utility{color:var(--red);background:var(--red-light);border-color:var(--red-border);font-family:var(--font);font-size:13px;font-weight:900;}
-.pin-key.utility:hover:not(:disabled){background:var(--red);color:#fff;}
+.pin-key.utility{color:var(--red);background:var(--red-light);border-color:var(--red-border);font-family:var(--font-body);font-size:13px;font-weight:900;}
+.pin-key.utility:hover:not(:disabled){background:var(--red);color:var(--on-accent);}
 .pin-key:disabled{opacity:.55;cursor:not-allowed;}
 .login-alert{display:none;min-height:38px;border-radius:10px;border:1px solid var(--red-border);background:var(--red-light);color:var(--red);padding:9px 12px;font-size:12px;font-weight:800;text-align:center;line-height:1.6;}
 .login-alert.visible{display:block;}
-.login-primary{display:none;align-items:center;justify-content:center;gap:7px;width:100%;min-height:58px;margin-top:1px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-family:var(--font);font-size:15px;font-weight:900;cursor:pointer;transition:background .15s,opacity .15s,transform .06s;}
+.login-primary{display:none;align-items:center;justify-content:center;gap:7px;width:100%;min-height:58px;margin-top:1px;border:none;border-radius:10px;background:var(--accent);color:var(--on-accent);font-family:var(--font-body);font-size:15px;font-weight:900;cursor:pointer;transition:background .15s,opacity .15s,transform .06s;}
 .login-primary.visible{display:inline-flex;}
 .login-primary:hover:not(:disabled){background:var(--accent-dark);}
 .login-primary:active:not(:disabled){transform:translateY(1px);}
 .login-primary:disabled{opacity:.56;cursor:not-allowed;}
-.login-secondary{display:none;align-items:center;justify-content:center;width:100%;min-height:42px;border-radius:10px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-secondary);font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;}
+.login-secondary{display:none;align-items:center;justify-content:center;width:100%;min-height:42px;border-radius:10px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-secondary);font-family:var(--font-body);font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;}
 .login-secondary.visible{display:inline-flex;}
 .login-secondary:hover{border-color:var(--accent);background:var(--accent-light);color:var(--accent);}
 .app-header{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;}
@@ -85,64 +103,69 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-
 .app-title-text h1{font-size:15px;font-weight:700;line-height:1.2;}
 .app-title-text span{font-size:11px;color:var(--text-muted);}
 .app-header-btns{display:flex;align-items:center;gap:6px;}
-.hbtn{display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--border-strong);background:var(--surface);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;transition:all .15s;}
+.hbtn{display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--border-strong);background:var(--surface);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;transition:all .15s;}
 .hbtn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
 .hbtn.active-user{border-color:var(--green);color:var(--green);background:var(--green-light);}
-.hbtn.ver-btn{border-color:#bfdbfe;color:#1d4ed8;background:#eff6ff;}
+.hbtn.ver-btn{border-color:var(--accent-border);color:var(--accent-dark);background:var(--accent-light);}
 .hbtn.settings-configured{border-color:var(--green);color:var(--green);background:var(--green-light);}
 .main-tabs-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;box-shadow:var(--shadow);}
-.main-seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:10px;padding:4px;gap:3px;}
-.main-seg-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 28px;border-radius:7px;font-family:var(--font);font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;border:none;background:transparent;transition:all .15s;min-width:120px;}
-.main-seg-btn .msb-icon{font-size:16px;}
-.main-seg-btn.active{background:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(37,99,235,.3);}
-.main-seg-btn:not(.active):hover{background:var(--accent-light);color:var(--accent);}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.main-tabs-bar{display:flex;width:100%;gap:8px;}
+.main-tab-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 14px;border-radius:10px;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text-secondary);cursor:pointer;border:1.5px solid var(--border-strong);background:var(--surface-2);transition:background .15s,color .15s,border-color .15s;}
+.main-tab-btn .msb-icon{font-size:16px;}
+.main-tab-btn.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
+.main-tab-btn:not(.active):hover{background:var(--accent-light);color:var(--accent);border-color:var(--accent-border);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
 .modal-overlay.open{opacity:1;pointer-events:all;}
 .modal{background:var(--surface);border-radius:var(--radius);width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;transform:translateY(14px);transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
 .modal-overlay.open .modal{transform:translateY(0);}
+/* ─── Standards #2/#4/#14: شِل النوافذ الكبيرة (About + Changelog) ─── */
+.eco-modal{background:var(--surface);border-radius:var(--radius);width:100%;max-width:calc(var(--container-max) * .9);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(14px);transition:transform .2s cubic-bezier(.34,1.56,.64,1);overflow:hidden;}
+.modal-overlay.open .eco-modal{transform:translateY(0);}
+.eco-modal-hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--border);font-size:15px;font-weight:800;background:var(--surface);}
+.eco-modal-body{flex:1;overflow-y:auto;padding:18px 20px 22px;}
+/* ─── Standards #5: أقسام About المعتمدة ─── */
+.about-sec{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;background:var(--surface-2);}
+.about-sec>summary{cursor:pointer;padding:11px 14px;font-size:13px;font-weight:800;color:var(--text-primary);}
+.about-sec-body{padding:4px 16px 16px;font-size:13px;line-height:1.9;color:var(--text-mid);}
+.about-sec-body code{font-family:var(--font-mono);font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:1px 6px;color:var(--accent);direction:ltr;display:inline-block;}
+.about-sec-body h4{color:var(--accent);font-size:13px;font-weight:800;margin:14px 0 6px;}
+.about-sec-body ol,.about-sec-body ul{margin:0 18px 0 0;}
+.about-sec-body table{width:100%;border-collapse:collapse;margin-top:6px;}
+.about-sec-body th,.about-sec-body td{border:1px solid var(--border);padding:6px 10px;text-align:right;font-size:12px;}
+.about-sec-body th{background:var(--surface);font-weight:800;}
+.about-pre{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-family:var(--font-mono);font-size:11.5px;line-height:1.9;white-space:pre-wrap;direction:ltr;text-align:left;}
+/* ─── Standards #38: زرار الخطر ─── */
+.btn-red{padding:9px 20px;background:var(--red);color:var(--on-accent);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;}
+.btn-red:hover{background:var(--red-dark);}
+
 .modal-header{padding:14px 18px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
-.modal-close-btn{background:var(--red-light);border:1px solid var(--red-border);color:var(--red);font-size:14px;font-weight:700;cursor:pointer;padding:3px 10px;border-radius:var(--radius-sm);}
-.modal-close-btn:hover{background:var(--red);color:#fff;}
+.modal-close-x{background:var(--red-light);border:1px solid var(--red-border);color:var(--red);font-size:14px;font-weight:700;cursor:pointer;padding:3px 10px;border-radius:var(--radius-sm);}
+.modal-close-x:hover{background:var(--red);color:var(--on-accent);}
 .modal-body{padding:20px;display:flex;flex-direction:column;gap:14px;}
 .field-group{display:flex;flex-direction:column;gap:5px;}
 .field-label{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;}
-.field-input{border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);padding:9px 11px;font-family:var(--mono);font-size:12px;color:var(--text-primary);outline:none;width:100%;direction:ltr;}
+.field-input{border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);padding:9px 11px;font-family:var(--font-mono);font-size:12px;color:var(--text-primary);outline:none;width:100%;direction:ltr;}
 .field-input:focus{border-color:var(--accent);}
 .modal-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
-.btn-save{padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;}
-.btn-modal-cancel{padding:8px 14px;background:transparent;color:var(--text-secondary);border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;cursor:pointer;}
+.btn-save{padding:8px 18px;background:var(--accent);color:var(--on-accent);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;}
+.btn-modal-cancel{padding:8px 14px;background:transparent;color:var(--text-secondary);border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;cursor:pointer;}
 .changelog-body{overflow-y:auto;padding:20px;}
 .cl-version{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.cl-ver-badge{font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 10px;border-radius:5px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+.cl-ver-badge{font-family:var(--font-mono);font-size:12px;font-weight:700;padding:3px 10px;border-radius:5px;background:var(--accent-light);color:var(--accent-dark);border:1px solid var(--accent-border);}
 .cl-ver-date{font-size:12px;color:var(--text-muted);}
 .cl-items{list-style:none;display:flex;flex-direction:column;gap:5px;margin-bottom:16px;padding-right:4px;border-bottom:1px solid var(--border);padding-bottom:16px;}
 .cl-items:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
 .cl-item{display:flex;gap:8px;font-size:13px;}
 .cl-item-label{font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:2px;}
-.cl-new{background:#f0fdf4;color:#15803d;}.cl-fix{background:#fef2f2;color:#dc2626;}.cl-change{background:#fffbeb;color:#92400e;}
-.about-summary{padding:10px 14px;cursor:pointer;font-weight:700;font-size:14px;background:var(--surface-2);border-radius:8px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;border:1px solid var(--border);}
-.about-summary::-webkit-details-marker{display:none;}
-details[open]>.about-summary{border-radius:8px 8px 0 0;border-bottom:none;}
-.about-body{border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:14px 16px;font-size:13px;line-height:1.75;}
-.about-desc{color:var(--text-primary);margin:0 0 12px;}
-.about-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px;}
-.about-steps{display:flex;flex-direction:column;gap:8px;}
-.about-step{display:flex;gap:10px;align-items:flex-start;}
-.about-num{min-width:22px;height:22px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--mono);flex-shrink:0;}
-.about-endpoints{display:flex;flex-direction:column;gap:6px;}
-.about-ep{display:flex;gap:10px;align-items:baseline;font-size:13px;}
-.about-ep code{font-family:var(--mono);font-size:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:1px 7px;color:var(--accent);white-space:nowrap;flex-shrink:0;}
-.about-code{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;overflow-x:auto;white-space:pre;direction:ltr;text-align:left;line-height:1.65;color:var(--text-primary);margin:0;}
-.modal-body-about{padding:0 20px 20px;max-height:70vh;overflow-y:auto;}
-.confirm-detail-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.cl-new{background:var(--green-light);color:var(--green-dark);}.cl-fix{background:var(--red-light);color:var(--red);}.cl-change{background:var(--amber-light);color:var(--amber-dark);}
 .confirm-detail-row:last-of-type{border-bottom:none;}
 .confirm-detail-label{font-size:12px;color:var(--text-secondary);}
 .confirm-detail-val{font-size:13px;font-weight:700;}
-.confirm-detail-val.green{color:var(--green);}.confirm-detail-val.red{color:var(--red);}.confirm-detail-val.accent{color:var(--accent);}
+.confirm-detail-val.green{color:var(--green);}.confirm-detail-val.red{color:var(--red);}.confirm-detail-val.accent{color:var(--accent);}.confirm-detail-val.amber{color:var(--amber);}
 .confirm-note{font-size:12px;color:var(--text-secondary);background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border);margin-top:4px;}
-.btn-confirm-ok{padding:9px 20px;color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;}
-.btn-confirm-ok.green-btn{background:var(--green);}.btn-confirm-ok.accent-btn{background:var(--accent);}
-.btn-post-audit{display:none;align-items:center;gap:10px;width:100%;padding:14px 18px;border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;border:2px solid;transition:all .15s;}
+.btn-confirm-ok{padding:9px 20px;color:var(--on-accent);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;}
+.btn-confirm-ok.green-btn{background:var(--green);}.btn-confirm-ok.accent-btn{background:var(--accent);}.btn-confirm-ok.btn-red{background:var(--red);}.btn-confirm-ok.btn-red:hover{background:var(--red-dark);}
+.btn-post-audit{display:none;align-items:center;gap:10px;width:100%;padding:14px 18px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;border:2px solid;transition:all .15s;}
 .btn-post-audit:hover:not(:disabled){filter:brightness(.93);}
 .btn-post-audit:disabled{opacity:.5;cursor:not-allowed;}
 .btn-same-product{background:var(--accent-light);color:var(--accent);border-color:var(--accent);}
@@ -151,44 +174,44 @@ details[open]>.about-summary{border-radius:8px 8px 0 0;border-bottom:none;}
 /* Priority Queue */
 .priority-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
 .priority-toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);flex-wrap:wrap;}
-.priority-refresh-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border:1px solid var(--green-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;font-weight:700;color:var(--green);background:var(--green-light);cursor:pointer;}
-.priority-refresh-btn:hover{background:var(--green);color:#fff;}
+.priority-refresh-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border:1px solid var(--green-border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:700;color:var(--green);background:var(--green-light);cursor:pointer;}
+.priority-refresh-btn:hover{background:var(--green);color:var(--on-accent);}
 .priority-refresh-btn:disabled{opacity:.5;cursor:not-allowed;}
 /* v3.1.0 Timestamp */
-.priority-ts-badge{display:none;align-items:center;gap:8px;padding:6px 14px;background:var(--accent-light);border:1px solid #bfdbfe;border-radius:var(--radius-sm);font-size:13px;font-weight:700;color:var(--text-primary);}
+.priority-ts-badge{display:none;align-items:center;gap:8px;padding:6px 14px;background:var(--accent-light);border:1px solid var(--accent-border);border-radius:var(--radius-sm);font-size:13px;font-weight:700;color:var(--text-primary);}
 .priority-ts-part{white-space:nowrap;}
 .priority-ts-relative{font-size:11px;font-weight:600;color:var(--accent);}
 .priority-threshold-wrap{display:flex;align-items:center;gap:6px;}
 .priority-threshold-label{font-size:11px;font-weight:700;color:var(--text-secondary);}
-.priority-threshold-sel{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:5px 8px;font-family:var(--font);font-size:12px;font-weight:600;color:var(--text-primary);background:var(--surface);cursor:pointer;outline:none;}
+.priority-threshold-sel{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:5px 8px;font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--text-primary);background:var(--surface);cursor:pointer;outline:none;}
 .priority-active-toggle{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
 .priority-active-toggle input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;}
 .priority-stats-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:var(--surface);}
 .priority-stat-total{font-size:12px;font-weight:700;color:var(--text-secondary);}
 .priority-stat-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid;}
-.p-chip-p0{background:#fff0f0;color:#991b1b;border-color:#fca5a5;}
+.p-chip-p0{background:var(--red-lighter);color:var(--red-darker);border-color:var(--red-border);}
 .p-chip-p1{background:var(--red-light);color:var(--red);border-color:var(--red-border);}
 .p-chip-p2{background:var(--orange-light);color:var(--orange);border-color:var(--orange-border);}
 .p-chip-p3{background:var(--amber-light);color:var(--amber);border-color:var(--amber-border);}
-.p-chip-p4{background:var(--accent-light);color:var(--accent);border-color:#bfdbfe;}
+.p-chip-p4{background:var(--accent-light);color:var(--accent);border-color:var(--accent-border);}
 .p-chip-p5{background:var(--bg);color:var(--text-secondary);border-color:var(--border);}
 .p-chip-p6{background:var(--green-light);color:var(--green);border-color:var(--green-border);}
 .priority-table-wrap{overflow-y:auto;max-height:620px;}
 .priority-table{width:100%;border-collapse:collapse;}
-.priority-table th{padding:10px 14px;text-align:right;font-size:12px;font-weight:700;background:#e5e7eb;border-bottom:2px solid var(--border-strong);white-space:nowrap;position:sticky;top:0;z-index:1;}
+.priority-table th{padding:10px 14px;text-align:right;font-size:12px;font-weight:700;background:var(--border);border-bottom:2px solid var(--border-strong);white-space:nowrap;position:sticky;top:0;z-index:1;}
 .priority-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
 .priority-row{cursor:pointer;transition:background .1s;}
 .priority-row:hover{background:var(--accent-light);}
 .priority-row:hover .priority-sku{text-decoration:underline;}
 .priority-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid;}
-.priority-badge-p0{background:#fff0f0;color:#991b1b;border-color:#fca5a5;}
+.priority-badge-p0{background:var(--red-lighter);color:var(--red-darker);border-color:var(--red-border);}
 .priority-badge-p1{background:var(--red-light);color:var(--red);border-color:var(--red-border);}
 .priority-badge-p2{background:var(--orange-light);color:var(--orange);border-color:var(--orange-border);}
 .priority-badge-p3{background:var(--amber-light);color:var(--amber);border-color:var(--amber-border);}
-.priority-badge-p4{background:var(--accent-light);color:var(--accent);border-color:#bfdbfe;}
+.priority-badge-p4{background:var(--accent-light);color:var(--accent);border-color:var(--accent-border);}
 .priority-badge-p5{background:var(--bg);color:var(--text-secondary);border-color:var(--border);}
 .priority-badge-p6{background:var(--green-light);color:var(--green);border-color:var(--green-border);}
-.priority-sku{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);}
+.priority-sku{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--accent);}
 .audit-age-never{font-weight:700;color:var(--red);}
 .audit-age-old{color:var(--amber);font-weight:600;}
 .audit-age-medium{color:var(--text-secondary);}
@@ -197,13 +220,13 @@ details[open]>.about-summary{border-radius:8px 8px 0 0;border-bottom:none;}
 td.centered{text-align:center;}
 .search-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px;box-shadow:var(--shadow);}
 .search-tabs{display:flex;gap:8px;margin-bottom:14px;}
-.tab-btn{flex:1;padding:10px;border:2px solid var(--border-strong);background:var(--surface-2);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.tab-btn{flex:1;padding:10px;border:2px solid var(--border-strong);background:var(--surface-2);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
 .tab-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
-.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.tab-btn.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
 .search-input-wrap{display:flex;align-items:center;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);}
 .search-input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
 .search-icon{padding:0 10px;color:var(--text-muted);font-size:15px;}
-#skuSearch{flex:1;border:none;outline:none;padding:10px 4px;font-family:var(--font);font-size:13px;color:var(--text-primary);background:transparent;direction:rtl;}
+#skuSearch{flex:1;border:none;outline:none;padding:10px 4px;font-family:var(--font-body);font-size:13px;color:var(--text-primary);background:transparent;direction:rtl;}
 #skuSearch::placeholder{color:var(--text-muted);}
 .clear-btn{padding:0 10px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px;display:none;align-items:center;}
 .clear-btn.visible{display:flex;}
@@ -212,42 +235,42 @@ td.centered{text-align:center;}
 .dropdown-list.open{display:block;}
 .dropdown-item{padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
 .dropdown-item:hover{background:var(--accent-light);}
-.item-sku{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:4px;white-space:nowrap;}
+.item-sku{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:4px;white-space:nowrap;}
 .item-name{font-size:12px;color:var(--text-primary);flex:1;}
 .dropdown-loading,.dropdown-empty{padding:18px;text-align:center;color:var(--text-muted);font-size:12px;}
 .barcode-area{display:none;}
 .barcode-area.active{display:block;}
 .barcode-input-wrap{display:flex;align-items:center;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);}
 .barcode-input-wrap.scanning{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.1);}
-#barcodeInput{flex:1;border:none;outline:none;padding:10px 14px;font-family:var(--mono);font-size:14px;color:var(--text-primary);background:transparent;direction:rtl;}
-#barcodeInput::placeholder{font-family:var(--font);color:var(--text-muted);}
+#barcodeInput{flex:1;border:none;outline:none;padding:10px 14px;font-family:var(--font-mono);font-size:14px;color:var(--text-primary);background:transparent;direction:rtl;}
+#barcodeInput::placeholder{font-family:var(--font-body);color:var(--text-muted);}
 .barcode-icon{padding:0 14px;color:var(--text-muted);font-size:20px;}
 #results{display:none;}
 #results.visible{display:block;}
 .product-topbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;}
-.product-topbar.status-active{background:#f0fdf4;border-color:#86efac;}
-.product-topbar.status-other{background:#fef2f2;border-color:#fca5a5;}
+.product-topbar.status-active{background:var(--green-light);border-color:var(--green-border);}
+.product-topbar.status-other{background:var(--red-light);border-color:var(--red-border);}
 .product-main-stack{display:flex;flex-direction:column;align-items:center;gap:7px;flex-shrink:0;}
 .product-img-wrap{width:210px;height:210px;border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:64px;color:var(--text-muted);cursor:pointer;transition:transform .15s,box-shadow .15s;}
 .product-img-wrap:hover{transform:scale(1.015);box-shadow:0 4px 16px rgba(0,0,0,.12);}
 .product-img-wrap img{width:100%;height:100%;object-fit:cover;}
 .product-brand-line{font-size:16px;font-weight:800;color:var(--text-primary);text-align:center;margin-top:2px;}
-.product-sku-line{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:5px;padding:3px 10px;}
+.product-sku-line{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-border);border-radius:5px;padding:3px 10px;}
 .product-size-line{font-size:16px;font-weight:800;color:var(--green);background:var(--green-light);border:1px solid var(--green-border);border-radius:6px;padding:3px 16px;}
 .product-color-line{font-size:11px;font-weight:600;color:var(--purple);background:var(--purple-light);border:1px solid var(--purple-border);border-radius:5px;padding:2px 9px;}
 .product-nav-col{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
-.nav-link-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:6px;padding:6px 13px;text-decoration:none;white-space:nowrap;}
-.nav-link-btn:hover{background:var(--accent);color:#fff;}
+.nav-link-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-border);border-radius:6px;padding:6px 13px;text-decoration:none;white-space:nowrap;}
+.nav-link-btn:hover{background:var(--accent);color:var(--on-accent);}
 .status-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 .status-ACTIVE{background:var(--green-light);color:var(--green);}.status-OTHER{background:var(--red-light);color:var(--red);}
-.refresh-btn{display:none;align-items:center;gap:5px;padding:5px 11px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
+.refresh-btn{display:none;align-items:center;gap:5px;padding:5px 11px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
 #imageLightboxOverlay{background:rgba(0,0,0,.85);cursor:zoom-out;}
 #imageLightboxOverlay img{max-width:92vw;max-height:92vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);cursor:default;}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;box-shadow:var(--shadow);}
 .stat-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
 .stat-value{font-size:28px;font-weight:700;line-height:1.1;margin:4px 0;font-variant-numeric:tabular-nums;}
 .stat-desc{font-size:11px;color:var(--text-muted);}
-.val-committed{color:var(--accent);}.val-available{color:var(--green);}.val-onhand{color:var(--text-primary);}.val-shelf{color:#92400e;font-size:40px!important;}
+.val-committed{color:var(--accent);}.val-available{color:var(--green);}.val-onhand{color:var(--text-primary);}.val-shelf{color:var(--amber-dark);font-size:40px!important;}
 .audit-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:10px;box-shadow:var(--shadow);}
 .audit-phase1{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
 .audit-q-left{display:flex;flex-direction:column;gap:6px;flex:1;}
@@ -256,69 +279,69 @@ td.centered{text-align:center;}
 .audit-info-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .audit-info-label{font-size:13px;font-weight:600;color:var(--text-secondary);}
 .audit-info-val{font-size:15px;font-weight:700;}
-.audit-emp-badge{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:5px;padding:3px 11px;}
+.audit-emp-badge{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--accent-dark);background:var(--accent-light);border:1px solid var(--accent-border);border-radius:5px;padding:3px 11px;}
 .audit-notes-row{font-size:13px;color:var(--text-secondary);padding-top:6px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
 .audit-q-btns{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;}
-.btn-audit-ok{display:flex;align-items:center;gap:6px;padding:10px 22px;background:var(--green-light);color:var(--green);border:1.5px solid var(--green-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
-.btn-audit-ok:hover{background:var(--green);color:#fff;}
+.btn-audit-ok{display:flex;align-items:center;gap:6px;padding:10px 22px;background:var(--green-light);color:var(--green);border:1.5px solid var(--green-border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-audit-ok:hover{background:var(--green);color:var(--on-accent);}
 .btn-audit-ok:disabled{opacity:.5;cursor:not-allowed;}
-.btn-want-adjust{display:flex;align-items:center;gap:6px;padding:10px 22px;background:var(--surface-2);color:var(--text-secondary);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-want-adjust{display:flex;align-items:center;gap:6px;padding:10px 22px;background:var(--surface-2);color:var(--text-secondary);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
 .btn-want-adjust:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
 .btn-want-adjust:disabled{opacity:.5;cursor:not-allowed;}
-.btn-start-scan{display:flex;align-items:center;gap:6px;padding:10px 22px;background:var(--purple-light);color:var(--purple);border:1.5px solid var(--purple-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
-.btn-start-scan:hover{background:var(--purple);color:#fff;}
+.btn-start-scan{display:flex;align-items:center;gap:6px;padding:10px 22px;background:var(--purple-light);color:var(--purple);border:1.5px solid var(--purple-border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-start-scan:hover{background:var(--purple);color:var(--on-accent);}
 .btn-start-scan:disabled{opacity:.5;cursor:not-allowed;}
 .adjust-panel{display:none;border-top:1px solid var(--border);margin-top:16px;padding-top:16px;}
 .adjust-panel.visible{display:block;}
 .adjust-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .adjust-panel-title{font-size:13px;font-weight:700;}
-.btn-back{display:flex;align-items:center;gap:4px;padding:4px 10px;background:transparent;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;color:var(--text-secondary);cursor:pointer;}
-.scan-suggest-note{display:none;font-size:12px;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-weight:600;}
+.btn-back{display:flex;align-items:center;gap:4px;padding:4px 10px;background:transparent;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:11px;color:var(--text-secondary);cursor:pointer;}
+.scan-suggest-note{display:none;font-size:12px;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-border);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-weight:600;}
 .adjust-body{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
 .adjust-field{display:flex;flex-direction:column;gap:5px;}
 .adjust-label{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;}
-.adjust-current-val{font-size:30px;font-weight:700;color:#92400e;font-variant-numeric:tabular-nums;line-height:1.1;}
+.adjust-current-val{font-size:30px;font-weight:700;color:var(--amber-dark);font-variant-numeric:tabular-nums;line-height:1.1;}
 .delta-wrap{display:flex;align-items:center;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);overflow:hidden;}
 .delta-wrap:focus-within{border-color:var(--accent);}
 .delta-btn{width:40px;height:42px;border:none;background:var(--surface-2);font-size:20px;font-weight:600;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .delta-btn:hover{background:var(--accent-light);color:var(--accent);}
 .delta-btn.minus:hover{background:var(--red-light);color:var(--red);}
-#deltaInput{width:80px;border:none;outline:none;padding:8px 6px;font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text-primary);text-align:center;background:transparent;}
+#deltaInput{width:80px;border:none;outline:none;padding:8px 6px;font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--text-primary);text-align:center;background:transparent;}
 .preview-new{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1;}
 .preview-new.positive{color:var(--green);}.preview-new.negative{color:var(--red);}.preview-new.zero{color:var(--text-muted);}
 .notes-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:200px;}
-.notes-input{border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);padding:8px 11px;font-family:var(--font);font-size:12px;outline:none;width:100%;direction:rtl;}
+.notes-input{border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);padding:8px 11px;font-family:var(--font-body);font-size:12px;outline:none;width:100%;direction:rtl;}
 .notes-input:focus{border-color:var(--accent);}
-.btn-apply{display:flex;align-items:center;gap:6px;padding:11px 22px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-apply{display:flex;align-items:center;gap:6px;padding:11px 22px;background:var(--accent);color:var(--on-accent);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
 .btn-apply:disabled{opacity:.5;cursor:not-allowed;}
 .scan-count-panel{display:none;border-top:1px solid var(--border);margin-top:16px;padding-top:16px;}
 .scan-count-panel.visible{display:block;}
 .scan-count-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
 .scan-count-title{font-size:13px;font-weight:700;}
 .scan-count-header-btns{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.btn-reset-count-sm{display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--red-light);color:var(--red);border:1px solid var(--red-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
-.btn-reset-count-sm:hover{background:var(--red);color:#fff;}
+.btn-reset-count-sm{display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--red-light);color:var(--red);border:1px solid var(--red-border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-reset-count-sm:hover{background:var(--red);color:var(--on-accent);}
 .scan-count-input-wrap{display:flex;align-items:center;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:18px;transition:all .15s;}
 .scan-count-input-wrap.scanning{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.1);}
 .scan-count-input-wrap.disabled-no-barcode{opacity:.5;pointer-events:none;background:var(--surface-2);}
-#scanCountInput{flex:1;border:none;outline:none;padding:10px 14px;font-family:var(--mono);font-size:14px;color:var(--text-primary);background:transparent;direction:rtl;}
-#scanCountInput::placeholder{font-family:var(--font);color:var(--text-muted);}
+#scanCountInput{flex:1;border:none;outline:none;padding:10px 14px;font-family:var(--font-mono);font-size:14px;color:var(--text-primary);background:transparent;direction:rtl;}
+#scanCountInput::placeholder{font-family:var(--font-body);color:var(--text-muted);}
 .scan-count-live{text-align:center;margin-bottom:18px;}
 .scan-count-number{font-size:52px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums;line-height:1;transition:transform .15s;display:inline-block;}
 .scan-count-number.pulse{transform:scale(1.18);}
 .scan-count-label{font-size:12px;color:var(--text-muted);margin-top:4px;}
 .scan-count-manual{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px;}
 .scan-count-manual label{font-size:12px;font-weight:600;color:var(--text-secondary);}
-.scan-count-manual #scanCountManual{width:80px;border:none;outline:none;padding:8px 6px;font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text-primary);text-align:center;background:transparent;}
+.scan-count-manual #scanCountManual{width:80px;border:none;outline:none;padding:8px 6px;font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--text-primary);text-align:center;background:transparent;}
 .scan-count-total-row{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:20px;padding:10px;background:var(--surface-2);border-radius:var(--radius-sm);}
-.scan-count-total-row span:last-child{font-size:22px;color:var(--accent);font-family:var(--mono);}
-.btn-finish-count{display:block;width:100%;padding:14px 22px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:15px;font-weight:800;cursor:pointer;text-align:center;box-shadow:0 2px 8px rgba(22,163,74,.25);}
+.scan-count-total-row span:last-child{font-size:22px;color:var(--accent);font-family:var(--font-mono);}
+.btn-finish-count{display:block;width:100%;padding:14px 22px;background:var(--green);color:var(--on-accent);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:15px;font-weight:800;cursor:pointer;text-align:center;box-shadow:0 2px 8px rgba(22,163,74,.25);}
 .btn-finish-count:hover{filter:brightness(.93);}
-#warningBanner{display:none;background:#fef2f2;border:2px solid var(--red);border-radius:var(--radius-sm);padding:16px 20px;margin-bottom:10px;align-items:flex-start;gap:12px;}
+#warningBanner{display:none;background:var(--red-light);border:2px solid var(--red);border-radius:var(--radius-sm);padding:16px 20px;margin-bottom:10px;align-items:flex-start;gap:12px;}
 .warning-icon{font-size:22px;flex-shrink:0;}
 .warning-text{display:flex;flex-direction:column;gap:3px;}
 .warning-title{font-size:14px;font-weight:800;color:var(--red);}
-.warning-body{font-size:13px;font-weight:500;color:#7f1d1d;}
+.warning-body{font-size:13px;font-weight:500;color:var(--red-darkest);}
 .orders-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
 .orders-card-header{padding:11px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
 .orders-card-header:hover{background:var(--surface-2);}
@@ -330,12 +353,12 @@ td.centered{text-align:center;}
 .orders-collapse-icon.open{transform:rotate(180deg);}
 .orders-body-wrap.collapsed{display:none;}
 .orders-table{width:100%;border-collapse:collapse;}
-.orders-table th{padding:11px 14px;text-align:right;font-size:12px;font-weight:700;background:#e5e7eb;border-bottom:2px solid var(--border-strong);white-space:nowrap;}
+.orders-table th{padding:11px 14px;text-align:right;font-size:12px;font-weight:700;background:var(--border);border-bottom:2px solid var(--border-strong);white-space:nowrap;}
 .orders-table td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
-.orders-table tr:hover td{background:#fafafa;}
-.order-name-link{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);text-decoration:none;direction:ltr;display:inline-block;}
+.orders-table tr:hover td{background:var(--surface-2);}
+.order-name-link{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--accent);text-decoration:none;direction:ltr;display:inline-block;}
 .order-name-link:hover{text-decoration:underline;}
-.order-date{color:var(--text-primary);font-size:13px;font-weight:600;font-family:var(--mono);}
+.order-date{color:var(--text-primary);font-size:13px;font-weight:600;font-family:var(--font-mono);}
 .qty-badge{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border-radius:6px;font-size:13px;font-weight:700;}
 .qty-unfulfilled{background:var(--accent-light);color:var(--accent);}
 .stage-pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
@@ -352,12 +375,11 @@ td.centered{text-align:center;}
 .loading-spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .order-checkbox{width:16px;height:16px;cursor:pointer;accent-color:var(--accent);}
-.btn-fulfill{display:none;align-items:center;gap:6px;padding:5px 14px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-fulfill{display:none;align-items:center;gap:6px;padding:5px 14px;background:var(--green);color:var(--on-accent);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
 .btn-fulfill.visible{display:flex;}
-.btn-select-all{display:flex;align-items:center;gap:5px;padding:4px 10px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
+.btn-select-all{display:flex;align-items:center;gap:5px;padding:4px 10px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
 .selected-count{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:2px 8px;border-radius:10px;display:none;}
 .selected-count.visible{display:inline-block;}
-.log-tab-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
 .log-filters-header{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;background:var(--surface-2);cursor:pointer;user-select:none;}
 .log-filters-title{font-size:12px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px;}
 .log-filters-toggle{font-size:13px;color:var(--text-muted);transition:transform .25s;}
@@ -367,68 +389,124 @@ td.centered{text-align:center;}
 .log-frow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
 .log-fg{display:flex;flex-direction:column;gap:3px;}
 .log-flabel{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
-.log-fsel,.log-finput{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:var(--font);font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;height:34px;}
+.log-fsel,.log-finput{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;height:34px;}
 .log-fsel.w-emp{width:160px;}.log-fsel.w-type{width:155px;}.log-fsel.w-count{width:130px;}.log-finput.w-search{width:220px;}
-.log-date-wrap input[type=date]{width:160px;height:34px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:var(--font);font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;cursor:pointer;}
-.log-preset-wrap{position:relative;align-self:flex-end;}
-.log-preset-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;font-weight:600;color:var(--text-secondary);background:var(--surface);cursor:pointer;height:34px;white-space:nowrap;}
-.log-preset-btn.has-preset{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
-.log-preset-menu{position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-sm);box-shadow:0 4px 20px rgba(0,0,0,.12);z-index:200;min-width:170px;padding:4px;display:none;}
-.log-preset-menu.open{display:block;}
-.log-preset-item{padding:7px 12px;font-size:12px;cursor:pointer;border-radius:6px;color:var(--text-primary);display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.log-preset-item:hover{background:var(--surface-2);}
-.log-preset-item.active{background:var(--accent-light);color:var(--accent);}
-.log-preset-item .pr-check{font-size:11px;color:var(--accent);display:none;}
-.log-preset-item.active .pr-check{display:block;}
-.log-preset-sep{height:1px;background:var(--border);margin:3px 4px;}
-.log-clear-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--red-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;font-weight:600;color:var(--red);background:var(--red-light);cursor:pointer;height:34px;}
-.log-clear-btn:hover{background:var(--red);color:#fff;}
-.log-stats-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);}
-.log-refresh-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--green-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;font-weight:600;color:var(--green);background:var(--green-light);cursor:pointer;}
-.log-refresh-btn:hover{background:var(--green);color:#fff;}
-.log-stat-chip{font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3px 10px;}
-.log-stat-chip strong{color:var(--text-primary);}
-.log-stat-chip.filtered strong{color:var(--accent);}
-.log-export-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--green-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;font-weight:600;color:var(--green);background:var(--green-light);cursor:pointer;margin-right:auto;opacity:.5;pointer-events:none;}
-.log-export-btn.enabled{opacity:1;pointer-events:all;}
-.log-list-head{display:flex;align-items:center;gap:10px;padding:7px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);}
-.log-list-head input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent);}
-.log-list-head-lbl{font-size:11px;font-weight:600;color:var(--text-secondary);}
-.log-body{overflow-y:auto;max-height:600px;}
-.log-entry{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;}
-.log-entry:hover{background:var(--surface-2);}
-.log-entry.selected{background:var(--accent-light);}
-.log-cb{flex-shrink:0;padding-top:3px;}
-.log-cb input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent);}
-.log-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0;}
-.log-dot-ok{background:var(--green);}.log-dot-adj-pos{background:var(--green);}.log-dot-adj-neg{background:var(--red);}
-.log-entry-content{flex:1;min-width:0;}
-.log-entry-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;}
-.log-sku-badge{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid #bfdbfe;border-radius:4px;padding:1px 7px;}
-.log-type-badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;}
-.log-type-ok{background:var(--green-light);color:var(--green);}.log-type-adj-pos{background:#f0fdf4;color:#15803d;}.log-type-adj-neg{background:var(--red-light);color:var(--red);}
-.log-emp-badge{font-size:11px;font-weight:600;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:4px;padding:1px 7px;}
-.log-count-badge{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--purple);background:var(--purple-light);border:1px solid var(--purple-border);border-radius:4px;padding:1px 7px;}
-.log-product-name{font-size:12px;color:var(--text-secondary);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.log-qty-change{font-size:11px;font-family:var(--mono);margin-bottom:2px;}
-.log-qty-pos{color:var(--green);}.log-qty-neg{color:var(--red);}
-.log-meta{font-size:11px;color:var(--text-muted);}
-.log-notes{font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:2px;}
-.log-empty{padding:40px;text-align:center;color:var(--text-muted);font-size:13px;}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text-primary);color:#fff;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:500;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;}
+
+/* ══════════════════════════════════════════════════════════════
+   §LOG-CSS — القسم الموحّد (data-table-standard.md)
+   ══════════════════════════════════════════════════════════════ */
+/* ⚠️ ممنوع overflow:hidden هنا — بيقص قوايم الفلاتر المنسدلة */
+.unified-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
+.section-divider{height:1px;background:var(--border);margin:0;}
+.uf-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;}
+.uf-arrow{font-size:12px;color:var(--text-secondary);transition:transform .18s;}
+.uf-arrow.closed{transform:rotate(-90deg);}
+.uf-funnel{width:34px;height:22.5px;display:grid;place-items:center;color:var(--text-secondary);transition:color .15s;}
+.uf-funnel.active{color:var(--accent);}
+.uf-spacer{flex:1;}
+.uf-body{padding:0 16px 14px;display:flex;flex-direction:column;gap:10px;}
+.uf-body.closed{display:none;}
+.uf-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;}
+.uf-fg{display:flex;flex-direction:column;gap:5px;}
+.uf-flabel{font-size:11px;font-weight:800;color:var(--text-secondary);}
+.log-clear-btn{padding:7px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--red-border);background:var(--red-light);color:var(--red);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;}
+.log-clear-btn:hover{background:var(--red);color:var(--on-accent);}
+
+/* ─── مربع بحث نصي — بيتلوّن بمجرد وجود نص (Standards #13) ─── */
+.uf-search{position:relative;}
+.uf-search>span{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;color:var(--text-muted);}
+.uf-input{width:100%;height:38px;padding:0 12px 0 34px;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-primary);outline:none;transition:border-color .15s,background .15s;}
+.uf-input:focus{border-color:var(--accent);}
+.uf-input.has-value{background:var(--accent-light);border-color:var(--accent);}
+
+/* ─── multi-select (multi-select-filter.md) ─── */
+.ms-wrap{position:relative;}
+.ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:170px;height:38px;padding:0 12px;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text-primary);cursor:pointer;}
+.ms-btn.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+.ms-list{position:absolute;top:calc(100% + 4px);right:0;min-width:230px;max-height:300px;overflow-y:auto;background:var(--surface);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:200;padding:5px;display:none;}
+.ms-list.open{display:block;}
+/* "مسح الاختيار" فوق القائمة — مش في فوتر تحت (Standards #21) */
+.ms-ftr-top{display:flex;justify-content:flex-start;padding:4px 6px 7px;border-bottom:1px solid var(--border);margin-bottom:5px;}
+.ms-ftr-top button{background:none;border:none;color:var(--red);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;padding:2px 4px;}
+.ms-item{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:6px;font-size:13px;font-weight:600;color:var(--text-primary);cursor:pointer;}
+.ms-item:hover{background:var(--surface-hover);}
+.ms-item input{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;}
+.ms-empty{padding:10px;font-size:12px;color:var(--text-muted);text-align:center;}
+
+/* ─── chips — سطر لكل فلتر واسم الفلتر مرة واحدة (Standards #12/#23) ─── */
+.ms-chips-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+.chips-label{font-size:11px;font-weight:800;color:var(--text-secondary);}
+.ms-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:var(--accent-light);border:1px solid var(--accent-border);color:var(--accent);font-size:12px;font-weight:700;}
+.ms-chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;line-height:1;padding:0;}
+
+/* ─── صف النتائج (Standards #24) ─── */
+.results-row{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;}
+.results-title{font-size:13px;font-weight:800;color:var(--text-primary);}
+.results-count{min-width:54px;padding:5px 12px;border-radius:var(--radius-sm);background:var(--accent-light);border:1.5px solid var(--accent-border);color:var(--accent);font-size:17px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;}
+.results-actions{margin-right:auto;display:flex;gap:8px;}
+.log-refresh-btn,.log-export-btn{padding:7px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface);font-family:var(--font-body);font-size:12px;font-weight:700;color:var(--text-primary);cursor:pointer;}
+.log-refresh-btn:hover{background:var(--accent-light);border-color:var(--accent-border);color:var(--accent);}
+.log-export-btn{border-color:var(--green-border);background:var(--green-light);color:var(--green-dark);}
+.log-export-btn:hover{background:var(--green);color:var(--on-accent);}
+.log-export-btn:disabled{opacity:.45;cursor:not-allowed;}
+
+/* ─── بانر التصدير المقصوص — ثابت مش توست (Standards #30) ─── */
+.export-warn{margin:0 16px 12px;padding:10px 14px;border-radius:9px;background:var(--amber-light);border:1px solid var(--amber);color:var(--amber-dark);font-size:13px;font-weight:600;line-height:1.7;}
+
+/* ─── الجدول (Standards #26 — السجل جدول مش بطاقات) ─── */
+.log-table-wrap{overflow-x:auto;}
+.log-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.log-table th{padding:10px 12px;text-align:right;font-size:12px;font-weight:800;color:var(--text-mid);background:var(--surface-2);border-bottom:2px solid var(--border-strong);white-space:nowrap;}
+.log-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text-primary);}
+.log-table tbody tr:hover{background:var(--surface-hover);}
+.sortable-th{cursor:pointer;user-select:none;}
+.sortable-th:hover{color:var(--accent);}
+.sort-ind{font-size:11px;color:var(--accent);margin-right:3px;}
+.log-sku-badge{display:inline-block;padding:2px 8px;border-radius:5px;background:var(--accent-light);border:1px solid var(--accent-border);color:var(--accent);font-size:12px;font-weight:700;}
+.log-type-badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:12px;font-weight:700;white-space:nowrap;}
+.log-type-ok{background:var(--green-light);color:var(--green-dark);border:1px solid var(--green-border);}
+.log-type-pos{background:var(--green-light);color:var(--green-dark);border:1px solid var(--green-border);}
+.log-type-neg{background:var(--red-light);color:var(--red);border:1px solid var(--red-border);}
+.log-res-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11.5px;font-weight:700;}
+.res-success{background:var(--green-light);color:var(--green-dark);border:1px solid var(--green-border);}
+.res-warning{background:var(--amber-light);color:var(--amber-dark);border:1px solid var(--amber-border);}
+.res-error{background:var(--red-light);color:var(--red);border:1px solid var(--red-border);}
+.res-none{color:var(--text-muted);}
+.log-count-badge{display:inline-block;padding:2px 8px;border-radius:5px;background:var(--purple-light);border:1px solid var(--purple-border);color:var(--purple-dark);font-size:11.5px;font-weight:700;}
+.log-empty{padding:34px 16px;text-align:center;color:var(--text-muted);font-size:13px;}
+.col-num{font-variant-numeric:tabular-nums;direction:ltr;text-align:center;font-weight:700;}
+
+/* ─── الصفحات ─── */
+.pagination-row{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;flex-wrap:wrap;}
+.page-info{font-size:13px;color:var(--text-secondary);font-family:var(--font-mono);padding:0 8px;font-variant-numeric:tabular-nums;}
+.page-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);color:var(--text-primary);transition:background .15s,border-color .15s;}
+.page-btn:hover:not(:disabled){background:var(--accent-light);border-color:var(--accent-border);color:var(--accent);}
+.page-btn:disabled{opacity:.4;cursor:not-allowed;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text-primary);color:var(--on-accent);padding:9px 18px;border-radius:8px;font-size:12px;font-weight:500;z-index:9999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);}
-.toast.error{background:var(--red);}.toast.success{background:var(--green);}
+.toast-success{background:var(--green);}
+.toast-error{background:var(--red);}
+.toast-warning{background:var(--amber);}
+.toast-neutral{background:var(--neutral-dark);}
+/* أسماء بديلة للنداءات القديمة — من غيرها 'warn'/'info' بيدّوا توست بلا خلفية */
+.toast-warn{background:var(--amber);}
+.toast-info{background:var(--neutral-dark);}
 </style>
 
 <!-- §SHELL -->
 <div class="modal-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
   <div class="modal">
-    <div class="modal-header">⚙️ الإعدادات<button class="modal-close-btn" onclick="closeSettings()">✕</button></div>
+    <div class="modal-header">⚙️ الإعدادات<button class="modal-close-x" onclick="closeSettings()">✕</button></div>
     <div class="modal-body">
-      <div class="field-group"><label class="field-label">Worker URL</label><input type="text" class="field-input" id="cfWorkerUrl" /></div>
-      <div class="field-group"><label class="field-label">Worker Secret</label><input type="password" class="field-input" id="cfWorkerSecret" /></div>
-      <div class="field-group"><label class="field-label">Admin Worker URL</label><input type="text" class="field-input" id="cfAdminUrl" /></div>
-      <div class="field-group"><label class="field-label">Flow Companion Token</label><input type="password" class="field-input" id="cfFlowToken" /></div>
+      <!-- Standards #28: WORKER URL و ADMIN WORKER URL بقوا constants في §CONFIG.
+           WORKER SECRET هو السر الوحيد اللي بيتخزّن جهة العميل. -->
+      <div class="field-group"><label class="field-label">WORKER SECRET</label><input type="password" class="field-input" id="cfWorkerSecret" /></div>
+      <div class="field-group"><label class="field-label">FLOW COMPANION TOKEN</label><input type="password" class="field-input" id="cfFlowToken" /></div>
+      <div class="field-group" style="border-top:1.5px solid var(--border);padding-top:12px;">
+        <label class="field-label">فحص النظام</label>
+        <button class="log-refresh-btn" id="diagBtn" onclick="runDiag()">🩺 افحص الأداة والاتصالات</button>
+        <div id="diagResult" style="margin-top:10px;font-size:12px;line-height:1.8;"></div>
+      </div>
     </div>
     <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeSettings()">إلغاء</button><button class="btn-save" onclick="saveSettings()">حفظ</button></div>
   </div>
@@ -441,9 +519,22 @@ td.centered{text-align:center;}
   </div>
 </div>
 <div class="modal-overlay" id="changelogOverlay" onclick="if(event.target===this)closeChangelog()">
-  <div class="modal" style="max-width:500px;max-height:80vh;display:flex;flex-direction:column;">
-    <div class="modal-header">📋 سجل التحديثات<button class="modal-close-btn" onclick="closeChangelog()">✕</button></div>
-    <div class="changelog-body" style="flex:1;overflow-y:auto;">
+  <div class="eco-modal">
+    <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
+    <div class="eco-modal-body changelog-body">
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v5.0.0</span><span class="cl-ver-date">12-09-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>تعديل الكمية كان ممكن يتنفّذ على شوبيفاي والأداة تقول «خطأ» — فالموظف يعيد المحاولة والتعديل يتطبّق مرتين. دلوقتي الفعل بيتسجّل دايمًا وبيتعرض «⚠ تم جزئيًا» مع اللي تم فعليًا</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>تاب السجل كان بيعرض آخر ٥٠٠ عملية بس ويقول إنها الإجمالي، والتصدير كان بيطلع مقصوص بعلامة ✓ خضرا. دلوقتي فلترة وعدّ وترتيب على القاعدة كلها، بصفحات، والتصدير بيحذّر لو اتقص</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>أي خطأ في تحميل قائمة الموظفين كان بيتكتب في صندوق مخفي — الموظف يشوف شاشة دخول فاضية بلا سبب. الرسالة بقت ظاهرة</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>التوقيت بقى محسوب على Africa/Cairo بدل إضافة ٣ ساعات ثابتة — نهاية التوقيت الصيفي (29-10-2026) مش هتغلّط الساعة</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>مسح باركودين ورا بعض بسرعة كان ممكن يلزقهم في رقم واحد ويقول «لا يوجد منتج» — اتضاف حارس طول على أي قيمة مسحوبة</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>زرار «🩺 افحص الأداة والاتصالات» في الإعدادات + تحذير لو نسخة الـ Worker أقدم من المطلوب</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>فلاتر السجل بقت اختيار متعدد (موظفين · أنواع · اتجاه التعديل · عدد مرات الجرد)، مع ترتيب على كل عمود وصفحات</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>عمود «النتيجة» في السجل والتصدير — الصفوف الأقدم بتظهر «—» مش «✓»</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>رابط الـ Worker بقى ثابت في الكود — اتشال من شاشة الإعدادات (السر بس هو اللي بيتكتب)</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>تحديث كامل للشكل على معيار الواجهات v2: التابات · النوافذ · الألوان · صيغة التاريخ والوقت</span></li>
+      </ul>
       <div class="cl-version"><span class="cl-ver-badge">v4.0.1</span><span class="cl-ver-date">28-07-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>مسح الباركود لم يعد يبدّل تلقائياً لتاب "بحث بالـ SKU" — يفضل على وضع المسح لاستمرار السكانر</span></li>
@@ -453,7 +544,7 @@ td.centered{text-align:center;}
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>الضغط على صورة المنتج يفتح Popup بحجم الشاشة كاملة</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>Worker: إضافة product.vendor لـ list_skus و lookup_barcode لعرض اسم البراند</span></li>
       </ul>
-      <div class="cl-version"><span class="cl-ver-badge" style="background:#f9fafb;color:#374151;border-color:#d1d5db;">v4.0.0</span><span class="cl-ver-date">28-07-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" style="background:var(--surface-2);color:var(--text-mid);border-color:var(--border-strong);">v4.0.0</span><span class="cl-ver-date">28-07-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>عد الرف بالسكانر (📷 ابدأ العد بالسكانر) — كل مسح لباركود الـ SKU الحالي يزيد العداد الحي +1</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>إدخال يدوي اختياري يُجمع مع عدد السكانر (للقطع بدون باركود ظاهر)</span></li>
@@ -462,7 +553,7 @@ td.centered{text-align:center;}
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>"✅ إنهاء العد" يقارن الإجمالي بعدد القطع المتوقع تلقائياً: تطابق → يفتح تأكيد "الجرد مظبوط" مباشرة / فرق → يفتح تعديل الكمية مع الرقم معبأ تلقائياً وقابل للتعديل + ملاحظة تلقائية بتفاصيل العد</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>لا تغييرات في الـ Worker — الميزة بالكامل Frontend فقط، تعتمد على نفس الـ endpoints الحالية</span></li>
       </ul>
-      <div class="cl-version"><span class="cl-ver-badge" style="background:#f9fafb;color:#374151;border-color:#d1d5db;">v3.1.0</span><span class="cl-ver-date">31-05-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" style="background:var(--surface-2);color:var(--text-mid);border-color:var(--border-strong);">v3.1.0</span><span class="cl-ver-date">31-05-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>فلاتر تاب أولويات الجرد — الأولوية / آخر جرد / بحث SKU اسم المنتج</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>Timestamp بجانب زرار التحديث — تاريخ + وقت + منذ (يُحدَّث كل دقيقة)</span></li>
@@ -471,14 +562,14 @@ td.centered{text-align:center;}
         <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>Worker: استثناء Inventory not tracked من Priority Queue (tracked field في GQL)</span></li>
         <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>Worker: استثناء تاج Suspended من كل أماكن الأداة — Priority Queue + بحث + باركود</span></li>
       </ul>
-      <div class="cl-version"><span class="cl-ver-badge" style="background:#f9fafb;color:#374151;border-color:#d1d5db;">v3.0.0</span><span class="cl-ver-date">31-05-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" style="background:var(--surface-2);color:var(--text-mid);border-color:var(--border-strong);">v3.0.0</span><span class="cl-ver-date">31-05-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>تاب أولويات الجرد — P0-P6 بترتيب ذكي (Available + Committed + تاريخ الجرد)</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>Popup بعد كل جرد — باقي المقاسات / التالي في الأولويات</span></li>
         <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>إعادة كتابة شاشة الدخول — state machine + isLoginBusy + auto-submit</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>Worker: جلب كل المنتجات من المتجر (بدون collection filter)</span></li>
       </ul>
-      <div class="cl-version"><span class="cl-ver-badge" style="background:#f9fafb;color:#6b7280;border-color:#d1d5db;">v2.5.0</span><span class="cl-ver-date">30-05-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" style="background:var(--surface-2);color:var(--text-secondary);border-color:var(--border-strong);">v2.5.0</span><span class="cl-ver-date">30-05-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>منطق التغليف: s1/s2_packed_by من Pack Checker</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>About Modal</span></li>
@@ -488,105 +579,91 @@ td.centered{text-align:center;}
 </div>
 <!-- About Modal -->
 <div class="modal-overlay" id="aboutOverlay" onclick="if(event.target===this)closeAbout()">
-  <div class="modal" style="max-width:660px;max-height:88vh;display:flex;flex-direction:column;">
-    <div class="modal-header">ℹ️ عن الأداة — Inventory Audit<button class="modal-close-btn" onclick="closeAbout()">✕</button></div>
-    <div class="modal-body-about">
-      <details open style="margin-top:16px;">
-        <summary class="about-summary">📋 وصف الأداة</summary>
-        <div class="about-body">
-          <p class="about-desc">أداة مراجعة وضبط الجرد — تتيح عرض أولويات الجرد تلقائياً (P0–P6) مع فلاتر متقدمة وجرد متسلسل ذكي. تستثني تلقائياً المنتجات غير المتتبعة (Inventory not tracked) وكل المنتجات ذات تاج Suspended من Worker.</p>
-          <div class="about-label">المستخدمون</div><p>موظفو المخزن — جرد المنتجات وضبط الكميات + متابعة الأولويات</p>
-          <div class="about-label">كيف تعمل</div>
-          <div class="about-steps">
-            <div class="about-step"><span class="about-num">1</span><span>تاب أولويات الجرد (🎯): يجلب كل المنتجات المتتبعة ويرتبها P0–P6، مع استثناء Suspended تلقائياً</span></div>
-            <div class="about-step"><span class="about-num">2</span><span>الفلاتر: تصفية بالأولوية / حالة آخر جرد / بحث SKU أو اسم المنتج</span></div>
-            <div class="about-step"><span class="about-num">3</span><span>اضغط SKU في القائمة → ينتقل لتاب الجرد ويحمّل المنتج مباشرة</span></div>
-            <div class="about-step"><span class="about-num">4</span><span>عد الرف: يدوي (✅ الجرد مظبوط / 🔧 أريد التعديل) أو بالسكانر (📷 ابدأ العد بالسكانر)</span></div>
-            <div class="about-step"><span class="about-num">5</span><span>بعد الجرد: popup يعرض باقي المقاسات و/أو التالي في الأولويات</span></div>
-            <div class="about-step"><span class="about-num">6</span><span>الجرد مظبوط → يُسجَّل التاريخ والموظف في Shopify + D1</span></div>
-            <div class="about-step"><span class="about-num">7</span><span>تعديل الكمية → يُطبَّق على Available في Shopify + تسجيل D1</span></div>
-          </div>
-          <div class="about-label">الـ Endpoints</div>
-          <div class="about-endpoints">
-            <div class="about-ep"><code>get_audit_priorities</code><span>جلب المنتجات للـ Priority Queue — يستثني Untracked + Suspended</span></div>
-            <div class="about-ep"><code>list_skus</code><span>بحث SKU / اسم المنتج — يستثني Suspended، يرجع product.vendor</span></div>
-            <div class="about-ep"><code>lookup_barcode</code><span>بحث بالباركود — يستثني Suspended، يرجع product.vendor</span></div>
-            <div class="about-ep"><code>get_details</code><span>أوردرات Unfulfilled + حالة التغليف S1/S2</span></div>
-            <div class="about-ep"><code>adjust_inventory</code><span>تعديل Available + تسجيل D1</span></div>
-            <div class="about-ep"><code>set_audit_date</code><span>تسجيل جرد مظبوط بدون تعديل</span></div>
-          </div>
+  <div class="eco-modal">
+    <div class="eco-modal-hdr">ℹ️ عن الأداة — Inventory Audit<button class="modal-close-x" onclick="closeAbout()">✕</button></div>
+    <div class="eco-modal-body">
+
+      <details class="about-sec" open>
+        <summary>📋 وصف الأداة</summary>
+        <div class="about-sec-body">
+          <p>أداة مراجعة وضبط الجرد — بتعرض أولويات الجرد تلقائيًا (P0–P6) بفلاتر
+             متقدمة وجرد متسلسل، وبتستثني من الـ Worker المنتجات غير المتتبعة
+             (<code>inventoryItem.tracked = false</code>) وكل المنتجات بتاج <code>Suspended</code>.</p>
+
+          <h4>المستخدمون</h4>
+          <p>موظفو المخزن — جرد المنتجات وضبط الكميات ومتابعة الأولويات.</p>
+
+          <h4>كيف تعمل</h4>
+          <ol>
+            <li>تاب <b>أولويات الجرد 🎯</b>: بيجيب كل المنتجات المتتبعة ويرتّبها P0–P6.</li>
+            <li>الضغط على SKU بينقل لتاب <b>الجرد 📦</b> ويحمّل الصنف.</li>
+            <li>البحث بالـ SKU أو بمسح الباركود بالسكانر — مع حارس طول على القيمة المسحوبة.</li>
+            <li><b>وضع العد بالسكانر</b>: كل مسح = قطعة، والإجمالي بيتقارن بالرصيد المتوقع.</li>
+            <li>تطابق → «✅ الجرد مظبوط» · فرق → لوحة تعديل الكمية بالرقم معبّأ.</li>
+            <li>كل عملية بتتسجّل في D1 بنتيجتها (<code>extra.result</code>) وبتظهر في تاب السجل.</li>
+          </ol>
+
+          <h4>الـ Endpoints</h4>
+          <table>
+            <tr><th>action</th><th>بيعمل إيه</th></tr>
+            <tr><td>check_employee / register_pin / verify_employee / log_logout / get_employees</td><td>المصادقة الموحّدة (D1)</td></tr>
+            <tr><td>list_skus</td><td>بحث عن SKU / منتج</td></tr>
+            <tr><td>lookup_barcode</td><td>بحث بالباركود (سكانر)</td></tr>
+            <tr><td>get_details</td><td>الأوردرات الغير مجهّزة لصنف — بيرجّع <code>orderId</code> الرقمي كمان</td></tr>
+            <tr><td>get_audit_date</td><td>آخر تاريخ/موظف/ملاحظات جرد لصنف</td></tr>
+            <tr><td>get_audit_priorities</td><td>قايمة أولويات الجرد + <code>truncated</code></td></tr>
+            <tr><td>adjust_inventory <b>(POST)</b></td><td>تصحيح الرصيد + تسجيل تاريخ الجرد</td></tr>
+            <tr><td>set_audit_date <b>(POST)</b></td><td>تأكيد إن الجرد مظبوط من غير تعديل</td></tr>
+            <tr><td>get_logs / get_logs_count / get_logs_export</td><td>السجل: صفحة · عدّ · تصدير بـ cap/total/truncated</td></tr>
+            <tr><td>diag / get_config</td><td>فحص ذاتي · نسخة الـ Worker</td></tr>
+          </table>
+
+          <h4>⚙️ نتيجة كل عملية كتابة</h4>
+          <table>
+            <tr><th>الحالة</th><th>معناها</th><th>الإجراءات المصاحبة</th></tr>
+            <tr><td><b>✓ تم</b> (success)</td><td>الفعل تم واتأكد من شوبيفاي</td><td>تعديل الكمية + كتابة الميتافيلد + صف D1</td></tr>
+            <tr><td><b>⚠ تم جزئيًا</b> (warning)</td><td>الكمية اتعدّلت، لكن تاريخ الجرد ما اتكتبش</td><td>تعديل الكمية + صف D1 + تحذير بالإجراء اليدوي — <b>ومتعيدش التعديل</b></td></tr>
+            <tr><td><b>✗ فشل</b> (error)</td><td>النداء وصل لشوبيفاي واترفض — مفيش أي أثر</td><td>صف D1 بـ <code>result=error</code> بس</td></tr>
+          </table>
         </div>
       </details>
-      <details style="margin-top:8px;">
-        <summary class="about-summary">🔧 تشريح الكود</summary>
-        <div class="about-body">
-          <pre class="about-code">FEATURE MAP (v4.0.1)
-Feature                            | File   | §Section  | fn / action
-----------------------------------------------------------------------
-Priority Queue — جلب               | Worker | §SHOPIFY  | getAllVariantsForAudit
-Priority Queue — عرض               | HTML   | §TOOL-JS  | loadPriorityData/renderPriorityTable
-Priority Queue — فلاتر              | HTML   | §TOOL-JS  | togglePriorityFilters/applyPriorityFilters
-Priority Queue — Timestamp          | HTML   | §TOOL-JS  | updatePriorityTimestamp (interval 60s)
-Suspended Filter                    | Worker | §SHOPIFY  | getAllVariantsForAudit+listSkus+lookupBarcode
-Untracked Filter                    | Worker | §SHOPIFY  | getAllVariantsForAudit only
-SKU click to Audit tab              | HTML   | §TOOL-JS  | loadVariantFromPriority
-Post-Audit Popup                    | HTML   | §TOOL-JS  | onAuditComplete/showPostAuditPopup
-Scanner Piece Counting (v4.0)       | HTML   | §TOOL-JS  | scanCount* / §TOOL-JS::scanCount
-  - بدء/إلغاء وضع العد              |        |           | startScanCount/cancelScanCount
-  - مطابقة الباركود لكل مسحة        |        |           | processScanCountValue
-  - إعادة العد من الصفر             |        |           | resetScanCount
-  - إنهاء العد + مقارنة تلقائية     |        |           | finishScanCount
-  - تعبئة تلقائية لخانة التعديل     |        |           | showAdjustPanel(prefillDelta)
-Login — state machine               | HTML   | §AUTH-JS  | renderLoginMode (4 states)
-سجل العمليات                        | HTML   | §LOG-JS   | loadLog/exportSelectedLog
-Product Card v2 (v4.0.1)            | HTML   | §TOOL-JS  | renderProductCard (brand/SKU/size lines)
-Image Lightbox (v4.0.1)             | HTML   | §TOOL-JS  | openImageLightbox/closeImageLightbox
-Barcode no-tab-switch fix (v4.0.1)  | HTML   | §TOOL-JS  | lookupByBarcode
-Manual Count Stepper (v4.0.1)       | HTML   | §TOOL-JS  | stepManualCount
 
-KEY VARIABLES
-LS_URL_KEY            = 'stockaudit_worker_url'
-LS_SEC_KEY            = 'stockaudit_worker_secret'
-LS_ADMIN_URL          = 'admin_worker_url' (shared)
-LS_FLOW_KEY           = 'stockaudit_flow_token'
-currentEmployee       -- JS memory only
-priorityData          -- null | [{variantId,productId,sku,productTitle,...}]
-priorityFiltered      -- after filters
-lastPriorityRefreshTime -- Date | null
-priorityMode          -- {active, currentProductId}
-pfFiltersOpen         -- true (filter panel state)
-scanCountState        -- {active, scannerCount, targetBarcode} (v4.0 — piece counting mode)
+      <details class="about-sec">
+        <summary>🔧 تشريح الكود</summary>
+        <div class="about-sec-body">
+          <h4>FEATURE MAP</h4>
+          <ul>
+            <li><code>§CONFIG</code> — <code>WORKER_URL</code> · <code>TOOL_VERSION</code> · <code>MIN_WORKER_VERSION</code> · <code>esc()</code> · <code>apiRequest</code> بمهلة · دوال التوقيت (Intl)</li>
+            <li><code>§SHELL-JS</code> — الإعدادات · التوست (٤ أنواع) · <code>renderVersionUI</code> · <code>checkWorkerVersion</code> · <code>runDiag</code></li>
+            <li><code>§AUTH-JS</code> — <code>renderLoginMode</code> (٤ حالات) · <code>loadEmployeesList</code> · <code>finishLogin</code></li>
+            <li><code>§SCAN</code> — <code>handleBarcodeScan</code> · <code>handleScanCountInput</code> · <code>§SCAN::plausibility</code></li>
+            <li><code>§TOOL-JS</code> — الأولويات · بطاقة المنتج · لوحة التعديل · العد بالسكانر</li>
+            <li><code>§LOG-JS</code> — <code>logParams</code> · <code>fetchLog</code> · <code>renderLogTable</code> · <code>applySort</code> · <code>exportLogXLSX</code></li>
+          </ul>
 
-PRIORITY LOGIC
-P0: avail < 0             خطأ محتمل
-P1: avail=0 and comm>0   محجوز بالكامل
-P2: avail=1-3 and comm>0 محجوز أقل من 3 قطع
-P3: avail=1-3 and comm=0 من 1-3 قطع
-P4: avail=4-6            من 4-6 قطع
-P5: avail=7-10           من 7-10 قطع
-P6: avail>10             أكبر من 10 قطع
+          <h4>KEY VARIABLES</h4>
+          <ul>
+            <li><code>LS_SECRET = 'stockaudit_worker_secret'</code> — السر الوحيد في localStorage</li>
+            <li><code>LS_FLOW_KEY = 'stockaudit_flow_token'</code> — 🔴 معلّق: مفروض ينتقل للـ Worker كسر</li>
+            <li><code>WORKER_URL</code> — constant مش حقل إعدادات (Standards #28)</li>
+            <li><code>TOOL_VERSION</code> / <code>MIN_WORKER_VERSION</code> — مصدر واحد لرقم النسخة وحارس نسخة الـ Worker</li>
+            <li><code>currentEmployee</code> — في الذاكرة بس، عمره ما يدخل localStorage</li>
+            <li><code>LOG_PAGE_SIZE = 100</code> · <code>msState</code> — حالة فلاتر السجل multi-select</li>
+          </ul>
 
-SCANNER PIECE COUNTING (v4.0 — لا تغيير في الـ Worker)
-• كل مسح لباركود = currentVariant.barcode → scannerCount++
-• باركود مختلف أثناء العد → رفض + صوت/اهتزاز خطأ + إعادة العد الكامل لصفر
-• إدخال يدوي اختياري يُجمع مع عدد السكانر (الإجمالي = سكانر + يدوي)
-• "إنهاء العد" يقارن الإجمالي بـ currentShelfQty (نفس رقم الصندوق الأصفر):
-    - تطابق تام → يفتح نفس Confirm Modal بتاع "الجرد مظبوط" مباشرة
-    - فرق → يفتح adjust-panel مع delta معبأ تلقائياً (قابل للتعديل اليدوي) + ملاحظة تلقائية بتفاصيل العد
-• لا endpoints جديدة — نفس set_audit_date / adjust_inventory الحاليين
-
-PRODUCT CARD (v4.0.1)
-• البراند = product.vendor من Shopify — لو فاضي، يعرض اسم المنتج الكامل كـ fallback
-• الصورة قابلة للضغط → Popup بحجم الشاشة الكاملة (imageLightboxOverlay)
-• زرارا "صفحة الـ SKU" و"سجل التعديلات" في عمود منفصل (product-nav-col) بجانب الصورة
-
-EXCLUSIONS (Worker-side)
-• Inventory not tracked -> Priority Queue only
-• Tag: Suspended -> everywhere in tool</pre>
+          <h4>NOTES / QUIRKS</h4>
+          <ul>
+            <li><b>الجرد والوقت:</b> التوقيت محسوب بـ <code>Intl</code> على <code>Africa/Cairo</code> — مفيش إزاحة ثابتة، فنهاية التوقيت الصيفي مش محتاجة أي تدخل.</li>
+            <li><b>فلتر التاريخ</b> بيقارن <code>timestamp</code> المخزّن (UTC) والعرض بالقاهرة — فرق الساعتين/التلاتة ممكن يحط عملية بعد ٩ مساءً في يوم UTC اللي بعده.</li>
+            <li><b>فلاتر السجل كلها server-side</b> — العدّ والصفحات والتصدير من نفس <code>logParams()</code>، فالرقم المعروض هو رقم القاعدة مش رقم الصفحة.</li>
+            <li><b>التصدير بيقص عند 2000 صف</b> (<code>cap</code> من الـ Worker) — والبانر الأصفر بيقول الرقمين لو حصل.</li>
+            <li><b>P0–P6</b> محسوبة من <code>available</code> و<code>committed</code> في الواجهة، والعتبة الزمنية للجرد قابلة للتغيير من التاب.</li>
+            <li><b>الصفوف الأقدم من v5.0.0</b> مالهاش <code>extra.result</code> — بتتعرض «—» مش «✓»، لأننا فعليًا مش عارفين.</li>
+          </ul>
         </div>
       </details>
+
     </div>
-    <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeAbout()">إغلاق</button></div>
   </div>
 </div>
 <!-- Image Lightbox — v4.0.1 -->
@@ -596,7 +673,7 @@ EXCLUSIONS (Worker-side)
 <!-- Post-Audit Popup -->
 <div class="modal-overlay" id="postAuditOverlay" onclick="if(event.target===this)closePostAuditPopup()">
   <div class="modal" style="max-width:460px;">
-    <div class="modal-header">✅ تم الجرد بنجاح<button class="modal-close-btn" onclick="closePostAuditPopup()">✕</button></div>
+    <div class="modal-header">✅ تم الجرد بنجاح<button class="modal-close-x" onclick="closePostAuditPopup()">✕</button></div>
     <div class="modal-body" style="gap:10px;">
       <button class="btn-post-audit btn-same-product" id="btnSameProduct"><span class="post-audit-icon">👟</span><span id="btnSameProductText">باقي مقاسات هذا المنتج</span></button>
       <button class="btn-post-audit btn-next-priority" id="btnNextPriority"><span class="post-audit-icon">←</span><span id="btnNextPriorityText">التالي في الأولويات</span></button>
@@ -611,15 +688,16 @@ EXCLUSIONS (Worker-side)
   <div class="app-header-btns">
     <button class="hbtn" id="activeUserBtn" onclick="doLogout()">👤 —</button>
     <button class="hbtn" onclick="openAbout()">ℹ️ عن الأداة</button>
-    <button class="hbtn ver-btn" onclick="openChangelog()">v4.0.1 📋</button>
+    <button class="hbtn warn" id="verStaleBtn" style="display:none;border-color:var(--amber);color:var(--amber);background:var(--amber-light);" onclick="showWorkerStale()">⚠️ الـ Worker نسخة قديمة</button>
+    <button class="hbtn ver-btn" id="verBtn" onclick="openChangelog()">v— 📋</button>
     <button class="hbtn" id="settingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
   </div>
 </div>
 <div class="main-tabs-wrap">
-  <div class="main-seg">
-    <button class="main-seg-btn active" id="mainTabAudit" onclick="switchMainTab('audit')"><span class="msb-icon">📦</span><span>الجرد</span></button>
-    <button class="main-seg-btn" id="mainTabPriority" onclick="switchMainTab('priority')"><span class="msb-icon">🎯</span><span>أولويات الجرد</span></button>
-    <button class="main-seg-btn" id="mainTabLog" onclick="switchMainTab('log')"><span class="msb-icon">📜</span><span>سجل العمليات</span></button>
+  <div class="main-tabs-bar">
+    <button class="main-tab-btn active" id="mainTabAudit" onclick="switchMainTab('audit')"><span class="msb-icon">📦</span><span>الجرد</span></button>
+    <button class="main-tab-btn" id="mainTabPriority" onclick="switchMainTab('priority')"><span class="msb-icon">🎯</span><span>أولويات الجرد</span></button>
+    <button class="main-tab-btn" id="mainTabLog" onclick="switchMainTab('log')"><span class="msb-icon">📜</span><span>سجل العمليات</span></button>
   </div>
 </div>
 
@@ -655,7 +733,7 @@ EXCLUSIONS (Worker-side)
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:0;margin-bottom:10px;">
-      <div class="stat-card" style="flex:1.4;min-width:0;padding:16px 14px;border:2px solid #d97706;background:#fef9c3;"><div class="stat-label">عدد القطع على الرف</div><div class="stat-value val-shelf" id="qtyShelf">—</div><div class="stat-desc">المتوقع عند الجرد</div></div>
+      <div class="stat-card" style="flex:1.4;min-width:0;padding:16px 14px;border:2px solid var(--amber);background:var(--yellow-light);"><div class="stat-label">عدد القطع على الرف</div><div class="stat-value val-shelf" id="qtyShelf">—</div><div class="stat-desc">المتوقع عند الجرد</div></div>
       <div style="font-size:26px;font-weight:300;color:var(--text-muted);padding:0 8px;">=</div>
       <div class="stat-card" style="flex:1;min-width:0;"><div class="stat-label">Available</div><div class="stat-value val-available" id="qtyAvailable">—</div><div class="stat-desc">متاح للبيع</div></div>
       <div style="font-size:26px;font-weight:300;color:var(--text-muted);padding:0 8px;">+</div>
@@ -798,41 +876,107 @@ EXCLUSIONS (Worker-side)
 
 <!-- §LOG -->
 <div id="logTabContent" style="display:none;">
-  <div class="log-tab-wrap">
-    <div style="border-bottom:1px solid var(--border);">
-      <div class="log-filters-header" onclick="toggleLogFilters()"><div class="log-filters-title"><span>🔽</span><span>الفلاتر</span></div><span class="log-filters-toggle open" id="logFiltersToggleIcon">▲</span></div>
-      <div class="log-filters-body" id="logFiltersBody">
-        <div class="log-frow">
-          <div class="log-fg"><span class="log-flabel">الموظف</span><select class="log-fsel w-emp" id="logFilterEmployee" onchange="onLogEmpFilterChange()"><option value="">كل الموظفين</option></select></div>
-          <div class="log-fg"><span class="log-flabel">نوع التعديل</span><select class="log-fsel w-type" id="logFilterType" onchange="onLogFilterChange()"><option value="">كل العمليات</option><option value="ok">مظبوط فقط</option><option value="adj_pos">زيادة ↑</option><option value="adj_neg">نقصان ↓</option></select></div>
-          <div class="log-fg"><span class="log-flabel">عدد مرات الجرد</span><select class="log-fsel w-count" id="logFilterCount" onchange="onLogFilterChange()"><option value="">الكل</option><option value="1">1 مرة</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="10+">أكثر من 10</option></select></div>
-          <div class="log-fg"><span class="log-flabel">من تاريخ</span><div class="log-date-wrap"><input type="date" id="logFilterDateFrom" onchange="onLogFilterChange();" /></div></div>
-          <div class="log-fg"><span class="log-flabel">إلى تاريخ</span><div class="log-date-wrap"><input type="date" id="logFilterDateTo" onchange="onLogFilterChange();" /></div></div>
-          <div class="log-fg"><span class="log-flabel">فترة سريعة</span>
-            <div class="log-preset-wrap">
-              <button class="log-preset-btn" id="logPresetBtn" onclick="togglePresetMenu(event)"><span id="logPresetLabel">⚡ اختار فترة</span><span>▾</span></button>
-              <div class="log-preset-menu" id="logPresetMenu">
-                <div class="log-preset-item" data-preset="today" onclick="applyPreset('today')"><span>اليوم</span><span class="pr-check">✓</span></div>
-                <div class="log-preset-item" data-preset="yesterday" onclick="applyPreset('yesterday')"><span>أمس</span><span class="pr-check">✓</span></div>
-                <div class="log-preset-sep"></div>
-                <div class="log-preset-item" data-preset="last7" onclick="applyPreset('last7')"><span>آخر 7 أيام</span><span class="pr-check">✓</span></div>
-                <div class="log-preset-item" data-preset="last30" onclick="applyPreset('last30')"><span>آخر 30 يوم</span><span class="pr-check">✓</span></div>
-                <div class="log-preset-item" data-preset="thisMonth" onclick="applyPreset('thisMonth')"><span>الشهر الحالي</span><span class="pr-check">✓</span></div>
-                <div class="log-preset-item" data-preset="thisYear" onclick="applyPreset('thisYear')"><span>العام الحالي</span><span class="pr-check">✓</span></div>
-              </div>
+  <div class="unified-section">
+
+    <!-- ─── §LOG::filters ─── -->
+    <div class="uf-head" onclick="toggleLogFilters()">
+      <span class="uf-arrow" id="ufArrow">▼</span>
+      <span class="uf-funnel" id="ufFunnel" title="الفلاتر">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M3 5h18l-7 8v5l-4 2v-7z"/>
+        </svg>
+      </span>
+      <span class="uf-spacer"></span>
+      <button class="log-clear-btn" onclick="event.stopPropagation();clearLogFilters()">✕ مسح كل الفلاتر</button>
+    </div>
+
+    <div class="uf-body" id="ufBody">
+      <div class="uf-row">
+        <div class="uf-fg" style="flex:1;min-width:230px;">
+          <span class="uf-flabel">بحث SKU / اسم المنتج</span>
+          <div class="uf-search"><span>🔍</span><input type="text" class="uf-input" id="logSearch" /></div>
+        </div>
+        <!-- Standards #19: الفترة السريعة أولاً، بعدها من ثم إلى -->
+        <div class="uf-fg">
+          <span class="uf-flabel">فترة سريعة</span>
+          <div class="ms-wrap" id="presetWrap">
+            <button class="ms-btn" id="logPresetBtn" onclick="togglePresetMenu(event)"><span id="logPresetLabel">⚡ اختار فترة</span><span>▾</span></button>
+            <div class="ms-list" id="logPresetMenu">
+              <div class="ms-ftr-top"><button onclick="clearDateFilter()">✕ مسح الاختيار</button></div>
+              <div class="ms-item" onclick="applyPreset('today')">اليوم</div>
+              <div class="ms-item" onclick="applyPreset('yesterday')">أمس</div>
+              <div class="ms-item" onclick="applyPreset('last7')">آخر 7 أيام</div>
+              <div class="ms-item" onclick="applyPreset('last30')">آخر 30 يوم</div>
+              <div class="ms-item" onclick="applyPreset('thisMonth')">الشهر الحالي</div>
+              <div class="ms-item" onclick="applyPreset('thisYear')">العام الحالي</div>
             </div>
           </div>
-          <div class="log-fg" style="align-self:flex-end;"><button class="log-clear-btn" onclick="clearLogFilters()">✕ مسح</button></div>
         </div>
-        <div class="log-frow">
-          <div class="log-fg" style="flex:1;"><span class="log-flabel">بحث SKU / اسم المنتج</span><input type="text" class="log-finput w-search" style="width:100%;" id="logSearch" placeholder="ابحث..." oninput="onLogSearchInput()" /></div>
-          <div class="log-fg" style="flex:1;"><span class="log-flabel">بحث في الملحوظات</span><input type="text" class="log-finput w-search" style="width:100%;" id="logSearchNotes" placeholder="ابحث في الملحوظات..." oninput="onLogSearchInput()" /></div>
+        <div class="uf-fg">
+          <span class="uf-flabel">من تاريخ</span>
+          <input type="date" class="uf-input" style="padding:0 10px;" id="logFilterDateFrom"
+                 onclick="this.showPicker&amp;&amp;this.showPicker();" onchange="onLogFilterChange()" />
+        </div>
+        <div class="uf-fg">
+          <span class="uf-flabel">إلى تاريخ</span>
+          <input type="date" class="uf-input" style="padding:0 10px;" id="logFilterDateTo"
+                 onclick="this.showPicker&amp;&amp;this.showPicker();" onchange="onLogFilterChange()" />
         </div>
       </div>
+
+      <!-- Standards #21: كل الفلاتر multi-select بدون استثناء -->
+      <div class="uf-row">
+        <div class="uf-fg"><span class="uf-flabel">الموظف</span>
+          <div class="ms-wrap" id="msWrap-emp"><button class="ms-btn" id="msBtn-emp" onclick="msToggle('emp',event)"><span id="msLbl-emp">كل الموظفين</span><span>▾</span></button><div class="ms-list" id="msList-emp"></div></div>
+        </div>
+        <div class="uf-fg"><span class="uf-flabel">نوع العملية</span>
+          <div class="ms-wrap" id="msWrap-type"><button class="ms-btn" id="msBtn-type" onclick="msToggle('type',event)"><span id="msLbl-type">كل العمليات</span><span>▾</span></button><div class="ms-list" id="msList-type"></div></div>
+        </div>
+        <div class="uf-fg"><span class="uf-flabel">اتجاه التعديل</span>
+          <div class="ms-wrap" id="msWrap-dir"><button class="ms-btn" id="msBtn-dir" onclick="msToggle('dir',event)"><span id="msLbl-dir">الكل</span><span>▾</span></button><div class="ms-list" id="msList-dir"></div></div>
+        </div>
+        <div class="uf-fg"><span class="uf-flabel">عدد مرات الجرد</span>
+          <div class="ms-wrap" id="msWrap-cnt"><button class="ms-btn" id="msBtn-cnt" onclick="msToggle('cnt',event)"><span id="msLbl-cnt">الكل</span><span>▾</span></button><div class="ms-list" id="msList-cnt"></div></div>
+        </div>
+        <div class="uf-fg" style="flex:1;min-width:200px;">
+          <span class="uf-flabel">بحث في الملاحظات</span>
+          <div class="uf-search"><span>🔍</span><input type="text" class="uf-input" id="logSearchNotes" /></div>
+        </div>
+      </div>
+
+      <!-- Standards #12/#23: سطر chips لكل فلتر، واسم الفلتر مرة واحدة في أوله -->
+      <div id="chipsZone"></div>
     </div>
-    <div class="log-stats-bar"><button class="log-refresh-btn" onclick="loadLog()">↺ تحديث</button><div class="log-stat-chip">إجمالي: <strong id="logTotalCount">—</strong></div><div class="log-stat-chip filtered">فلتر: <strong id="logFilteredCount">—</strong></div><button class="log-export-btn" id="logExportBtn" onclick="exportSelectedLog()">⬇ تصدير المحدد .xlsx</button></div>
-    <div class="log-list-head"><input type="checkbox" id="logSelectAll" onchange="toggleLogSelectAll(this)" /><span class="log-list-head-lbl">تحديد الكل</span></div>
-    <div class="log-body" id="logBody"><div class="log-empty">اضغط تحديث لتحميل السجل</div></div>
+
+    <div class="section-divider"></div>
+
+    <!-- ─── §LOG::results ─── -->
+    <div class="results-row" onclick="toggleLogTable()">
+      <span class="uf-arrow" id="tblArrow">▼</span>
+      <span class="results-title">النتائج</span>
+      <span class="results-count" id="logResultsCount">—</span>
+      <span class="results-actions">
+        <button class="log-refresh-btn" onclick="event.stopPropagation();fetchLog()">↺ تحديث</button>
+        <button class="log-export-btn" id="logExportBtn" onclick="event.stopPropagation();exportLogXLSX()">⬇ تصدير المعروض .xlsx</button>
+      </span>
+    </div>
+
+    <div id="logExportWarn" class="export-warn" style="display:none;"></div>
+
+    <div id="logTableZone">
+      <div class="log-table-wrap">
+        <table class="log-table">
+          <thead><tr id="logHeadRow"></tr></thead>
+          <tbody id="logBody"><tr><td colspan="10"><div class="log-empty">جاري التحميل...</div></td></tr></tbody>
+        </table>
+      </div>
+      <div class="pagination-row" id="paginationRow" style="display:none;">
+        <button class="page-btn" id="btnPrevPage" onclick="goPage(-1)">→ السابق</button>
+        <span class="page-info" id="pageInfo"></span>
+        <button class="page-btn" id="btnNextPage" onclick="goPage(1)">التالي ←</button>
+      </div>
+    </div>
+
   </div>
 </div>
 </div>
@@ -841,18 +985,21 @@ EXCLUSIONS (Worker-side)
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
     <button class="login-settings-btn missing" id="loginSettingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
+    <div class="login-version" id="loginVersionText"></div>
     <div class="login-top">
       <div class="login-icon">📦</div>
       <div class="login-title">Inventory Audit</div>
       <div class="login-desc">أداة مراجعة وضبط الجرد</div>
-      <div class="login-sub" id="loginSub">اختر اسمك للمتابعة.</div>
+      <div class="login-sub" id="loginSub"></div>
     </div>
     <div class="login-body">
       <div class="login-field">
-        <label for="loginSelect">الموظف</label>
-        <select id="loginSelect" onchange="handleEmployeeChange()" disabled><option value="">— اختر —</option></select>
+        <select id="loginSelect" onchange="handleEmployeeChange()" disabled><option value="">اختر اسمك للمتابعة</option></select>
         <div class="login-status warn" id="loginStatus">الإعدادات غير مكتملة — افتح الإعدادات أولاً.</div>
       </div>
+      <!-- ⚠️ Standards #8: بره .pin-zone — جوّاها بيبقى مخفي في الخطوة الأولى
+           فأي فشل في تحميل الموظفين (CORS/سر/شبكة) مايظهرش للمستخدم خالص -->
+      <div class="login-alert" id="loginAlert"></div>
       <div class="pin-zone" id="pinZone">
         <div class="pin-label" id="pinLabel">أدخل الـ PIN</div>
         <div class="pin-slots" id="pinSlots">
@@ -864,7 +1011,6 @@ EXCLUSIONS (Worker-side)
           <button class="pin-key" onclick="pressPinKey('7')">7</button><button class="pin-key" onclick="pressPinKey('8')">8</button><button class="pin-key" onclick="pressPinKey('9')">9</button>
           <button class="pin-key utility" onclick="pressPinKey('clear')">مسح</button><button class="pin-key" onclick="pressPinKey('0')">0</button><button class="pin-key utility" onclick="pressPinKey('back')">←</button>
         </div>
-        <div class="login-alert" id="loginAlert"></div>
         <button class="login-primary visible" id="loginPrimaryBtn" onclick="handlePrimaryLoginAction()" disabled>دخول</button>
         <button class="login-secondary" id="loginSecondaryBtn" onclick="restartNewPinFlow()">الرجوع لإدخال PIN جديد</button>
       </div>
@@ -876,59 +1022,261 @@ EXCLUSIONS (Worker-side)
 // ══════════════════════════════════════════════════════
 // §CONFIG
 // ══════════════════════════════════════════════════════
-const SHOP_DOMAIN='6c7e1a-53.myshopify.com';
-const LS_URL_KEY='stockaudit_worker_url',LS_SEC_KEY='stockaudit_worker_secret',LS_ADMIN_URL='admin_worker_url',LS_FLOW_KEY='stockaudit_flow_token';
-function getConfig(){return{url:(localStorage.getItem(LS_URL_KEY)||'').replace(/\/$/,''),secret:localStorage.getItem(LS_SEC_KEY)||'',adminUrl:(localStorage.getItem(LS_ADMIN_URL)||'').replace(/\/$/,''),flowToken:localStorage.getItem(LS_FLOW_KEY)||''};}
-function isConfigured(){const c=getConfig();return c.url.startsWith('http')&&c.secret.length>0;}
-async function apiGet(action,params={}){
-  const{url,secret}=getConfig();if(!url||!secret)throw new Error('الإعدادات غير مكتملة');
-  const u=new URL(url);u.searchParams.set('action',action);
-  Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,String(v)));
-  const res=await fetch(u.toString(),{headers:{'Authorization':'Bearer '+secret}});
-  const data=await res.json();if(!res.ok||!data.ok)throw new Error(data.error||'خطأ في الاتصال');return data;
+const SHOP_DOMAIN = '6c7e1a-53.myshopify.com';
+
+// ⚠️ Standards #28: رابط الـ Worker **constant** — مش حقل إعدادات ومش localStorage.
+//    الحماية في WORKER_SECRET + CORS allowlist، مش في إخفاء الرابط.
+const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.dev';
+
+// مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
+// كلهم بيتملوا منه عن طريق renderVersionUI().
+const TOOL_VERSION = '5.0.0';
+// أقل نسخة Worker الواجهة دي بتشتغل معاها. الواجهة بتقرا get_config/diag و
+// get_logs_count/get_logs_export و status/actions و orderId — كلهم اتضافوا في 5.0.0.
+const MIN_WORKER_VERSION = '5.0.0';
+
+// السر الوحيد اللي بيتخزّن جهة العميل. (FLOW لسه هنا — 🔴 معلّق، شوف CLAUDE.md)
+const LS_SECRET   = 'stockaudit_worker_secret';
+const LS_FLOW_KEY = 'stockaudit_flow_token';
+
+function getConfig(){
+  return {
+    url:       WORKER_URL.replace(/\/$/,''),
+    secret:    localStorage.getItem(LS_SECRET)   || '',
+    flowToken: localStorage.getItem(LS_FLOW_KEY) || '',
+  };
 }
-async function apiPost(action,body={}){
-  const{url,secret}=getConfig();if(!url||!secret)throw new Error('الإعدادات غير مكتملة');
-  const u=new URL(url);u.searchParams.set('action',action);
-  const res=await fetch(u.toString(),{method:'POST',headers:{'Authorization':'Bearer '+secret,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const data=await res.json();if(!res.ok||!data.ok)throw new Error(data.error||'خطأ في الاتصال');return data;
+function isConfigured(){ return getConfig().secret.length > 0; }
+
+// ─── §CONFIG::esc — التهريب قبل أي innerHTML ───
+// أي قيمة مصدرها بره الصفحة (API · رسالة خطأ · سجل D1 · إدخال مستخدم) بتعدّي
+// من هنا قبل innerHTML — **وده شامل title="..."** وكل attribute.
+// `<` واحدة في اسم منتج أو ملاحظة بتبلع باقي الصف من غير أي رسالة.
+function esc(v){
+  return String(v ?? '').replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+}
+
+// ─── §CONFIG::time — توقيت القاهرة يتحسب، مايتكتبش ثابت ───
+// نفس النسخة بالحرف في الـ Worker (constants §13). الإزاحة الثابتة كانت هتغلط
+// بساعة من 29-10-2026 من غير ما الأداة تشتكي.
+const CAIRO_TZ  = 'Africa/Cairo';
+const _cairoFmt = new Intl.DateTimeFormat('en-CA', {
+  timeZone: CAIRO_TZ, hourCycle: 'h23',
+  year:'numeric', month:'2-digit', day:'2-digit',
+  hour:'2-digit', minute:'2-digit', second:'2-digit',
+});
+function cairoParts(d){
+  const o = {};
+  for (const p of _cairoFmt.formatToParts(d)) if (p.type !== 'literal') o[p.type] = p.value;
+  if (o.hour === '24') o.hour = '00';
+  return o;
+}
+function cairoDateStr(d = new Date()){ const p = cairoParts(d); return `${p.year}-${p.month}-${p.day}`; }
+
+// Standards #14/#23: 📅 DD/MM/YYYY 🕐 HH:MM صباحاً/مساءً — بدون بادج
+function formatDateTime(iso){
+  if (!iso) return '—';
+  const p = cairoParts(new Date(iso));
+  let h = +p.hour; const ampm = h >= 12 ? 'مساءً' : 'صباحاً'; h = h % 12 || 12;
+  return `📅 ${p.day}/${p.month}/${p.year} 🕐 ${String(h).padStart(2,'0')}:${p.minute} ${ampm}`;
+}
+function formatDate(iso){
+  if (!iso) return '—';
+  const p = cairoParts(new Date(iso));
+  return `📅 ${p.day}/${p.month}/${p.year}`;
+}
+function formatTimeOnly(iso){
+  if (!iso) return '—';
+  const p = cairoParts(new Date(iso));
+  let h = +p.hour; const ampm = h >= 12 ? 'مساءً' : 'صباحاً'; h = h % 12 || 12;
+  return `🕐 ${String(h).padStart(2,'0')}:${p.minute} ${ampm}`;
+}
+// عمود التاريخ في XLSX — الاستثناء الوحيد: بدون إيموجي
+function formatDateForExport(iso){
+  if (!iso) return '—';
+  const p = cairoParts(new Date(iso));
+  return `${p.day}/${p.month}/${p.year}`;
+}
+function formatTimeForExport(iso){
+  if (!iso) return '—';
+  const p = cairoParts(new Date(iso));
+  let h = +p.hour; const ampm = h >= 12 ? 'مساءً' : 'صباحاً'; h = h % 12 || 12;
+  return `${String(h).padStart(2,'0')}:${p.minute} ${ampm}`;
+}
+
+// ─── §CONFIG::apiRequest — الطبقة اللي بتفرّق أنواع الفشل + المهلة ───
+// ⚠️ `await resp.json()` المباشرة بتخلط تلات حالات في رسالة واحدة غامضة:
+//    الـ Worker رد بخطأ · الـ URL/CORS رافض · الـ Worker رد بحاجة مش JSON.
+const API_TIMEOUT_MS = 90000;   // طويلة عن قصد: القطع بدري أسوأ من الانتظار
+
+async function apiRequest(url, opts = {}){
+  const ctrl  = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), API_TIMEOUT_MS);
+  let resp, text;
+  try {
+    resp = await fetch(url, { ...opts, signal: ctrl.signal });
+    text = await resp.text();
+  } catch (e) {
+    if (e.name === 'AbortError')
+      throw new Error(`الـ Worker ما ردّش خلال ${API_TIMEOUT_MS/1000} ثانية — `
+        + `**راجع تاب السجل قبل ما تعيد المحاولة**: ممكن تكون العملية تمّت`);
+    throw new Error(`تعذّر الوصول للـ Worker (شبكة أو CORS) — ${e.message}`);
+  } finally { clearTimeout(timer); }
+
+  let data;
+  try { data = JSON.parse(text); }
+  catch { throw new Error(`الـ Worker رد بحاجة مش JSON (HTTP ${resp.status}) — ${text.slice(0,140)}`); }
+
+  if (!resp.ok || data.ok === false) throw new Error(data.error || `الـ Worker رد بخطأ (HTTP ${resp.status})`);
+  return data;
+}
+
+function apiUrl(action, params = {}){
+  const { url } = getConfig();
+  const u = new URL(url);
+  u.searchParams.set('action', action);
+  Object.entries(params).forEach(([k,v]) => u.searchParams.set(k, String(v)));
+  return u.toString();
+}
+async function apiGet(action, params = {}){
+  const { secret } = getConfig();
+  if (!secret) { openSettings(); throw new Error('الإعدادات غير مكتملة — أدخل الـ Worker Secret'); }
+  return apiRequest(apiUrl(action, params), { headers: { 'Authorization': 'Bearer ' + secret } });
+}
+async function apiPost(action, body = {}){
+  const { secret } = getConfig();
+  if (!secret) { openSettings(); throw new Error('الإعدادات غير مكتملة — أدخل الـ Worker Secret'); }
+  return apiRequest(apiUrl(action), {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + secret, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
 }
 
 // ══════════════════════════════════════════════════════
 // §SHELL-JS
 // ══════════════════════════════════════════════════════
-function updateSettingsButtonsState(){const ok=isConfigured();document.getElementById('settingsBtn').classList.toggle('settings-configured',ok);updateLoginSettingsBtnState();}
-function updateLoginSettingsBtnState(){const btn=document.getElementById('loginSettingsBtn');if(!btn)return;btn.classList.toggle('ready',isConfigured());btn.classList.toggle('missing',!isConfigured());}
-function openSettings(){const c=getConfig();document.getElementById('cfWorkerUrl').value=c.url;document.getElementById('cfWorkerSecret').value=c.secret;document.getElementById('cfAdminUrl').value=c.adminUrl;document.getElementById('cfFlowToken').value=c.flowToken;document.getElementById('settingsOverlay').classList.add('open');}
-function closeSettings(){document.getElementById('settingsOverlay').classList.remove('open');}
-function saveSettings(){
-  const url=document.getElementById('cfWorkerUrl').value.trim().replace(/\/$/,'');
-  const secret=document.getElementById('cfWorkerSecret').value.trim();
-  const adminUrl=document.getElementById('cfAdminUrl').value.trim().replace(/\/$/,'');
-  const flowToken=document.getElementById('cfFlowToken').value.trim();
-  if(!url||!secret){showToast('الرجاء إدخال الـ URL والـ Secret','error');return;}
-  localStorage.setItem(LS_URL_KEY,url);localStorage.setItem(LS_SEC_KEY,secret);
-  if(adminUrl)localStorage.setItem(LS_ADMIN_URL,adminUrl);if(flowToken)localStorage.setItem(LS_FLOW_KEY,flowToken);
-  updateSettingsButtonsState();closeSettings();showToast('تم حفظ الإعدادات ✓','success');loadEmployeesList();
+function updateSettingsButtonsState(){
+  const ok = isConfigured();
+  document.getElementById('settingsBtn').classList.toggle('settings-configured', ok);
+  updateLoginSettingsBtn();
 }
-function openChangelog(){document.getElementById('changelogOverlay').classList.add('open');}
-function closeChangelog(){document.getElementById('changelogOverlay').classList.remove('open');}
-function openAbout(){document.getElementById('aboutOverlay').classList.add('open');}
-function closeAbout(){document.getElementById('aboutOverlay').classList.remove('open');}
-function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
-function switchMainTab(tab){
-  ['audit','priority','log'].forEach(t=>{
-    const tid='mainTab'+t.charAt(0).toUpperCase()+t.slice(1);
-    document.getElementById(tid).classList.toggle('active',t===tab);
-    document.getElementById(t+'TabContent').style.display=t===tab?'block':'none';
-  });
-  if(tab==='log'&&!logLoaded)loadLog();
-  if(tab==='priority'&&priorityData===null)loadPriorityData();
+// ⚠️ الاسم **من غير** "State" في الآخر — القالب القديم كان فيه تعارض تسمية
+function updateLoginSettingsBtn(){
+  const btn = document.getElementById('loginSettingsBtn'); if (!btn) return;
+  btn.classList.toggle('ready', isConfigured());
+  btn.classList.toggle('missing', !isConfigured());
+}
+function openSettings(){
+  const c = getConfig();
+  document.getElementById('cfWorkerSecret').value = c.secret;
+  document.getElementById('cfFlowToken').value    = c.flowToken;
+  document.getElementById('settingsOverlay').classList.add('open');
+}
+function closeSettings(){ document.getElementById('settingsOverlay').classList.remove('open'); }
+function saveSettings(){
+  const secret    = document.getElementById('cfWorkerSecret').value.trim();
+  const flowToken = document.getElementById('cfFlowToken').value.trim();
+  if (!secret) { showToast('الرجاء إدخال الـ Worker Secret', 'error'); return; }
+  localStorage.setItem(LS_SECRET, secret);
+  if (flowToken) localStorage.setItem(LS_FLOW_KEY, flowToken);
+  updateSettingsButtonsState(); closeSettings();
+  showToast('تم حفظ الإعدادات ✓', 'success');
+  loadEmployeesList(); checkWorkerVersion();
+}
+function openChangelog(){ document.getElementById('changelogOverlay').classList.add('open'); }
+function closeChangelog(){ document.getElementById('changelogOverlay').classList.remove('open'); }
+function openAbout(){ document.getElementById('aboutOverlay').classList.add('open'); }
+function closeAbout(){ document.getElementById('aboutOverlay').classList.remove('open'); }
+
+// Standards #41: الأنواع الأربعة الرسمية — success · error · warning · neutral
+function showToast(msg, type = 'neutral', ms = 3500){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast toast-' + (type || 'neutral');
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.remove('show'), ms);
 }
 
-// ══════════════════════════════════════════════════════
+// ─── §SHELL-JS::version — مصدر واحد + حارس نسخة الـ Worker ───
+function renderVersionUI(){
+  const btn = document.getElementById('verBtn');
+  if (btn) btn.textContent = `v${TOOL_VERSION} 📋`;
+  const badge = document.getElementById('clLatestBadge');
+  if (badge) badge.textContent = `v${TOOL_VERSION}`;
+  const lv = document.getElementById('loginVersionText');
+  if (lv) lv.textContent = `v${TOOL_VERSION}`;
+}
+
+let workerVersion = null;
+// مقارنة رقمية — مش نصية. "10" أصغر من "9" لو اتقارنوا كنص.
+function cmpVersion(a, b){
+  const pa = String(a).replace(/^v/,'').split('.').map(Number);
+  const pb = String(b).replace(/^v/,'').split('.').map(Number);
+  for (let i = 0; i < 3; i++){ const d = (pa[i]||0) - (pb[i]||0); if (d) return d; }
+  return 0;
+}
+async function checkWorkerVersion(){
+  // 🔴 إلزامي — من غير السطر ده مودال الإعدادات بيفتح **لوحده** على أي جهاز
+  //    جديد فوق شاشة الدخول ويغطّي زرار الإعدادات اللي جوّه الكارت.
+  if (!isConfigured()) return;
+  try {
+    const d = await apiGet('get_config');
+    workerVersion = d.version || null;
+    const stale = workerVersion && cmpVersion(workerVersion, MIN_WORKER_VERSION) < 0;
+    const btn = document.getElementById('verStaleBtn');
+    if (btn) btn.style.display = stale ? '' : 'none';
+  } catch { /* الإعدادات ممكن تكون لسه مش مضبوطة */ }
+}
+function showWorkerStale(){
+  showToast(
+    `الـ Worker نسخته ${workerVersion} والواجهة محتاجة ${MIN_WORKER_VERSION} على الأقل — `
+    + `التحديث على ما يبدو ما نزلش. راجع Deployments و Promote في كلاودفلير.`,
+    'error', 7000);
+}
+
+// ─── §SHELL-JS::diag — الفحص الذاتي ───
+async function runDiag(){
+  const box = document.getElementById('diagResult');
+  const btn = document.getElementById('diagBtn');
+  box.innerHTML = 'جاري الفحص...'; btn.disabled = true;
+  try {
+    const d = await apiGet('diag');
+    // بيفهم الشكلين (مصفوفة / كائن) — الأدوات القديمة بترجّع كائن
+    const rows = Array.isArray(d.checks)
+      ? d.checks.map(c => ({ icon: c.ok ? '✅' : '❌', label: c.label || c.name, detail: c.detail }))
+      : Object.entries(d.checks || {}).map(([k,v]) => {
+          const txt = (v && typeof v === 'object') ? JSON.stringify(v) : String(v);
+          let icon = 'ℹ️';
+          if (/(Error|Warning)$/.test(k))      icon = '⚠️';
+          else if (/^FAILED/i.test(txt))       icon = '❌';
+          else if (txt === 'ok' || v === true) icon = '✅';
+          else if (v === false)                icon = '❌';
+          return { icon, label: k, detail: txt };
+        });
+    box.innerHTML = `<div style="margin-bottom:6px;font-weight:800;">Worker v${esc(d.version||'—')}</div>`
+      + rows.map(r => `<div>${r.icon} <b>${esc(r.label)}</b> — ${esc(r.detail)}</div>`).join('');
+  } catch (e) {
+    box.innerHTML = `<div style="color:var(--red);font-weight:700;">❌ ${esc(e.message)}</div>`;
+  } finally { btn.disabled = false; }
+}
+
+function switchMainTab(tab){
+  ['audit','priority','log'].forEach(t => {
+    const tid = 'mainTab' + t.charAt(0).toUpperCase() + t.slice(1);
+    document.getElementById(tid).classList.toggle('active', t === tab);
+    document.getElementById(t + 'TabContent').style.display = t === tab ? 'block' : 'none';
+  });
+  if (tab === 'log' && !logLoaded) { logLoaded = true; initLogFilters(); fetchLog(); }
+  if (tab === 'priority' && priorityData === null) loadPriorityData();
+}
+
 // §AUTH-JS
 // ══════════════════════════════════════════════════════
+let allEmployees=[];
 let currentEmployee=null,loginMode='employee',pinDigits=[],pendingNewPin='',isLoginBusy=false,autoLoginTimer=null;
 let _audioCtx=null;
 function _getACtx(){if(!_audioCtx)_audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(_audioCtx.state==='suspended')_audioCtx.resume();return _audioCtx;}
@@ -936,16 +1284,17 @@ function playBeep(type){try{const ctx=_getACtx();const run=()=>{const o=ctx.crea
 function vibrateDevice(pattern){try{if(navigator.vibrate)navigator.vibrate(pattern);}catch{}}
 async function loadEmployeesList(){
   const sel=document.getElementById('loginSelect'),status=document.getElementById('loginStatus');
-  clearLoginAlert();sel.innerHTML='<option value="">— اختر —</option>';sel.disabled=true;
+  clearLoginAlert();sel.innerHTML='<option value="">اختر اسمك للمتابعة</option>';sel.disabled=true;
   if(!isConfigured()){status.className='login-status warn';status.textContent='الإعدادات غير مكتملة — افتح الإعدادات أولاً.';return;}
   status.className='login-status info';status.textContent='جارٍ تحميل قائمة الموظفين...';
   try{
     const data=await apiGet('get_employees');const emps=data.employees||[];
-    const logSel=document.getElementById('logFilterEmployee');
-    if(logSel)logSel.innerHTML='<option value="">كل الموظفين</option>';
-    emps.forEach(e=>{const o=document.createElement('option');o.value=e.username;o.textContent=e.display_name;sel.appendChild(o);if(logSel){const o2=o.cloneNode(true);logSel.appendChild(o2);}});
+    allEmployees=emps;
+    if(msState&&msState.emp){msState.emp.options=emps.map(e=>({v:e.username,t:e.display_name||e.username}));}
+    emps.forEach(e=>{const o=document.createElement('option');o.value=e.username;o.textContent=e.display_name;sel.appendChild(o);});
     sel.disabled=false;status.className=emps.length?'login-status info':'login-status warn';
-    status.textContent=emps.length?'اختر الموظف للمتابعة.':'لا يوجد موظفون نشطون.';
+    // Standards #34: بعد تحميل ناجح وفيه موظفين — الرسالة فاضية، الإرشاد في الـ placeholder
+    status.textContent=emps.length?'':'لا يوجد موظفون نشطون.';
   }catch(err){status.className='login-status error';status.textContent='تعذّر تحميل قائمة الموظفين.';showLoginAlert(err.message||'خطأ في الاتصال');}
 }
 function renderLoginMode(mode){
@@ -954,7 +1303,7 @@ function renderLoginMode(mode){
   if(mode!=='confirm')pendingNewPin='';
   pinZone.classList.toggle('visible',mode!=='employee');
   switch(mode){
-    case 'employee':loginSub.textContent='اختر اسمك للمتابعة.';primaryBtn.classList.remove('visible');secondBtn.classList.remove('visible');break;
+    case 'employee':loginSub.textContent='';primaryBtn.classList.remove('visible');secondBtn.classList.remove('visible');break;
     case 'existing':loginSub.textContent='أدخل الـ PIN الخاص بك.';pinLabel.textContent='أدخل الـ PIN';primaryBtn.textContent='دخول';primaryBtn.classList.add('visible');secondBtn.classList.remove('visible');break;
     case 'new':loginSub.textContent='أول مرة؟ اختر PIN جديد من 4 أرقام.';pinLabel.textContent='اختر PIN جديد';primaryBtn.textContent='متابعة ←';primaryBtn.classList.add('visible');secondBtn.classList.remove('visible');break;
     case 'confirm':loginSub.textContent='أكّد الـ PIN الذي اخترته.';pinLabel.textContent='تأكيد الـ PIN';primaryBtn.textContent='تأكيد وتسجيل الدخول';primaryBtn.classList.add('visible');secondBtn.classList.add('visible');break;
@@ -1059,25 +1408,67 @@ async function doLogout(){
 // ══════════════════════════════════════════════════════
 // §SCAN
 // ══════════════════════════════════════════════════════
-let _barcodeTimer=null,_lastKeyTime=0;
-const barcodeInput=document.getElementById('barcodeInput'),barcodeWrap=document.getElementById('barcodeWrap');
-barcodeInput.addEventListener('input',()=>{clearTimeout(_barcodeTimer);barcodeWrap.classList.add('scanning');const now=Date.now(),gap=now-_lastKeyTime;_lastKeyTime=now;_barcodeTimer=setTimeout(handleBarcodeScan,gap<80?150:400);});
-function handleBarcodeScan(){const val=barcodeInput.value.trim();barcodeInput.value='';barcodeInput.focus();barcodeWrap.classList.remove('scanning');if(!val)return;lookupByBarcode(val);}
+// ⚠️ الشكل المعتمد: `isBurst` من **طول القيمة** — حتمي ومقروء.
+//    الشكل القديم كان بيقيس الفجوة الزمنية بين الضغطات، وده بيعتمد على استجابة
+//    الـ main thread: أثناء رسم جدول الأولويات الأحداث بتتكدّس والفجوة المقيسة
+//    بتعدّي 80ms فبيرجع لـ 400ms في صمت — والباركودين بيتلزقوا.
+// ⛔ المسح جوّه handleScan مش في الـ listener — المسح في الـ listener بيمسح
+//    الإدخال في نص دفعة السكانر.
+const SCAN_BURST_MS = 150, SCAN_TYPE_MS = 400;
 
-// scan count input — v4.0 — same scanner-gun timing pattern, routed only while scanCountState.active
-let _scanCountTimer=null,_scanCountLastKey=0;
-const scanCountInputEl=document.getElementById('scanCountInput');
-scanCountInputEl.addEventListener('input',()=>{
-  if(!scanCountState.active)return;
+// ─── §SCAN::plausibility — حارس إلزامي على أي قيمة مسحوبة ───
+// السكانر بيغلط بطريقتين صامتتين: باركودين بيتلزقوا في قيمة واحدة، وباركود
+// بيتقرا نص قراية. الاتنين بيعدّوا للـ API كقيمة «صالحة» فترجع «غير موجود» —
+// وهي رسالة كاذبة على منتج موجود.
+const BARCODE_MIN_LEN = 6, BARCODE_MAX_LEN = 20;
+function scanIsPlausible(raw){
+  const v = String(raw || '').trim();
+  if (v.length >= BARCODE_MIN_LEN && v.length <= BARCODE_MAX_LEN) return true;
+  showToast(
+    `الرقم "${v}" طوله ${v.length} خانة — المتوقّع بين ${BARCODE_MIN_LEN} و${BARCODE_MAX_LEN}. `
+    + (v.length > BARCODE_MAX_LEN
+        ? 'غالبًا اتسكن باركودين ورا بعض — اسكنهم تاني واحد واحد.'
+        : 'غالبًا الباركود اتقرا ناقص — اسكنه تاني.'),
+    'warning', 6000);
+  playBeep('error');
+  return false;
+}
+
+let _barcodeTimer = null;
+const barcodeInput = document.getElementById('barcodeInput'), barcodeWrap = document.getElementById('barcodeWrap');
+barcodeInput.addEventListener('input', () => {
+  clearTimeout(_barcodeTimer);
+  barcodeWrap.classList.add('scanning');
+  const isBurst = barcodeInput.value.length > 3;
+  _barcodeTimer = setTimeout(handleBarcodeScan, isBurst ? SCAN_BURST_MS : SCAN_TYPE_MS);
+});
+function handleBarcodeScan(){
+  const val = barcodeInput.value.trim();   // القراية هنا
+  barcodeInput.value = '';                 // والمسح هنا
+  barcodeInput.focus();
+  barcodeWrap.classList.remove('scanning');
+  if (!val) return;
+  if (!scanIsPlausible(val)) return;
+  lookupByBarcode(val);
+}
+
+// scan count input — نفس النمط بالظبط، بيشتغل بس أثناء وضع العد
+let _scanCountTimer = null;
+const scanCountInputEl = document.getElementById('scanCountInput');
+scanCountInputEl.addEventListener('input', () => {
+  if (!scanCountState.active) return;
   clearTimeout(_scanCountTimer);
   document.getElementById('scanCountInputWrap').classList.add('scanning');
-  const now=Date.now(),gap=now-_scanCountLastKey;_scanCountLastKey=now;
-  _scanCountTimer=setTimeout(handleScanCountInput,gap<80?150:400);
+  const isBurst = scanCountInputEl.value.length > 3;
+  _scanCountTimer = setTimeout(handleScanCountInput, isBurst ? SCAN_BURST_MS : SCAN_TYPE_MS);
 });
 function handleScanCountInput(){
-  const val=scanCountInputEl.value.trim();scanCountInputEl.value='';scanCountInputEl.focus();
+  const val = scanCountInputEl.value.trim();
+  scanCountInputEl.value = '';
+  scanCountInputEl.focus();
   document.getElementById('scanCountInputWrap').classList.remove('scanning');
-  if(!val)return;
+  if (!val) return;
+  if (!scanIsPlausible(val)) return;
   processScanCountValue(val);
 }
 
@@ -1108,10 +1499,11 @@ function needsAudit(d,t){return getDaysSince(d)>t;}
 function updatePriorityTimestamp(){
   if(!lastPriorityRefreshTime)return;
   const el=document.getElementById('priorityTimestamp');if(!el)return;
-  const d=lastPriorityRefreshTime,pad=n=>String(n).padStart(2,'0');
-  let h=d.getHours();const m=pad(d.getMinutes()),ampm=h>=12?'\u0645\u0633\u0627\u0621\u064b':'\u0635\u0628\u0627\u062d\u064b\u200f';h=h%12||12;
-  document.getElementById('ptDate').textContent=pad(d.getDate())+' / '+pad(d.getMonth()+1)+' / '+d.getFullYear();
-  document.getElementById('ptTime').textContent=pad(h)+':'+m+' '+ampm;
+  const d=lastPriorityRefreshTime;
+  // توقيت القاهرة المحسوب — مش getHours() المحلي بتاع جهاز الموظف
+  const pt=cairoParts(d);let h=+pt.hour;const ampm=h>=12?'مساءً':'صباحاً';h=h%12||12;
+  document.getElementById('ptDate').textContent=`${pt.day} / ${pt.month} / ${pt.year}`;
+  document.getElementById('ptTime').textContent=`${String(h).padStart(2,'0')}:${pt.minute} ${ampm}`;
   const diffSec=Math.floor((Date.now()-d.getTime())/1000);
   let rel;
   if(diffSec<60)rel='(\u0627\u0644\u0622\u0646)';
@@ -1214,11 +1606,11 @@ function renderPriorityTable(variants){
 
 async function loadVariantFromPriority(item){
   priorityMode={active:true,currentProductId:item.productId};switchMainTab('audit');
-  showToast('\u062c\u0627\u0631\u064a \u062a\u062d\u0645\u064a\u0644 '+item.sku+'...','');
+  showToast('\u062c\u0627\u0631\u064a \u062a\u062d\u0645\u064a\u0644 '+item.sku+'...','neutral');
   try{
     const data=await apiGet('list_skus',{search:item.sku});
     const variant=(data.variants||[]).find(v=>v.id===item.variantId)||(data.variants||[])[0];
-    if(variant)selectVariant(variant);else{showToast('\u0644\u0645 \u064a\u062a\u0645 \u0627\u0644\u0639\u062b\u0648\u0631 \u0639\u0644\u0649 \u0627\u0644\u0640 variant','error');priorityMode={active:false,currentProductId:null};}
+    if(variant)selectVariant(variant);else{showToast('\u0644\u0645 \u064a\u062a\u0645 \u0627\u0644\u0639\u062b\u0648\u0631 \u0639\u0644\u0649 \u0627\u0644\u0640 variant','warning');priorityMode={active:false,currentProductId:null};}
   }catch(e){showToast('\u062e\u0637\u0623: '+e.message,'error');priorityMode={active:false,currentProductId:null};}
 }
 
@@ -1256,12 +1648,9 @@ async function loadSkus(search){dropdownList.innerHTML='<div class="dropdown-loa
 function renderDropdown(variants){if(!variants.length){dropdownList.innerHTML='<div class="dropdown-empty">لا توجد نتائج</div>';return;}dropdownList.innerHTML=variants.map(v=>'<div class="dropdown-item" onclick=\'selectVariant('+JSON.stringify(v).replace(/'/g,"&#39;")+')\' ><span class="item-sku">'+(v.sku||'—')+'</span><span class="item-name">'+(v.product?.title||'')+' '+(v.selectedOptions?.map(o=>o.value).join(' / ')||'')+'</span></div>').join('');dropdownList.classList.add('open');}
 function selectVariant(variant){currentSku=variant.sku;currentVariant=variant;skuSearch.value=variant.sku;clearBtn.classList.add('visible');dropdownList.classList.remove('open');renderProductCard(variant);loadOrders(variant);}
 function switchTab(tab){document.getElementById('tabSku').classList.toggle('active',tab==='sku');document.getElementById('tabBarcode').classList.toggle('active',tab==='barcode');document.getElementById('skuMode').style.display=tab==='sku'?'block':'none';document.getElementById('barcodeMode').classList.toggle('active',tab==='barcode');if(tab==='barcode')barcodeInput.focus();}
-async function lookupByBarcode(barcode){showToast('جاري البحث...','');try{const data=await apiGet('lookup_barcode',{barcode});if(!data.variant){showToast('لا يوجد منتج بهذا الباركود','error');return;}showToast('تم العثور على المنتج','success');selectVariant(data.variant);/* v4.0.1: لا تبديل تلقائي للتاب — يفضل على وضع مسح الباركود لاستمرار المسح */skuSearch.value=data.variant.sku;clearBtn.classList.add('visible');barcodeInput.focus();}catch(e){showToast(e.message,'error');}}
+async function lookupByBarcode(barcode){showToast('جاري البحث...','neutral');try{const data=await apiGet('lookup_barcode',{barcode});if(!data.variant){showToast('لا يوجد منتج بهذا الباركود','warning');return;}showToast('تم العثور على المنتج','success');selectVariant(data.variant);/* v4.0.1: لا تبديل تلقائي للتاب — يفضل على وضع مسح الباركود لاستمرار المسح */skuSearch.value=data.variant.sku;clearBtn.classList.add('visible');barcodeInput.focus();}catch(e){showToast(e.message,'error');}}
 function openImageLightbox(){if(!currentImgUrl)return;document.getElementById('lightboxImg').src=currentImgUrl;document.getElementById('imageLightboxOverlay').classList.add('open');}
 function closeImageLightbox(){document.getElementById('imageLightboxOverlay').classList.remove('open');}
-function toCairo(iso){return new Date(new Date(iso).getTime()+3*60*60*1000);}
-function formatDateTime(iso){const d=toCairo(iso),pad=n=>String(n).padStart(2,'0');let h=d.getUTCHours();const m=pad(d.getUTCMinutes()),ampm=h>=12?'مساءً':'صباحاً';h=h%12||12;return pad(d.getUTCDate())+'-'+pad(d.getUTCMonth()+1)+'-'+d.getUTCFullYear()+' الساعة '+pad(h)+':'+m+' '+ampm;}
-function formatDate(iso){const d=toCairo(iso),pad=n=>String(n).padStart(2,'0');return pad(d.getUTCDate())+'-'+pad(d.getUTCMonth()+1)+'-'+d.getUTCFullYear();}
 function renderProductCard(variant){
   if(scanCountState.active)cancelScanCount();
   currentVariant=variant;
@@ -1302,13 +1691,13 @@ function setPhase1ButtonsDisabled(disabled){
   document.getElementById('btnStartScanCount').disabled=disabled;
 }
 function startScanCount(){
-  if(!currentVariant){showToast('لم يتم اختيار منتج','error');return;}
-  if(currentShelfQty==null){showToast('جاري تحميل بيانات المنتج، حاول بعد لحظة','error');return;}
+  if(!currentVariant){showToast('لم يتم اختيار منتج','warning');return;}
+  if(currentShelfQty==null){showToast('جاري تحميل بيانات المنتج، حاول بعد لحظة','warning');return;}
   scanCountState.active=true;scanCountState.scannerCount=0;scanCountState.targetBarcode=currentVariant.barcode||null;
   document.getElementById('scanCountManual').value='0';
   updateScanCountDisplay();
   const wrap=document.getElementById('scanCountInputWrap');
-  if(!scanCountState.targetBarcode){wrap.classList.add('disabled-no-barcode');showToast('⚠️ لا يوجد باركود مسجل لهذا الـ SKU — استخدم الإدخال اليدوي فقط','error');}
+  if(!scanCountState.targetBarcode){wrap.classList.add('disabled-no-barcode');showToast('⚠️ لا يوجد باركود مسجل لهذا الـ SKU — استخدم الإدخال اليدوي فقط','warning');}
   else wrap.classList.remove('disabled-no-barcode');
   hideAdjustPanel();
   document.getElementById('scanCountPanel').classList.add('visible');
@@ -1325,7 +1714,7 @@ function resetScanCount(silent){
   scanCountState.scannerCount=0;
   document.getElementById('scanCountManual').value='0';
   updateScanCountDisplay();
-  if(!silent)showToast('تم إعادة العد من الصفر','');
+  if(!silent)showToast('تم إعادة العد من الصفر','neutral');
 }
 function updateScanCountDisplay(){
   document.getElementById('scanCountNumber').textContent=scanCountState.scannerCount.toLocaleString('en-US');
@@ -1343,13 +1732,13 @@ function animateScanCountPulse(){
 }
 function processScanCountValue(val){
   if(!scanCountState.active)return;
-  if(!scanCountState.targetBarcode){showToast('لا يوجد باركود مسجل — استخدم الإدخال اليدوي','error');return;}
+  if(!scanCountState.targetBarcode){showToast('لا يوجد باركود مسجل — استخدم الإدخال اليدوي','warning');return;}
   if(val===scanCountState.targetBarcode){
     scanCountState.scannerCount++;playBeep('success');vibrateDevice(50);
     updateScanCountDisplay();animateScanCountPulse();
   }else{
     playBeep('error');vibrateDevice([100,50,100]);
-    showToast('❌ باركود غير مطابق — تم إعادة العد من الصفر','error');
+    showToast('❌ باركود غير مطابق — تم إعادة العد من الصفر','warning');
     resetScanCount(true);
   }
 }
@@ -1360,13 +1749,13 @@ function finishScanCount(){
   document.getElementById('scanCountPanel').classList.remove('visible');
   document.getElementById('scanCountInputWrap').classList.remove('disabled-no-barcode','scanning');
   setPhase1ButtonsDisabled(false);
-  if(currentShelfQty==null){showToast('تعذر تحديد العدد المتوقع','error');return;}
+  if(currentShelfQty==null){showToast('تعذر تحديد العدد المتوقع','warning');return;}
   const delta=total-currentShelfQty;
   if(delta===0){
     showToast('✅ العدد مطابق ('+total.toLocaleString('en-US')+' قطعة)','success');
     confirmAuditOk();
   }else{
-    showToast('🔧 فيه فرق في العدد — راجع التعديل المقترح قبل التأكيد','error');
+    showToast('🔧 فيه فرق في العدد — راجع التعديل المقترح قبل التأكيد','warning');
     showAdjustPanel(delta);
     document.getElementById('adjustNotes').value='عدد بالسكانر: '+scanCountState.scannerCount.toLocaleString('en-US')+(manual>0?(' + يدوي: '+manual.toLocaleString('en-US')):'')+' = '+total.toLocaleString('en-US');
   }
@@ -1397,14 +1786,100 @@ function openConfirm(headerHTML,bodyHTML,okLabel,okClass,onConfirm){
   const newOk=okBtn.cloneNode(true),newCancel=cancelBtn.cloneNode(true);okBtn.parentNode.replaceChild(newOk,okBtn);cancelBtn.parentNode.replaceChild(newCancel,cancelBtn);
   newOk.textContent=okLabel;newOk.className='btn-confirm-ok '+okClass;newOk.addEventListener('click',()=>{document.getElementById('confirmOverlay').classList.remove('open');onConfirm();});newCancel.addEventListener('click',()=>document.getElementById('confirmOverlay').classList.remove('open'));document.getElementById('confirmOverlay').classList.add('open');
 }
-function confirmAuditOk(){if(!currentVariant){showToast('لم يتم اختيار منتج','error');return;}const shelf=currentShelfQty!=null?currentShelfQty.toLocaleString('en-US'):'—',empName=currentEmployee?.displayName||'—';const body='<div class="confirm-detail-row"><span class="confirm-detail-label">المنتج</span><span class="confirm-detail-val">'+currentVariant.product?.title+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">SKU</span><span class="confirm-detail-val accent">'+currentVariant.sku+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الموظف</span><span class="confirm-detail-val accent">'+empName+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">عدد القطع على الرف</span><span class="confirm-detail-val green">'+shelf+'</span></div><div class="confirm-note">سيتم تسجيل تاريخ ووقت الجرد واسم الموظف.</div>';openConfirm('✅ تأكيد: الجرد مظبوط',body,'تأكيد','green-btn',doAuditOk);}
-async function doAuditOk(){const variantId=currentVariant.id,productId=currentVariant.product?.id,btn=document.getElementById('btnAuditOk');btn.disabled=true;btn.textContent='⏳ جاري التسجيل...';try{const data=await apiPost('set_audit_date',{variantId,employee:currentEmployee?.username||'',sku:currentVariant.sku||'',productTitle:currentVariant.product?.title||'',shelfQty:currentShelfQty||0});showToast('تم تسجيل الجرد ✓','success');if(data.auditDate)updateAuditInfo(data.auditDate,currentEmployee?.username||'','');onAuditComplete(variantId,productId);}catch(e){showToast('خطأ: '+e.message,'error');}finally{btn.disabled=false;btn.textContent='✅ الجرد مظبوط';}}
-function confirmAdjust(){const delta=parseInt(document.getElementById('deltaInput').value)||0,notes=document.getElementById('adjustNotes').value.trim();if(delta===0){showToast('التعديل يجب أن يكون غير صفر','error');return;}if(!currentVariant){showToast('لم يتم اختيار منتج','error');return;}const current=currentShelfQty!=null?currentShelfQty:0,newVal=current+delta,deltaStr=(delta>0?'+':'')+delta.toLocaleString('en-US'),deltaClass=delta>0?'green':'red';const body='<div class="confirm-detail-row"><span class="confirm-detail-label">SKU</span><span class="confirm-detail-val accent">'+currentVariant.sku+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الموظف</span><span class="confirm-detail-val accent">'+(currentEmployee?.displayName||'—')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">عدد القطع على الرف</span><span class="confirm-detail-val">'+current.toLocaleString('en-US')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">التعديل</span><span class="confirm-detail-val '+deltaClass+'">'+deltaStr+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الكمية الجديدة</span><span class="confirm-detail-val '+(delta>0?'green':'red')+'">'+newVal.toLocaleString('en-US')+'</span></div>'+(notes?'<div class="confirm-detail-row"><span class="confirm-detail-label">ملاحظات</span><span class="confirm-detail-val" style="font-size:12px;">'+notes+'</span></div>':'')+'<div class="confirm-note">سيتم تطبيق التعديل على Available في Shopify.</div>';openConfirm('🔧 تأكيد تعديل الكمية',body,'تطبيق التعديل','accent-btn',doApplyAdjust);}
-async function doApplyAdjust(){const delta=parseInt(document.getElementById('deltaInput').value)||0,notes=document.getElementById('adjustNotes').value.trim(),inventoryItemId=currentVariant.inventoryItem?.id,variantId=currentVariant.id,productId=currentVariant.product?.id;if(!inventoryItemId){showToast('لا يوجد inventoryItem ID','error');return;}const btn=document.getElementById('btnApplyAdjust'),btnAudit=document.getElementById('btnAuditOk');btn.disabled=true;btnAudit.disabled=true;btn.textContent='⏳ جاري التعديل...';try{const data=await apiPost('adjust_inventory',{inventoryItemId,variantId,delta,employee:currentEmployee?.username||'',notes,sku:currentVariant.sku||'',productTitle:currentVariant.product?.title||'',shelfBefore:currentShelfQty||0});showToast('تم التعديل بنجاح ('+(delta>0?'+':'')+delta+') ✓','success');if(data.auditDate)updateAuditInfo(data.auditDate,currentEmployee?.username||'',notes);onAuditComplete(variantId,productId);await refreshCurrent();hideAdjustPanel();}catch(e){showToast('خطأ: '+e.message,'error');btn.disabled=false;}finally{btnAudit.disabled=false;btn.textContent='✔ تعديل الكمية';}}
+function confirmAuditOk(){if(!currentVariant){showToast('لم يتم اختيار منتج','warning');return;}const shelf=currentShelfQty!=null?currentShelfQty.toLocaleString('en-US'):'—',empName=currentEmployee?.displayName||'—';const body='<div class="confirm-detail-row"><span class="confirm-detail-label">المنتج</span><span class="confirm-detail-val">'+currentVariant.product?.title+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">SKU</span><span class="confirm-detail-val accent">'+currentVariant.sku+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الموظف</span><span class="confirm-detail-val accent">'+empName+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">عدد القطع على الرف</span><span class="confirm-detail-val green">'+shelf+'</span></div><div class="confirm-note">سيتم تسجيل تاريخ ووقت الجرد واسم الموظف.</div>';openConfirm('✅ تأكيد: الجرد مظبوط',body,'تأكيد','green-btn',doAuditOk);}
+// ─── §TOOL-JS::writeResult — أربع حالات مش اتنين (Standards Step 3C) ───
+// ⛔ `res.success ? 'تم' : 'فشل'` بيحوّل «تم جزئيًا» لنجاح أخضر. الحالة جاية من
+//    السيرفر كما هي، والواجهة آخر خط دفاع — بتعرض الشك بدل ما تخفيه.
+const RESULT_UI = {
+  success: { icon:'✓', label:'تم',        toast:'success' },
+  warning: { icon:'⚠', label:'تم جزئيًا', toast:'warning' },
+  error:   { icon:'✗', label:'فشل',       toast:'error'   },
+};
+// بتعرض النتيجة كاملة: البادج + «ما تم فعليًا» من actions + سبب التحذير كامل
+// + تنبيه لو العملية ما اتسجّلتش في D1.
+function presentWriteResult(data, headline){
+  const st = data.status || (data.ok ? 'success' : 'error');
+  const ui = RESULT_UI[st] || RESULT_UI.error;
+  const actions = (data.actions || []).join(' · ');
+  const warns   = (data.warnings || []).join(' — ');
+
+  let msg = `${ui.icon} ${ui.label} — ${headline}`;
+  if (warns) msg += ` | ${warns}`;
+  else if (st === 'error' && data.error) msg += ` | ${data.error}`;
+  if (data.logged === false) msg += ' | ⚠️ العملية تمت لكن ما اتسجلتش في السجل';
+
+  showToast(msg, ui.toast, st === 'success' ? 3500 : 9000);
+  if (st === 'warning') playBeep('error');
+
+  // نافذة ملخّص إجبارية لأي نتيجة مش نجاح كامل — التوست بيختفي في ثواني
+  if (st !== 'success') {
+    const rows = [
+      `<div class="confirm-detail-row"><span class="confirm-detail-label">النتيجة</span><span class="confirm-detail-val ${st === 'warning' ? 'amber' : 'red'}">${esc(ui.icon + ' ' + ui.label)}</span></div>`,
+      actions ? `<div class="confirm-detail-row"><span class="confirm-detail-label">اللي تم فعليًا</span><span class="confirm-detail-val" style="font-size:12px;">${esc(actions)}</span></div>`
+              : `<div class="confirm-detail-row"><span class="confirm-detail-label">اللي تم فعليًا</span><span class="confirm-detail-val" style="font-size:12px;">لا شيء</span></div>`,
+      (warns || data.error) ? `<div class="confirm-note">${esc(warns || data.error)}</div>` : '',
+      data.logged === false ? `<div class="confirm-note">⚠️ ما اتسجلتش في السجل: ${esc(data.logError || '')}</div>` : '',
+    ].join('');
+    openConfirm(st === 'warning' ? '⚠️ تمت جزئيًا' : '✗ فشلت العملية', rows, 'تمام', 'btn-red', () => {});
+  }
+  return st;
+}
+
+async function doAuditOk(){
+  const variantId = currentVariant.id, productId = currentVariant.product?.id;
+  const btn = document.getElementById('btnAuditOk');
+  btn.disabled = true; btn.textContent = '⏳ جاري التسجيل...';
+  try {
+    const data = await apiPost('set_audit_date', {
+      variantId,
+      employee:     currentEmployee?.username || '',
+      sku:          currentVariant.sku || '',
+      productTitle: currentVariant.product?.title || '',
+      shelfQty:     currentShelfQty || 0,
+    });
+    const st = presentWriteResult(data, 'تسجيل الجرد');
+    if (data.auditDate) updateAuditInfo(data.auditDate, currentEmployee?.username || '', '');
+    if (st !== 'error') onAuditComplete(variantId, productId);
+  } catch (e) {
+    showToast('خطأ: ' + e.message, 'error', 8000);
+  } finally { btn.disabled = false; btn.textContent = '✅ الجرد مظبوط'; }
+}
+
+async function doApplyAdjust(){
+  const delta = parseInt(document.getElementById('deltaInput').value) || 0;
+  const notes = document.getElementById('adjustNotes').value.trim();
+  const inventoryItemId = currentVariant.inventoryItem?.id;
+  const variantId = currentVariant.id, productId = currentVariant.product?.id;
+  if (!inventoryItemId) { showToast('لا يوجد inventoryItem ID', 'error'); return; }
+  const btn = document.getElementById('btnApplyAdjust'), btnAudit = document.getElementById('btnAuditOk');
+  btn.disabled = true; btnAudit.disabled = true; btn.textContent = '⏳ جاري التعديل...';
+  try {
+    const data = await apiPost('adjust_inventory', {
+      inventoryItemId, variantId, delta,
+      employee:     currentEmployee?.username || '',
+      notes,
+      sku:          currentVariant.sku || '',
+      productTitle: currentVariant.product?.title || '',
+      shelfBefore:  currentShelfQty || 0,
+    });
+    const st = presentWriteResult(data, `تعديل الكمية (${delta > 0 ? '+' : ''}${delta})`);
+    if (data.auditDate) updateAuditInfo(data.auditDate, currentEmployee?.username || '', notes);
+    if (st !== 'error') {
+      onAuditComplete(variantId, productId);
+      await refreshCurrent();
+      hideAdjustPanel();
+    }
+  } catch (e) {
+    // ⚠️ مهلة أو انقطاع شبكة: العملية **ممكن تكون تمّت** — الرسالة بتقول ده
+    showToast('خطأ: ' + e.message, 'error', 9000);
+  } finally { btnAudit.disabled = false; btn.disabled = false; btn.textContent = '✔ تعديل الكمية'; }
+}
+function confirmAdjust(){const delta=parseInt(document.getElementById('deltaInput').value)||0,notes=document.getElementById('adjustNotes').value.trim();if(delta===0){showToast('التعديل يجب أن يكون غير صفر','warning');return;}if(!currentVariant){showToast('لم يتم اختيار منتج','warning');return;}const current=currentShelfQty!=null?currentShelfQty:0,newVal=current+delta,deltaStr=(delta>0?'+':'')+delta.toLocaleString('en-US'),deltaClass=delta>0?'green':'red';const body='<div class="confirm-detail-row"><span class="confirm-detail-label">SKU</span><span class="confirm-detail-val accent">'+currentVariant.sku+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الموظف</span><span class="confirm-detail-val accent">'+(currentEmployee?.displayName||'—')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">عدد القطع على الرف</span><span class="confirm-detail-val">'+current.toLocaleString('en-US')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">التعديل</span><span class="confirm-detail-val '+deltaClass+'">'+deltaStr+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الكمية الجديدة</span><span class="confirm-detail-val '+(delta>0?'green':'red')+'">'+newVal.toLocaleString('en-US')+'</span></div>'+(notes?'<div class="confirm-detail-row"><span class="confirm-detail-label">ملاحظات</span><span class="confirm-detail-val" style="font-size:12px;">'+notes+'</span></div>':'')+'<div class="confirm-note">سيتم تطبيق التعديل على Available في Shopify.</div>';openConfirm('🔧 تأكيد تعديل الكمية',body,'تطبيق التعديل','btn-red',doApplyAdjust);}
+
 
 let ordersCollapsed=false;
 function toggleOrders(){ordersCollapsed=!ordersCollapsed;document.getElementById('ordersBodyWrap').classList.toggle('collapsed',ordersCollapsed);document.getElementById('collapseIcon').classList.toggle('open',!ordersCollapsed);}
-async function refreshCurrent(){if(!currentSku)return;try{const data=await apiGet('list_skus',{search:currentSku});const variant=(data.variants||[]).find(v=>v.sku===currentSku);if(variant){currentVariant=variant;renderProductCard(variant);loadOrders(variant);}else showToast('لم يتم العثور على الـ SKU','error');}catch(e){showToast('خطأ: '+e.message,'error');}}
+async function refreshCurrent(){if(!currentSku)return;try{const data=await apiGet('list_skus',{search:currentSku});const variant=(data.variants||[]).find(v=>v.sku===currentSku);if(variant){currentVariant=variant;renderProductCard(variant);loadOrders(variant);}else showToast('لم يتم العثور على الـ SKU','warning');}catch(e){showToast('خطأ: '+e.message,'error');}}
 async function loadOrders(variant){document.getElementById('ordersLoading').style.display='block';document.getElementById('ordersCard').style.display='none';ordersCollapsed=true;document.getElementById('ordersBodyWrap').classList.add('collapsed');document.getElementById('collapseIcon').classList.remove('open');try{const[ordersData]=await Promise.all([apiGet('get_details',{variantId:variant.id,productId:variant.product?.id}),loadAuditDate()]);renderOrders(ordersData.orders||[]);}catch(e){document.getElementById('ordersLoading').style.display='none';showToast('خطأ: '+e.message,'error');}}
 async function loadAuditDate(){if(!currentVariant)return;try{const data=await apiGet('get_audit_date',{variantId:currentVariant.id});if(data.auditDate)updateAuditInfo(data.auditDate,data.auditEmployee||'',data.auditNotes||'');else{document.getElementById('auditLastVal').textContent='لا يوجد تاريخ مسجّل';document.getElementById('auditInfoBox').style.display='flex';document.getElementById('auditEmpRow').style.display='none';document.getElementById('auditNotesRow').style.display='none';}}catch{document.getElementById('auditLastVal').textContent='—';document.getElementById('auditInfoBox').style.display='flex';}}
 function renderOrders(orders){
@@ -1413,93 +1888,502 @@ function renderOrders(orders){
   if(!orders.length){body.innerHTML='<div class="state-box"><div class="state-icon">✅</div><p>لا توجد أوردرات Unfulfilled لهذا الـ SKU</p></div>';document.getElementById('warningBanner').style.display='none';document.getElementById('btnSelectAll').style.display='none';const avail=parseInt(document.getElementById('qtyAvailable').textContent.replace(/,/g,''))||0;currentShelfQty=avail;document.getElementById('qtyShelf').textContent=avail.toLocaleString('en-US');document.getElementById('qtyPacked').textContent='0';return;}
   document.getElementById('btnSelectAll').style.display='flex';
   let totalUnfulfilled=0,packedQty=0,unpackedCommitted=0;
-  const rows=orders.map(order=>{const unf=order.items.reduce((s,i)=>s+i.unfulfilledQuantity,0);totalUnfulfilled+=unf;const isPacked=!!order.packedBy;if(isPacked)packedQty+=unf;else unpackedCommitted+=unf;const date=formatDate(order.createdAt),orderId=order.id.split('/').pop(),isS2=order.orderStage==='S2';const stageHtml=isS2?'<span class="stage-pill stage-s2">S2 — استبدال</span>':'<span class="stage-pill stage-s1">S1 — عادي</span>';const packHtml=isPacked?'<span class="pack-status pack-done">🔴 مغلَّف · '+order.packedBy+'</span>':'<span class="pack-status pack-shelf">🟢 على الرف</span>';return '<tr><td style="text-align:center;padding:10px;"><input type="checkbox" class="order-checkbox" data-orderid="'+orderId+'" onchange="onCheckboxChange(this)" /></td><td><a class="order-name-link" href="https://'+SHOP_DOMAIN+'/admin/orders/'+orderId+'" target="_blank">'+order.name+'</a></td><td><span class="order-date">'+date+'</span></td><td style="text-align:center;"><span class="qty-badge qty-unfulfilled">'+unf.toLocaleString('en-US')+'</span></td><td>'+stageHtml+'</td><td>'+packHtml+'</td></tr>';}).join('');
+  const rows=orders.map(order=>{const unf=order.items.reduce((s,i)=>s+i.unfulfilledQuantity,0);totalUnfulfilled+=unf;const isPacked=!!order.packedBy;if(isPacked)packedQty+=unf;else unpackedCommitted+=unf;const date=formatDate(order.createdAt),isS2=order.orderStage==='S2';
+    // ⚠️ الـ ID الرقمي بييجي من الـ Worker دلوقتي — الاشتقاق من الـ GID fallback بس
+    const orderId=String(order.orderId||order.id.split('/').pop()).replace(/\D/g,'');const stageHtml=isS2?'<span class="stage-pill stage-s2">S2 — استبدال</span>':'<span class="stage-pill stage-s1">S1 — عادي</span>';const packHtml=isPacked?'<span class="pack-status pack-done">🔴 مغلَّف · '+esc(order.packedBy)+'</span>':'<span class="pack-status pack-shelf">🟢 على الرف</span>';return '<tr><td style="text-align:center;padding:10px;"><input type="checkbox" class="order-checkbox" data-orderid="'+orderId+'" onchange="onCheckboxChange(this)" /></td><td><a class="order-name-link" href="https://'+SHOP_DOMAIN+'/admin/orders/'+orderId+'" target="_blank" rel="noopener">'+esc(order.name)+'</a></td><td><span class="order-date">'+date+'</span></td><td style="text-align:center;"><span class="qty-badge qty-unfulfilled">'+unf.toLocaleString('en-US')+'</span></td><td>'+stageHtml+'</td><td>'+packHtml+'</td></tr>';}).join('');
   body.innerHTML='<table class="orders-table"><thead><tr><th style="width:40px;"></th><th>رقم الأوردر</th><th>التاريخ</th><th style="text-align:center;">القطع غير مشحونة</th><th>نوع الأوردر</th><th>حالة التغليف</th></tr></thead><tbody>'+rows+'<tr class="summary-row"><td></td><td colspan="4">الإجمالي ('+orders.length+' أوردر)</td><td style="text-align:center;"><span class="qty-badge qty-unfulfilled">'+totalUnfulfilled.toLocaleString('en-US')+'</span></td></tr></tbody></table>';
   const avail=parseInt(document.getElementById('qtyAvailable').textContent.replace(/,/g,''))||0;currentShelfQty=avail+unpackedCommitted;document.getElementById('qtyShelf').textContent=currentShelfQty.toLocaleString('en-US');document.getElementById('qtyPacked').textContent=packedQty>0?'-'+packedQty.toLocaleString('en-US'):'0';document.getElementById('warningBanner').style.display='flex';
 }
 function onCheckboxChange(cb){const oid=cb.dataset.orderid;if(cb.checked)selectedOrderIds.add(oid);else selectedOrderIds.delete(oid);updateFulfillBtn();}
 function updateFulfillBtn(){const count=selectedOrderIds.size;document.getElementById('btnFulfill').classList.toggle('visible',count>0);document.getElementById('selectedCount').classList.toggle('visible',count>0);if(count>0){document.getElementById('selectedCount').textContent=count+' محدد';document.getElementById('btnFulfill').textContent='✅ Fulfill ('+count+')';}}
 function toggleSelectAll(){const cbs=document.querySelectorAll('.order-checkbox');const allChecked=[...cbs].every(c=>c.checked);cbs.forEach(c=>{c.checked=!allChecked;const oid=c.dataset.orderid;if(!allChecked)selectedOrderIds.add(oid);else selectedOrderIds.delete(oid);});document.getElementById('btnSelectAll').textContent=allChecked?'تحديد الكل':'إلغاء التحديد';updateFulfillBtn();}
-function confirmFulfill(){if(selectedOrderIds.size===0)return;const{flowToken}=getConfig();if(!flowToken){showToast('الرجاء إدخال Flow Token','error');openSettings();return;}const orderList=[...selectedOrderIds].map(id=>'<div style="font-family:monospace;font-size:12px;color:var(--accent);">#'+id+'</div>').join('');const body='<div class="confirm-detail-row"><span class="confirm-detail-label">عدد الأوردرات</span><span class="confirm-detail-val green">'+selectedOrderIds.size+'</span></div><div style="margin:10px 0 4px;font-size:11px;color:var(--text-secondary);font-weight:600;">الأوردرات:</div><div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;max-height:160px;overflow-y:auto;">'+orderList+'</div><div class="confirm-note">سيتم إرسال trigger لـ Flow Companion — specifier: FULFILL</div>';openConfirm('✅ تأكيد Fulfill Orders',body,'تأكيد وإرسال','green-btn',doFulfillOrders);}
-async function doFulfillOrders(){const{flowToken}=getConfig(),orderIds=[...selectedOrderIds],btn=document.getElementById('btnFulfill');btn.disabled=true;btn.textContent='⏳ جاري...';let s=0,f=0;for(const orderId of orderIds){try{const res=await fetch('https://flow-companion.mivicle.app/rest/1/flow/start/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bearerToken:flowToken,itemId:orderId,specifier:'FULFILL'})});if(res.ok)s++;else f++;}catch(e){f++;}}btn.disabled=false;updateFulfillBtn();if(f===0){showToast('تم إرسال '+s+' أوردر ✓','success');selectedOrderIds.clear();document.querySelectorAll('.order-checkbox').forEach(c=>c.checked=false);document.getElementById('btnSelectAll').textContent='تحديد الكل';updateFulfillBtn();}else showToast('نجح '+s+' / فشل '+f,'error');}
+// ─── §TOOL-JS::fulfill — Flow Companion ───
+// 🔴 معلّق (AUDIT-12-09-2026 بند ٦): النداء ده لسه **بيخرج من المتصفح مباشرةً**
+//    والتوكن لسه في localStorage، وما بيتسجّلش في D1. نقله للـ Worker محتاج
+//    قيمة `type` جديدة تتسجّل في `ecommoda-constants` §7 الأول — قرار أحمد.
+//    اللي اتصلّح هنا دلوقتي: التهريب · القفل واللقطة · الدليل بدل res.ok ·
+//    وأنواع التوست. اللي لسه مفتوح: السر والتسجيل والوسيط.
+let isFulfilling = false;
+
+function confirmFulfill(){
+  if (selectedOrderIds.size === 0 || isFulfilling) return;
+  const { flowToken } = getConfig();
+  if (!flowToken) { showToast('الرجاء إدخال Flow Token', 'warning'); openSettings(); return; }
+  const ids = [...selectedOrderIds];
+  const orderList = ids.map(id =>
+    `<div style="font-family:var(--font-mono);font-size:12px;color:var(--accent);">#${esc(id)}</div>`).join('');
+  const body =
+    `<div class="confirm-detail-row"><span class="confirm-detail-label">عدد الأوردرات</span><span class="confirm-detail-val green">${ids.length}</span></div>`
+  + `<div style="margin:10px 0 4px;font-size:11px;color:var(--text-secondary);font-weight:600;">الأوردرات:</div>`
+  + `<div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;max-height:160px;overflow-y:auto;">${orderList}</div>`
+  + `<div class="confirm-note">هيتبعت trigger لـ Flow Companion (specifier: FULFILL) على ${ids.length} أوردر — الفعل ده مفيش رجوع فيه من الأداة.</div>`;
+  openConfirm('✅ تأكيد Fulfill Orders', body, `تأكيد — نفّذ على ${ids.length} أوردر`, 'btn-red', doFulfillOrders);
+}
+
+async function doFulfillOrders(){
+  const { flowToken } = getConfig();
+  // ⚠️ لقطة قبل اللوب — لو المستخدم غيّر الاختيار أثناء التنفيذ، عنصر على
+  //    الحدود كان بيتبعت مرتين واللي بعده بيتخطّى بلا أي رسالة (Standards #43)
+  const batch = [...selectedOrderIds];
+  const btn = document.getElementById('btnFulfill');
+  isFulfilling = true;
+  btn.disabled = true; btn.textContent = `⏳ 0 / ${batch.length}`;
+  document.querySelectorAll('.order-checkbox').forEach(c => c.disabled = true);
+
+  let ok = 0; const failed = [];
+  try {
+    for (let i = 0; i < batch.length; i++){
+      const orderId = batch[i];
+      try {
+        const res = await fetch('https://flow-companion.mivicle.app/rest/1/flow/start/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bearerToken: flowToken, itemId: orderId, specifier: 'FULFILL' }),
+        });
+        const text = await res.text();
+        // ⚠️ `res.ok` لوحدها مش دليل — بعض الأخطاء بترجع 200 بجسم فيه error
+        if (!res.ok) throw new Error(`HTTP ${res.status} — ${text.slice(0,120)}`);
+        let payload = null; try { payload = JSON.parse(text); } catch { /* رد نصي مقبول */ }
+        if (payload && (payload.error || payload.success === false))
+          throw new Error(String(payload.error || 'الـ Flow رفض الطلب'));
+        ok++;
+      } catch (e) { failed.push({ orderId, reason: e.message }); }
+      btn.textContent = `⏳ ${i + 1} / ${batch.length}`;   // تقدّم حقيقي، مش حلقة بعد الرد
+    }
+  } finally {
+    isFulfilling = false;
+    document.querySelectorAll('.order-checkbox').forEach(c => c.disabled = false);
+    btn.disabled = false; updateFulfillBtn();
+  }
+
+  // الصفوف اللي نجحت بتتنزع سلاحها — الشاشة بعد النجاح ماتفضلش زي قبل الضغط
+  if (ok) {
+    batch.filter(id => !failed.some(f => f.orderId === id)).forEach(id => selectedOrderIds.delete(id));
+    document.querySelectorAll('.order-checkbox').forEach(c => { if (!selectedOrderIds.has(c.dataset.orderid)) c.checked = false; });
+    document.getElementById('btnSelectAll').textContent = 'تحديد الكل';
+    updateFulfillBtn();
+  }
+
+  if (!failed.length) {
+    showToast(`تم إرسال ${ok} أوردر ✓`, 'success');
+  } else {
+    // نافذة ملخّص — التوست بيختفي في ثواني وفي مخزن دي مدة كافية إن النتيجة تضيع
+    const rows = failed.slice(0, 12).map(f =>
+      `<div class="confirm-detail-row"><span class="confirm-detail-label">#${esc(f.orderId)}</span><span class="confirm-detail-val red" style="font-size:12px;">${esc(f.reason)}</span></div>`).join('');
+    openConfirm('⚠️ نتيجة الإرسال',
+      `<div class="confirm-detail-row"><span class="confirm-detail-label">تم</span><span class="confirm-detail-val green">${ok}</span></div>`
+      + `<div class="confirm-detail-row"><span class="confirm-detail-label">فشل</span><span class="confirm-detail-val red">${failed.length}</span></div>`
+      + rows
+      + (failed.length > 12 ? `<div class="confirm-note">و${failed.length - 12} غيرهم…</div>` : '')
+      + `<div class="confirm-note">الأوردرات اللي فشلت لسه محدّدة — تقدر تعيد المحاولة عليها.</div>`,
+      'تمام', 'btn-red', () => {});
+    showToast(`تم ${ok} · فشل ${failed.length}`, 'warning', 7000);
+  }
+}
 
 // ══════════════════════════════════════════════════════
-// §LOG-JS
+// §LOG-JS — Log Filter Model v2 (كل الفلترة والعدّ والترتيب server-side)
 // ══════════════════════════════════════════════════════
-let logLoaded=false,logAllData=[],logTotalAll=0,logSelectedIds=new Set(),logDebounce=null,logFiltersOpen=true;
-function toggleLogFilters(){logFiltersOpen=!logFiltersOpen;document.getElementById('logFiltersBody').classList.toggle('collapsed',!logFiltersOpen);document.getElementById('logFiltersToggleIcon').classList.toggle('open',logFiltersOpen);}
-let activePreset='';
-function togglePresetMenu(e){e.stopPropagation();document.getElementById('logPresetMenu').classList.toggle('open');}
-document.addEventListener('click',()=>{document.getElementById('logPresetMenu')?.classList.remove('open');});
-function toLocalISO(d){const pad=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
-function applyPreset(preset){
-  document.getElementById('logPresetMenu').classList.remove('open');
-  const now=new Date(new Date().getTime()+3*60*60*1000),today=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()));
-  let from,to;
-  switch(preset){case 'today':from=to=today;break;case 'yesterday':{const y=new Date(today);y.setUTCDate(y.getUTCDate()-1);from=to=y;break;}case 'last7':{from=new Date(today);from.setUTCDate(from.getUTCDate()-6);to=today;break;}case 'last30':{from=new Date(today);from.setUTCDate(from.getUTCDate()-29);to=today;break;}case 'thisMonth':from=new Date(Date.UTC(today.getUTCFullYear(),today.getUTCMonth(),1));to=today;break;case 'thisYear':from=new Date(Date.UTC(today.getUTCFullYear(),0,1));to=today;break;default:return;}
-  document.getElementById('logFilterDateFrom').value=toLocalISO(from);document.getElementById('logFilterDateTo').value=toLocalISO(to);
-  activePreset=preset;document.querySelectorAll('.log-preset-item').forEach(el=>el.classList.toggle('active',el.dataset.preset===preset));
-  const labels={today:'اليوم',yesterday:'أمس',last7:'آخر 7 أيام',last30:'آخر 30 يوم',thisMonth:'الشهر الحالي',thisYear:'العام الحالي'};
-  document.getElementById('logPresetLabel').textContent='⚡ '+labels[preset];document.getElementById('logPresetBtn').classList.add('has-preset');
-  if(!logLoaded)loadLog();else applyLogFilters();
+// ⛔ الفلترة في المتصفح على صفحات جاية من السيرفر بتعطل في السكوت:
+//    صف "النتائج" بيعدّ الصفحة مش القاعدة · الصفحة التانية بتيجي بلا فلترة ·
+//    والتصدير بينزّل غير المفلتر. كله من غير أي رسالة.
+const LOG_PAGE_SIZE = 100;
+let logLoaded = false, logCurrentPage = 1, logTotalCount = 0;
+let logSearchTimer = null, logFiltersOpen = true, logTableOpen = true;
+let logSortBy = 'date', logSortDir = 'desc';
+let logRows = [];
+
+// ─── §LOG-JS::multiSelect ───
+const msState = {
+  emp:  { selected: new Set(), options: [], label: 'كل الموظفين',  title: 'الموظف' },
+  type: { selected: new Set(), options: [
+            { v:'ok', t:'مظبوط' }, { v:'adjustment', t:'تعديل كمية' } ],
+          label: 'كل العمليات', title: 'نوع العملية' },
+  dir:  { selected: new Set(), options: [
+            { v:'pos', t:'زيادة ↑' }, { v:'neg', t:'نقصان ↓' }, { v:'zero', t:'بدون تغيير' } ],
+          label: 'الكل', title: 'اتجاه التعديل' },
+  cnt:  { selected: new Set(), options: [
+            ...Array.from({length:10}, (_,i) => ({ v:String(i+1), t:`${i+1} مرة` })),
+            { v:'10+', t:'أكثر من 10' } ],
+          label: 'الكل', title: 'عدد مرات الجرد' },
+};
+
+function msRenderList(key){
+  const st = msState[key], el = document.getElementById('msList-' + key);
+  const items = st.options.length
+    ? st.options.map(o => `<label class="ms-item">
+        <input type="checkbox" ${st.selected.has(o.v) ? 'checked' : ''}
+               onchange="event.stopPropagation();msToggleItem('${key}','${esc(o.v)}')">
+        <span>${esc(o.t)}</span></label>`).join('')
+    : '<div class="ms-empty">لا توجد خيارات</div>';
+  el.innerHTML = `<div class="ms-ftr-top"><button onclick="msClear('${key}')">✕ مسح الاختيار</button></div>${items}`;
 }
-function onLogFilterChange(){activePreset='';document.querySelectorAll('.log-preset-item').forEach(el=>el.classList.remove('active'));document.getElementById('logPresetLabel').textContent='⚡ اختار فترة';document.getElementById('logPresetBtn').classList.remove('has-preset');if(!logLoaded){loadLog();return;}applyLogFilters();}
-function clearLogFilters(){document.getElementById('logFilterEmployee').value='';document.getElementById('logFilterType').value='';document.getElementById('logFilterCount').value='';document.getElementById('logFilterDateFrom').value='';document.getElementById('logFilterDateTo').value='';document.getElementById('logSearch').value='';document.getElementById('logSearchNotes').value='';activePreset='';document.querySelectorAll('.log-preset-item').forEach(el=>el.classList.remove('active'));document.getElementById('logPresetLabel').textContent='⚡ اختار فترة';document.getElementById('logPresetBtn').classList.remove('has-preset');loadLog();}
-function onLogEmpFilterChange(){loadLog();}
-function onLogSearchInput(){clearTimeout(logDebounce);logDebounce=setTimeout(applyLogFilters,300);}
-function buildSkuCountMap(entries){const map={};entries.forEach(e=>{if(e.sku)map[e.sku]=(map[e.sku]||0)+1;});return map;}
-async function loadLog(){
-  const body=document.getElementById('logBody');body.innerHTML='<div class="log-empty"><div class="loading-spinner"></div><p style="margin-top:8px;font-size:12px;">جاري التحميل...</p></div>';document.getElementById('logFilteredCount').textContent='—';
-  try{
-    const emp=document.getElementById('logFilterEmployee').value;
-    if(logTotalAll===0||!emp){const dTotal=await apiGet('get_logs',{limit:'5000'});if(dTotal.ok)logTotalAll=(dTotal.entries||[]).filter(e=>e.type!=='login'&&e.type!=='logout').length;}
-    document.getElementById('logTotalCount').textContent=logTotalAll.toLocaleString('en-US');
-    const params={limit:'5000'};if(emp)params.employee=emp;
-    const data=await apiGet('get_logs',params);if(!data.ok)throw new Error(data.error||'خطأ');
-    logAllData=(data.entries||[]).filter(e=>e.type!=='login'&&e.type!=='logout');logLoaded=true;applyLogFilters();
-  }catch(e){body.innerHTML='<div class="log-empty">⚠️ '+e.message+'</div>';document.getElementById('logTotalCount').textContent='—';}
+function msToggle(key, ev){
+  ev.stopPropagation();
+  const el = document.getElementById('msList-' + key), wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.ms-list').forEach(l => l.classList.remove('open'));
+  if (!wasOpen) { msRenderList(key); el.classList.add('open'); }
 }
-function applyLogFilters(){
-  const type=document.getElementById('logFilterType').value,countVal=document.getElementById('logFilterCount').value;
-  const dateFrom=document.getElementById('logFilterDateFrom').value,dateTo=document.getElementById('logFilterDateTo').value;
-  const search=document.getElementById('logSearch').value.trim().toLowerCase(),searchN=document.getElementById('logSearchNotes').value.trim().toLowerCase();
-  const skuCountMap=buildSkuCountMap(logAllData);
-  const filtered=logAllData.filter(e=>{
-    const etype=e.type||'ok';
-    if(type==='ok'&&etype!=='ok')return false;if(type==='adj_pos'&&!(etype==='adjustment'&&(e.delta??0)>0))return false;if(type==='adj_neg'&&!(etype==='adjustment'&&(e.delta??0)<0))return false;
-    if(countVal){const cnt=skuCountMap[e.sku]||0;if(countVal==='10+'){if(cnt<=10)return false;}else{if(cnt!==parseInt(countVal))return false;}}
-    if(dateFrom||dateTo){const ts=e.timestamp?e.timestamp.substring(0,10):'';if(dateFrom&&ts<dateFrom)return false;if(dateTo&&ts>dateTo)return false;}
-    if(search){if(!(e.sku||'').toLowerCase().includes(search)&&!(e.product_title||'').toLowerCase().includes(search))return false;}
-    if(searchN&&!(e.notes||'').toLowerCase().includes(searchN))return false;return true;
+function msToggleItem(key, val){
+  const st = msState[key];
+  if (st.selected.has(val)) st.selected.delete(val); else st.selected.add(val);
+  msRenderList(key); msSyncBtn(key); renderChips(); onLogFilterChange();
+}
+function msClear(key){
+  msState[key].selected.clear();
+  msRenderList(key); msSyncBtn(key); renderChips(); onLogFilterChange();
+}
+function msSyncBtn(key){
+  const st = msState[key], n = st.selected.size;
+  document.getElementById('msLbl-' + key).textContent = n ? `${n} مختار` : st.label;
+  document.getElementById('msBtn-' + key).classList.toggle('active', n > 0);
+}
+// 🔴 الحارس اللي من غيره القائمة بتتقفل بعد **أول** اختيار:
+//    msRenderList بتعيد بناء innerHTML فالعنصر المضغوط بيتشال من الـ DOM قبل ما
+//    الحدث يوصل هنا، و contains(detached) بترجّع false. الهدف اللي مش في الصفحة
+//    أصلاً إحنا مش عارفين كان فين وقت الضغط — فمانعملش حاجة.
+document.addEventListener('click', (e) => {
+  if (!document.contains(e.target)) return;
+  Object.keys(msState).forEach(k => {
+    const wrap = document.getElementById('msWrap-' + k);
+    const list = document.getElementById('msList-' + k);
+    if (wrap && list && !wrap.contains(e.target)) list.classList.remove('open');
   });
-  document.getElementById('logFilteredCount').textContent=filtered.length.toLocaleString('en-US');renderLog(filtered,skuCountMap);
+  const pw = document.getElementById('presetWrap');
+  if (pw && !pw.contains(e.target)) document.getElementById('logPresetMenu').classList.remove('open');
+});
+
+function renderChips(){
+  const zone = document.getElementById('chipsZone');
+  let html = '';
+  for (const key of Object.keys(msState)){
+    const st = msState[key];
+    if (!st.selected.size) continue;
+    // اسم الفلتر **مرة واحدة** في أول السطر — مش مكرر جوّه كل chip
+    const chips = [...st.selected].map(v => {
+      const o = st.options.find(x => x.v === v);
+      return `<span class="ms-chip">${esc(o ? o.t : v)}<button onclick="msToggleItem('${key}','${esc(v)}')">✕</button></span>`;
+    }).join('');
+    html += `<div class="ms-chips-row"><span class="chips-label">${esc(st.title)}:</span>${chips}</div>`;
+  }
+  zone.innerHTML = html;
+  const anyActive = anyFilterActive();
+  document.getElementById('ufFunnel').classList.toggle('active', anyActive);
 }
-function renderLog(entries,skuCountMap){
-  const body=document.getElementById('logBody');logSelectedIds.clear();updateLogExportBtn();document.getElementById('logSelectAll').checked=false;
-  if(!entries.length){body.innerHTML='<div class="log-empty">لا توجد نتائج تطابق الفلاتر المحددة</div>';return;}
-  body.innerHTML=entries.map((e,idx)=>{
-    const type=e.type||'ok',delta=e.delta??0,valBefore=e.value_before??0,valAfter=e.value_after??0,entryId=e.id||idx;
-    let dotClass,typeHtml;if(type==='ok'){dotClass='log-dot-ok';typeHtml='<span class="log-type-badge log-type-ok">✅ مظبوط</span>';}else if(type==='adjustment'){if(delta>0){dotClass='log-dot-adj-pos';typeHtml='<span class="log-type-badge log-type-adj-pos">↑ +'+delta.toLocaleString('en-US')+'</span>';}else{dotClass='log-dot-adj-neg';typeHtml='<span class="log-type-badge log-type-adj-neg">↓ '+delta.toLocaleString('en-US')+'</span>';}}else{dotClass='';typeHtml='<span class="log-type-badge" style="background:var(--bg);color:var(--text-muted);">'+type+'</span>';}
-    const skuCount=e.sku?(skuCountMap[e.sku]||0):0;const skuHtml=e.sku?'<span class="log-sku-badge">'+e.sku+'</span>':'';const empHtml=e.employee?'<span class="log-emp-badge">👤 '+e.employee.replace(/_/g,' ')+'</span>':'';const countBadge=e.sku?'<span class="log-count-badge">× '+skuCount.toLocaleString('en-US')+' جرد</span>':'';
-    const titleHtml=e.product_title?'<div class="log-product-name">'+e.product_title+'</div>':'';const notesHtml=e.notes?'<div class="log-notes">📝 '+e.notes+'</div>':'';const dateStr=e.timestamp?formatDateTime(e.timestamp):'—';
-    let qtyHtml='';if(type==='ok')qtyHtml='<div class="log-qty-change log-qty-pos">عدد الرف: '+valBefore.toLocaleString('en-US')+'</div>';else if(type==='adjustment'){const cls=delta>0?'log-qty-pos':'log-qty-neg';qtyHtml='<div class="log-qty-change '+cls+'">قبل: '+valBefore.toLocaleString('en-US')+' → بعد: '+valAfter.toLocaleString('en-US')+'</div>';}
-    return '<div class="log-entry" id="log-entry-'+entryId+'"><div class="log-cb"><input type="checkbox" class="log-entry-cb" data-id="'+entryId+'" data-idx="'+idx+'" onchange="onLogCbChange(this)" /></div><div class="log-dot '+dotClass+'"></div><div class="log-entry-content"><div class="log-entry-top">'+skuHtml+typeHtml+empHtml+countBadge+'</div>'+titleHtml+qtyHtml+'<div class="log-meta">'+dateStr+'</div>'+notesHtml+'</div></div>';
+// ⚠️ !!value مش !== null — القيمة الفاضية '' لازم تتحسب «مفيش فلتر»
+function anyFilterActive(){
+  if (Object.keys(msState).some(k => msState[k].selected.size > 0)) return true;
+  if (!!document.getElementById('logSearch').value.trim())      return true;
+  if (!!document.getElementById('logSearchNotes').value.trim()) return true;
+  if (!!document.getElementById('logFilterDateFrom').value)     return true;
+  if (!!document.getElementById('logFilterDateTo').value)       return true;
+  return false;
+}
+
+// ─── §LOG-JS::filters ───
+// مصدر **واحد** لباراميترات الفلاتر — بتستخدمه التلات نداءات، فمفيش endpoint
+// بيفلتر بشكل مختلف عن اللي جنبه.
+function logParams(){
+  const p = {};
+  const emp = [...msState.emp.selected], typ = [...msState.type.selected];
+  const dir = [...msState.dir.selected], cnt = [...msState.cnt.selected];
+  const search = document.getElementById('logSearch').value.trim();
+  const notes  = document.getElementById('logSearchNotes').value.trim();
+  const from   = document.getElementById('logFilterDateFrom').value;
+  const to     = document.getElementById('logFilterDateTo').value;
+  if (emp.length)  p.employees   = emp.join(',');
+  if (typ.length)  p.types       = typ.join(',');
+  if (dir.length)  p.deltaDirs   = dir.join(',');
+  if (cnt.length)  p.auditCounts = cnt.join(',');
+  if (search)      p.search      = search;
+  if (notes)       p.searchNotes = notes;
+  if (from)        p.dateFrom    = from;
+  if (to)          p.dateTo      = to;
+  return p;
+}
+
+function toggleLogFilters(){
+  logFiltersOpen = !logFiltersOpen;
+  document.getElementById('ufBody').classList.toggle('closed', !logFiltersOpen);
+  document.getElementById('ufArrow').classList.toggle('closed', !logFiltersOpen);
+}
+function toggleLogTable(){
+  logTableOpen = !logTableOpen;
+  document.getElementById('logTableZone').style.display = logTableOpen ? '' : 'none';
+  document.getElementById('tblArrow').classList.toggle('closed', !logTableOpen);
+}
+function clearExportWarn(){
+  const w = document.getElementById('logExportWarn');
+  if (w) { w.style.display = 'none'; w.innerHTML = ''; }
+}
+function onLogFilterChange(){ logCurrentPage = 1; clearExportWarn(); renderChips(); fetchLog(); }
+
+function clearLogFilters(){
+  Object.keys(msState).forEach(k => { msState[k].selected.clear(); msSyncBtn(k); });
+  document.getElementById('logSearch').value = '';
+  document.getElementById('logSearchNotes').value = '';
+  syncSearchHighlight();
+  clearDateFilter(true);
+  renderChips(); onLogFilterChange();
+}
+
+// ─── §LOG-JS::dateRange — مفيش فترة افتراضية في الجداول التشغيلية ───
+function togglePresetMenu(ev){
+  ev.stopPropagation();
+  const m = document.getElementById('logPresetMenu');
+  const wasOpen = m.classList.contains('open');
+  document.querySelectorAll('.ms-list').forEach(l => l.classList.remove('open'));
+  if (!wasOpen) m.classList.add('open');
+}
+function setPresetLabel(txt, active){
+  document.getElementById('logPresetLabel').textContent = txt;
+  document.getElementById('logPresetBtn').classList.toggle('active', active);
+}
+function clearDateFilter(silent){
+  document.getElementById('logFilterDateFrom').value = '';
+  document.getElementById('logFilterDateTo').value = '';
+  setPresetLabel('⚡ اختار فترة', false);
+  document.getElementById('logPresetMenu').classList.remove('open');
+  if (!silent) onLogFilterChange();
+}
+function applyPreset(preset){
+  const now = new Date(), cd = cairoDateStr(now);
+  const [Y, M] = cd.split('-').map(Number);
+  const shift = (days) => {
+    const d = new Date(now.getTime() - days * 86400000);
+    return cairoDateStr(d);
+  };
+  let from = cd, to = cd;
+  if (preset === 'yesterday') { from = to = shift(1); }
+  else if (preset === 'last7')  { from = shift(6); }
+  else if (preset === 'last30') { from = shift(29); }
+  else if (preset === 'thisMonth') { from = `${Y}-${String(M).padStart(2,'0')}-01`; }
+  else if (preset === 'thisYear')  { from = `${Y}-01-01`; }
+  document.getElementById('logFilterDateFrom').value = from;
+  document.getElementById('logFilterDateTo').value = to;
+  const labels = { today:'اليوم', yesterday:'أمس', last7:'آخر 7 أيام',
+                   last30:'آخر 30 يوم', thisMonth:'الشهر الحالي', thisYear:'العام الحالي' };
+  setPresetLabel('⚡ ' + labels[preset], true);
+  document.getElementById('logPresetMenu').classList.remove('open');
+  onLogFilterChange();
+}
+
+function syncSearchHighlight(){
+  ['logSearch','logSearchNotes'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.toggle('has-value', !!el.value.trim());
+  });
+}
+
+function initLogFilters(){
+  msState.emp.options = (allEmployees || []).map(e => ({ v: e.username, t: (e.display_name || e.username) }));
+  Object.keys(msState).forEach(k => msSyncBtn(k));
+  ['logSearch','logSearchNotes'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      syncSearchHighlight();
+      clearTimeout(logSearchTimer);
+      logSearchTimer = setTimeout(() => { logCurrentPage = 1; clearExportWarn(); fetchLog(); }, 400);
+    });
+  });
+  renderLogHead(); renderChips();
+}
+
+// ─── §LOG-JS::table ───
+const LOG_COLS = [
+  { key:'date',         t:'التاريخ' },
+  { key:'time',         t:'الوقت' },
+  { key:'employee',     t:'الموظف' },
+  { key:'sku',          t:'SKU' },
+  { key:'productTitle', t:'المنتج' },
+  { key:'type',         t:'نوع العملية' },
+  { key:'valueBefore',  t:'قبل' },
+  { key:'valueAfter',   t:'بعد' },
+  { key:'delta',        t:'التغيير' },
+  { key:null,           t:'عدد مرات الجرد' },
+  { key:null,           t:'النتيجة' },
+  { key:null,           t:'الملاحظات' },
+];
+function renderLogHead(){
+  document.getElementById('logHeadRow').innerHTML = LOG_COLS.map(c => {
+    if (!c.key) return `<th>${esc(c.t)}</th>`;
+    // الأيقونة تظهر **بس** عند التفعيل — مفيش ⇅ ثابتة على كل عمود
+    const ind = logSortBy === c.key ? `<span class="sort-ind">${logSortDir === 'asc' ? '▲' : '▼'}</span>` : '';
+    return `<th class="sortable-th" onclick="applySort('${c.key}')">${esc(c.t)}${ind}</th>`;
   }).join('');
 }
-function onLogCbChange(cb){const id=cb.dataset.id;if(cb.checked)logSelectedIds.add(id);else logSelectedIds.delete(id);updateLogExportBtn();const allCbs=document.querySelectorAll('.log-entry-cb');document.getElementById('logSelectAll').checked=allCbs.length>0&&[...allCbs].every(c=>c.checked);document.getElementById('log-entry-'+id)?.classList.toggle('selected',cb.checked);}
-function toggleLogSelectAll(master){document.querySelectorAll('.log-entry-cb').forEach(cb=>{cb.checked=master.checked;const id=cb.dataset.id;if(master.checked)logSelectedIds.add(id);else logSelectedIds.delete(id);document.getElementById('log-entry-'+id)?.classList.toggle('selected',master.checked);});updateLogExportBtn();}
-function updateLogExportBtn(){const btn=document.getElementById('logExportBtn');if(!btn)return;const has=logSelectedIds.size>0;btn.classList.toggle('enabled',has);btn.textContent=has?'⬇ تصدير المحدد ('+logSelectedIds.size+') .xlsx':'⬇ تصدير المحدد .xlsx';}
-async function exportSelectedLog(){
-  if(logSelectedIds.size===0)return;const skuCountMap=buildSkuCountMap(logAllData);
-  const cbs=[...document.querySelectorAll('.log-entry-cb')].filter(c=>c.checked);
-  const rows=cbs.map(cb=>{const idx=parseInt(cb.dataset.idx),e=logAllData[idx];if(!e)return null;const type=e.type||'ok',delta=e.delta??0;const typeLabel=type==='ok'?'مظبوط':type==='adjustment'?(delta>0?'زيادة +'+delta:'نقصان '+delta):type;let dateOnly='—',timeOnly='—';if(e.timestamp){const d=toCairo(e.timestamp),pad=n=>String(n).padStart(2,'0');dateOnly=pad(d.getUTCDate())+'-'+pad(d.getUTCMonth()+1)+'-'+d.getUTCFullYear();let h=d.getUTCHours();const ampm=h>=12?'مساءً':'صباحاً';h=h%12||12;timeOnly=pad(h)+':'+pad(d.getUTCMinutes())+' '+ampm;}return{'التاريخ':dateOnly,'الوقت':timeOnly,'الموظف':(e.employee||'').replace(/_/g,' '),'SKU':e.sku||null,'المنتج':e.product_title||null,'نوع العملية':typeLabel,'قبل':e.value_before??null,'بعد':e.value_after??null,'التغيير':delta!==0?delta:null,'عدد مرات الجرد':e.sku?(skuCountMap[e.sku]||0):null,'الملاحظات':e.notes||null};}).filter(Boolean);
-  if(!rows.length)return;
-  try{const wb=new ExcelJS.Workbook();wb.views=[{rightToLeft:true}];const ws=wb.addWorksheet('سجل الجرد');ws.views=[{state:'frozen',ySplit:1,rightToLeft:true}];ws.columns=[{header:'التاريخ',key:'التاريخ',width:16},{header:'الوقت',key:'الوقت',width:14},{header:'الموظف',key:'الموظف',width:18},{header:'SKU',key:'SKU',width:24},{header:'المنتج',key:'المنتج',width:42},{header:'نوع العملية',key:'نوع العملية',width:16},{header:'قبل',key:'قبل',width:8},{header:'بعد',key:'بعد',width:8},{header:'التغيير',key:'التغيير',width:10},{header:'عدد مرات الجرد',key:'عدد مرات الجرد',width:16},{header:'الملاحظات',key:'الملاحظات',width:36}];rows.forEach(row=>{const c={};for(const k of Object.keys(row))c[k]=row[k]??null;ws.addRow(c);});ws.eachRow((r,idx)=>{if(idx===1)return;r.eachCell(c=>{if(typeof c.value==='number')c.numFmt='#,##0';});});const buffer=await wb.xlsx.writeBuffer();const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='audit-export-'+new Date().toISOString().substring(0,10)+'.xlsx';a.click();URL.revokeObjectURL(url);showToast('تم تصدير '+rows.length+' عملية ✓','success');}catch(err){showToast('خطأ في التصدير: '+err.message,'error');}
+// ٣ حالات: تصاعدي → تنازلي → بلا ترتيب. server-side — الترتيب على القاعدة كلها
+// مش على الصفحة المعروضة.
+function applySort(key){
+  if (logSortBy !== key)        { logSortBy = key; logSortDir = 'asc'; }
+  else if (logSortDir === 'asc'){ logSortDir = 'desc'; }
+  else                          { logSortBy = 'date'; logSortDir = 'desc'; }
+  renderLogHead(); fetchLog();
+}
+
+async function fetchLog(){
+  const body = document.getElementById('logBody');
+  body.innerHTML = `<tr><td colspan="${LOG_COLS.length}"><div class="log-empty"><div class="loading-spinner"></div></div></td></tr>`;
+  const offset = (logCurrentPage - 1) * LOG_PAGE_SIZE;
+  const base   = logParams();
+  try {
+    const [pageData, countData] = await Promise.all([
+      apiGet('get_logs',       { ...base, limit: LOG_PAGE_SIZE, offset, sortBy: logSortBy, sortDir: logSortDir }),
+      apiGet('get_logs_count', base),
+    ]);
+    logTotalCount = countData.total || 0;
+    logRows = pageData.entries || [];
+    document.getElementById('logResultsCount').textContent = logTotalCount.toLocaleString('en-US');
+    renderLogTable(logRows);
+    renderPagination();
+  } catch (e) {
+    body.innerHTML = `<tr><td colspan="${LOG_COLS.length}"><div class="log-empty">⚠️ ${esc(e.message)}</div></td></tr>`;
+    document.getElementById('logResultsCount').textContent = '—';
+    document.getElementById('paginationRow').style.display = 'none';
+  }
+}
+
+// الصفوف الأقدم من v5.0.0 مالهاش extra.result → "—" مش "✓"
+function safeExtra(raw){
+  if (!raw) return {};
+  if (typeof raw === 'object') return raw;
+  try { return JSON.parse(raw) || {}; } catch { return {}; }
+}
+const RESULT_LABELS = { success:'تم', warning:'تم جزئيًا', error:'فشل' };
+const resultLabel = (v) => RESULT_LABELS[v] || '—';
+
+function typeCell(e){
+  const t = e.type || 'ok', delta = e.delta ?? 0;
+  if (t === 'ok') return '<span class="log-type-badge log-type-ok">✅ مظبوط</span>';
+  if (t === 'adjustment') {
+    const cls = delta > 0 ? 'log-type-pos' : 'log-type-neg';
+    const arr = delta > 0 ? '↑ +' : '↓ ';
+    return `<span class="log-type-badge ${cls}">${arr}${delta.toLocaleString('en-US')}</span>`;
+  }
+  return `<span class="log-type-badge">${esc(t)}</span>`;
+}
+
+function renderLogTable(entries){
+  const body = document.getElementById('logBody');
+  if (!entries.length) {
+    body.innerHTML = `<tr><td colspan="${LOG_COLS.length}"><div class="log-empty">لا توجد نتائج تطابق الفلاتر المحددة</div></td></tr>`;
+    return;
+  }
+  body.innerHTML = entries.map(e => {
+    const x   = safeExtra(e.extra);
+    const res = x.result;
+    const resCell = res
+      ? `<span class="log-res-badge res-${esc(res)}">${esc(resultLabel(res))}</span>`
+      : '<span class="res-none">—</span>';
+    const warn = (x.warnings && x.warnings.length) ? x.warnings.join(' · ') : (x.error || '');
+    const note = [e.notes, warn].filter(Boolean).join(' — ');
+    const cnt  = e.sku_audit_count ?? null;
+    return `<tr>
+      <td>${esc(formatDate(e.timestamp))}</td>
+      <td>${esc(formatTimeOnly(e.timestamp))}</td>
+      <td>${esc((e.employee || '—').replace(/_/g, ' '))}</td>
+      <td>${e.sku ? `<span class="log-sku-badge">${esc(e.sku)}</span>` : '—'}</td>
+      <td>${esc(e.product_title || '—')}</td>
+      <td>${typeCell(e)}</td>
+      <td class="col-num">${e.value_before ?? '—'}</td>
+      <td class="col-num">${e.value_after ?? '—'}</td>
+      <td class="col-num">${(e.delta ?? 0) !== 0 ? esc(((e.delta > 0 ? '+' : '') + e.delta)) : '—'}</td>
+      <td>${cnt != null ? `<span class="log-count-badge">× ${Number(cnt).toLocaleString('en-US')}</span>` : '—'}</td>
+      <td>${resCell}</td>
+      <td title="${esc(note)}">${esc(note || '—')}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPagination(){
+  const totalPages = Math.max(1, Math.ceil(logTotalCount / LOG_PAGE_SIZE));
+  const row = document.getElementById('paginationRow');
+  row.style.display = logTotalCount > LOG_PAGE_SIZE ? '' : 'none';
+  document.getElementById('pageInfo').textContent =
+    `صفحة ${logCurrentPage.toLocaleString('en-US')} من ${totalPages.toLocaleString('en-US')}`;
+  document.getElementById('btnPrevPage').disabled = logCurrentPage <= 1;
+  document.getElementById('btnNextPage').disabled = logCurrentPage >= totalPages;
+}
+function goPage(dir){
+  const totalPages = Math.max(1, Math.ceil(logTotalCount / LOG_PAGE_SIZE));
+  const next = logCurrentPage + dir;
+  if (next < 1 || next > totalPages) return;
+  logCurrentPage = next; clearExportWarn(); fetchLog();
+}
+
+// ─── §LOG-JS::export — التصدير بيقرا get_logs_export والتقصّ **لازم يبان** ───
+async function exportLogXLSX(){
+  clearExportWarn();
+  const btn = document.getElementById('logExportBtn');
+  btn.disabled = true; const old = btn.textContent; btn.textContent = '⏳ جاري التصدير...';
+  try {
+    const data    = await apiGet('get_logs_export', logParams());
+    const entries = data.entries || [];
+    if (!entries.length) { showToast('مفيش صفوف مطابقة للفلاتر', 'warning'); return; }
+
+    const rows = entries.map(e => {
+      const x = safeExtra(e.extra);
+      const warn = (x.warnings && x.warnings.length) ? x.warnings.join(' · ') : (x.error || '');
+      return {
+        'التاريخ':        formatDateForExport(e.timestamp),
+        'الوقت':          formatTimeForExport(e.timestamp),
+        'الموظف':         (e.employee || '').replace(/_/g, ' '),
+        'SKU':            e.sku || null,
+        'المنتج':         e.product_title || null,
+        'نوع العملية':    e.type === 'ok' ? 'مظبوط'
+                          : e.type === 'adjustment' ? ((e.delta ?? 0) > 0 ? 'زيادة' : 'نقصان')
+                          : (e.type || ''),
+        'قبل':            e.value_before ?? null,
+        'بعد':            e.value_after ?? null,
+        'التغيير':        (e.delta ?? 0) !== 0 ? e.delta : null,
+        'عدد مرات الجرد': e.sku_audit_count ?? null,
+        // 🔴 نفس ماب الشاشة — '—' معناها «ما اتحاولش»، مش «تم جزئيًا»
+        'النتيجة':        resultLabel(x.result),
+        'ملاحظة النتيجة': warn || null,
+        'الملاحظات':      e.notes || null,
+      };
+    });
+
+    const wb = new ExcelJS.Workbook(); wb.views = [{ rightToLeft: true }];
+    const ws = wb.addWorksheet('سجل الجرد');
+    ws.views = [{ state:'frozen', ySplit:1, rightToLeft:true }];
+    ws.columns = Object.keys(rows[0]).map(k => ({
+      header:k, key:k,
+      width: k === 'المنتج' ? 42 : k === 'الملاحظات' || k === 'ملاحظة النتيجة' ? 36
+           : k === 'SKU' ? 24 : k === 'الموظف' ? 18 : 15,
+    }));
+    rows.forEach(r => ws.addRow(r));
+    ws.eachRow((r, idx) => { if (idx === 1) return; r.eachCell(c => { if (typeof c.value === 'number') c.numFmt = '#,##0'; }); });
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url;
+    // ⚠️ cairoDateStr مش toISOString — الأخيرة UTC فتصدير ١ صباحًا بياخد تاريخ إمبارح
+    a.download = 'audit-export-' + cairoDateStr() + '.xlsx';
+    a.click(); URL.revokeObjectURL(url);
+
+    // ⬇️ الحقيقة بتيجي من الـ Worker — ممنوع الواجهة تكتب السقف عندها
+    const truncated = data.truncated === true || (data.cap && entries.length >= data.cap);
+    const warnBox = document.getElementById('logExportWarn');
+    if (truncated) {
+      warnBox.innerHTML = `⚠️ <b>التصدير اتقص</b> — الملف فيه ${entries.length.toLocaleString('en-US')} صف`
+        + (data.total != null ? ` من أصل <b>${Number(data.total).toLocaleString('en-US')}</b> مطابقين للفلاتر` : '')
+        + `. ضيّق الفترة أو الفلاتر وصدّر على دفعات.`;
+      warnBox.style.display = '';
+      showToast(`⚠️ التصدير اتقص عند ${entries.length.toLocaleString('en-US')} صف — الملف مش كامل`, 'error', 7000);
+    } else {
+      showToast(`تم تصدير ${entries.length.toLocaleString('en-US')} عملية ✓`, 'success');
+    }
+  } catch (err) {
+    showToast('خطأ في التصدير: ' + err.message, 'error', 6000);
+  } finally { btn.disabled = false; btn.textContent = old; }
 }
 
 // Init
+renderVersionUI();
 updateSettingsButtonsState();
 loadEmployeesList();
+checkWorkerVersion();
 </script>
 </body>
 </html>
