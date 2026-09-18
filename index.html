@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<!-- skills: html-builder v7.0.0 · worker-builder v3.0.0 · constants v2.1.0 — 12-09-2026 -->
+<!-- skills: html-builder v7.0.0 · worker-builder v3.3.0 · constants v2.1.0 — 18-09-2026 -->
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Inventory Audit</title>
@@ -485,6 +485,116 @@ td.centered{text-align:center;}
 /* أسماء بديلة للنداءات القديمة — من غيرها 'warn'/'info' بيدّوا توست بلا خلفية */
 .toast-warn{background:var(--amber);}
 .toast-info{background:var(--neutral-dark);}
+
+/* ═══════════════════════════════════════════════════════════
+   §BULK-CSS — الجرد الجماعي (v6.0.0)
+   كل الألوان من التوكنز المعرّفة فوق — صفر hex حرفي هنا (Standards #35/#36)
+   ═══════════════════════════════════════════════════════════ */
+.bulk-wrap{display:flex;flex-direction:column;gap:14px;}
+.bulk-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
+.bulk-card-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.bulk-card-title{font-size:14px;font-weight:800;color:var(--text-primary);}
+.bulk-card-sub{font-size:12px;font-weight:600;color:var(--text-secondary);}
+.bulk-card-spacer{flex:1;}
+.bulk-card-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
+
+/* ─── شريط الأدوات ─── */
+.bulk-toolbar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);flex-wrap:wrap;}
+.bulk-btn{padding:8px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface);font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text-primary);cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
+.bulk-btn:hover:not(:disabled){background:var(--accent-light);border-color:var(--accent-border);color:var(--accent);}
+.bulk-btn:disabled{opacity:.45;cursor:not-allowed;}
+.bulk-btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
+.bulk-btn.primary:hover:not(:disabled){background:var(--accent-dark);border-color:var(--accent-dark);color:var(--on-accent);}
+.bulk-btn.danger{background:var(--red-light);border-color:var(--red-border);color:var(--red);}
+.bulk-btn.danger:hover:not(:disabled){background:var(--red);border-color:var(--red);color:var(--on-accent);}
+.bulk-btn.go{background:var(--green);border-color:var(--green);color:var(--on-accent);}
+.bulk-btn.go:hover:not(:disabled){background:var(--green-dark);border-color:var(--green-dark);color:var(--on-accent);}
+.bulk-btn.amber{background:var(--amber-light);border-color:var(--amber-border);color:var(--amber-dark);}
+.bulk-btn.amber:hover:not(:disabled){background:var(--amber);border-color:var(--amber);color:var(--on-accent);}
+.bulk-idx-stat{font-size:12.5px;font-weight:700;color:var(--text-secondary);}
+.bulk-idx-stat b{color:var(--text-primary);font-variant-numeric:tabular-nums;}
+
+/* ─── جلسة المسح ─── */
+.bulk-scan-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.bulk-scan-wrap{position:relative;flex:1;min-width:260px;display:flex;align-items:center;gap:10px;height:56px;padding:0 16px;border:2.5px solid var(--border-strong);border-radius:var(--radius);background:var(--surface-2);transition:border-color .15s,background .15s;}
+.bulk-scan-wrap.armed{border-color:var(--accent);background:var(--accent-light);}
+.bulk-scan-wrap.scanning{border-color:var(--green);background:var(--green-light);}
+.bulk-scan-wrap.disabled{opacity:.5;}
+.bulk-scan-wrap>span{font-size:22px;}
+.bulk-scan-wrap input{flex:1;border:none;background:transparent;outline:none;font-family:var(--font-body);font-size:16px;font-weight:700;color:var(--text-primary);}
+.bulk-scan-wrap input:disabled{cursor:not-allowed;}
+
+.bulk-live{padding:10px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface-2);font-size:13px;font-weight:700;color:var(--text-secondary);min-height:42px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.bulk-live.ok{border-color:var(--green-border);background:var(--green-light);color:var(--green-dark);}
+.bulk-live.bad{border-color:var(--red-border);background:var(--red-light);color:var(--red);}
+.bulk-live-count{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:28px;padding:0 9px;border-radius:var(--radius-sm);background:var(--surface);border:1.5px solid currentColor;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;}
+
+.bulk-stats{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;}
+.bulk-stat{flex:1;min-width:110px;padding:9px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface-2);text-align:center;}
+.bulk-stat-num{font-size:20px;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums;}
+.bulk-stat-lbl{font-size:11.5px;font-weight:700;color:var(--text-secondary);margin-top:2px;}
+.bulk-stat.accent{border-color:var(--accent-border);background:var(--accent-light);}
+.bulk-stat.accent .bulk-stat-num{color:var(--accent);}
+.bulk-stat.red{border-color:var(--red-border);background:var(--red-light);}
+.bulk-stat.red .bulk-stat-num{color:var(--red);}
+
+.bulk-manual-add{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;}
+
+/* ─── الأكواد اللي الأداة ما عرفتهاش (Standards #44) ─── */
+.bulk-prob-card{border-color:var(--red-border);background:var(--red-lighter);}
+.bulk-prob-card .bulk-card-hdr{border-bottom-color:var(--red-border);}
+.bulk-prob-list{display:flex;flex-direction:column;gap:7px;max-height:230px;overflow-y:auto;}
+.bulk-prob-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--surface);border:1.5px solid var(--red-border);box-shadow:inset 4px 0 0 var(--red);flex-wrap:wrap;}
+.bulk-prob-code{font-size:14px;font-weight:800;color:var(--red-darker);font-variant-numeric:tabular-nums;direction:ltr;}
+.bulk-prob-why{font-size:12px;font-weight:600;color:var(--text-mid);flex:1;min-width:180px;}
+.bulk-prob-x{background:none;border:none;color:var(--red);font-size:16px;font-weight:800;cursor:pointer;line-height:1;padding:0 4px;}
+
+/* ─── نطاق الجرد ─── */
+.bulk-scope-opts{display:flex;gap:10px;flex-wrap:wrap;}
+.bulk-scope-opt{flex:1;min-width:260px;display:flex;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface-2);cursor:pointer;transition:border-color .15s,background .15s;}
+.bulk-scope-opt.on{border-color:var(--accent);background:var(--accent-light);}
+.bulk-scope-opt.locked{opacity:.5;cursor:not-allowed;}
+.bulk-scope-opt input{margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;}
+.bulk-scope-name{font-size:13px;font-weight:800;color:var(--text-primary);}
+.bulk-scope-desc{font-size:12px;font-weight:600;color:var(--text-secondary);line-height:1.7;margin-top:3px;}
+
+/* ─── الجدول ─── */
+.bulk-table-wrap{overflow-x:auto;overflow-y:auto;max-height:640px;}
+.bulk-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.bulk-table th{padding:10px 10px;text-align:right;font-size:12px;font-weight:800;color:var(--text-mid);background:var(--surface-2);border-bottom:2px solid var(--border-strong);white-space:nowrap;position:sticky;top:0;z-index:2;}
+.bulk-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text-primary);}
+.bulk-table tbody tr:hover{background:var(--surface-hover);}
+.bulk-table tbody tr.is-done{background:var(--green-light);}
+.bulk-table tbody tr.is-blocked{background:var(--amber-light);}
+.bulk-table input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;}
+.bulk-manual-cell{width:74px;height:30px;padding:0 8px;border:1.5px solid var(--border-strong);border-radius:6px;background:var(--surface);font-family:var(--font-body);font-size:12.5px;font-weight:700;color:var(--text-primary);text-align:center;outline:none;}
+.bulk-manual-cell:focus{border-color:var(--accent);}
+.bulk-manual-cell:disabled{opacity:.5;cursor:not-allowed;}
+
+.bulk-state{display:inline-block;padding:2px 9px;border-radius:5px;font-size:11.5px;font-weight:700;white-space:nowrap;}
+.st-match{background:var(--green-light);color:var(--green-dark);border:1px solid var(--green-border);}
+.st-short{background:var(--red-light);color:var(--red);border:1px solid var(--red-border);}
+.st-over{background:var(--accent-light);color:var(--accent);border:1px solid var(--accent-border);}
+.st-missing{background:var(--orange-light);color:var(--orange);border:1px solid var(--orange-border);}
+.st-no_barcode{background:var(--surface-2);color:var(--text-secondary);border:1px solid var(--border-strong);}
+.st-needs_check{background:var(--amber-light);color:var(--amber-dark);border:1px solid var(--amber-border);}
+.st-other_states{background:var(--purple-light);color:var(--purple-dark);border:1px solid var(--purple-border);}
+
+.bulk-diff{font-weight:800;font-variant-numeric:tabular-nums;direction:ltr;display:inline-block;}
+.bulk-diff.pos{color:var(--green-dark);}
+.bulk-diff.neg{color:var(--red);}
+.bulk-diff.zero{color:var(--text-muted);}
+
+/* ─── شريط التقدّم — بيتحرّك بعد كل مجموعة فعليًا (Step 3C) ─── */
+.bulk-progress{display:none;padding:10px 16px;border-bottom:1px solid var(--border);}
+.bulk-progress.on{display:block;}
+.bulk-progress-track{height:10px;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);overflow:hidden;}
+.bulk-progress-bar{height:100%;width:0;background:var(--accent);transition:width .2s ease;}
+.bulk-progress-txt{margin-top:6px;font-size:12px;font-weight:700;color:var(--text-secondary);font-variant-numeric:tabular-nums;}
+
+.bulk-note{padding:10px 14px;border-radius:var(--radius-sm);background:var(--accent-light);border:1px solid var(--accent-border);color:var(--accent-dark);font-size:12.5px;font-weight:600;line-height:1.8;}
+.bulk-note.warn{background:var(--amber-light);border-color:var(--amber-border);color:var(--amber-dark);}
+.bulk-note.danger{background:var(--red-light);border-color:var(--red-border);color:var(--red-dark);}
 </style>
 
 <!-- §SHELL -->
@@ -515,7 +625,18 @@ td.centered{text-align:center;}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v5.1.0</span><span class="cl-ver-date">12-09-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.0.0</span><span class="cl-ver-date">18-09-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>تاب «🧾 الجرد الجماعي»</b> — تمسح رفوف كاملة بالسكانر من غير توقّف، والأداة بتعدّ وتقارن بشوبيفاي وتنفّذ التعديلات كلها دفعة واحدة. الأقسام القديمة (الجرد الفردي · الأولويات · السجل) زي ما هي بالظبط</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>كل مسحة بحث محلي مش نداء شبكة — الفهرس بيتحمّل مرة واحدة في أول الجلسة، فالمسح المتواصل مابيستناش الإنترنت</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>وضعان للنطاق:</b> «اللي اتمسح بس» (الافتراضي — أي صنف تاني مايتلمسش) و«جرد شامل» (الصنف اللي ما اتمسحش بيظهر «مش متسكن» ورصيده يتصفّر لو حدّدته). صفوف الوضع الشامل <b>مش متحدّدة افتراضيًا</b></span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>أي صنف عليه حجز بيفضل «محتاج مراجعة» لحد ما الأداة تعرف كام قطعة منه <b>اتغلّفت خلاص</b> (مش على الرف) — نفس منطق تاب الجرد الفردي</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>كود اتمسح والأداة ما عرفتهوش، أو باركود متكرر على أكتر من صنف → بيروح لقايمة حمرا و<b>التنفيذ بيتقفل</b> لحد ما تتفضى. الأداة مش بتخمّن على أنهي صنف تحسبه</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>التعديل الجماعي بيتبعت كقيمة مطلقة مع تحقق من الرصيد الحالي</b> بدل الفرق النسبي — أي صنف اتباع أو اتشحن بعد ما عدّيته بيترفض من شوبيفاي <b>من غير أي أثر على المخزون</b> بدل ما التعديل يتطبّق على رصيد تاني. ودي كمان الحماية من الضغط مرتين</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>أرقام الفهرس بتتقرا من <b>الموقع اللي الأداة بتكتب عليه</b> صراحةً، مش أول موقع في القايمة</span></li>
+      </ul>
+
+      <div class="cl-version"><span class="cl-ver-badge">v5.1.0</span><span class="cl-ver-date">12-09-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>اتشال زرار «✅ Fulfill Orders» وخانات تحديد الأوردرات من كارت الأوردرات غير المشحونة — الأداة دي أداة جرد، والـ fulfillment مالوش مكان فيها. الميزة مكانتش بتتستخدم، وكانت بتبعت من متصفح الموظف لخدمة خارجية من غير أي تسجيل في السجل</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>اتشال حقل «FLOW COMPANION TOKEN» من الإعدادات، والتوكن القديم بيتمسح تلقائيًا من متصفح كل موظف</span></li>
@@ -601,6 +722,30 @@ td.centered{text-align:center;}
             <li>كل عملية بتتسجّل في D1 بنتيجتها (<code>extra.result</code>) وبتظهر في تاب السجل.</li>
           </ol>
 
+          <h4>🧾 تاب الجرد الجماعي (v6.0.0)</h4>
+          <ol>
+            <li><b>تحميل الفهرس</b> — كل المتغيّرات الصالحة للجرد (باركود · SKU · الرصيد على
+                <code>LOCATION_ID</code> · آخر جرد) في نداء واحد. كل مسحة بعد كده بحث محلي مش نداء شبكة.</li>
+            <li><b>جلسة المسح</b> — مسح متواصل لرفوف كاملة. الكود المجهول أو المتكرر على أكتر من صنف
+                بيروح لقايمة حمرا و<b>بيقفل التنفيذ</b> لحد ما تتفضى.</li>
+            <li><b>النطاق</b> — «اللي اتمسح بس» (الافتراضي) أو «جرد شامل». الفرق بينهم هو معنى
+                الصنف اللي <b>ما اتمسحش</b>: مش جزء من الجرد، ولا مش موجود على الرف.</li>
+            <li><b>مراجعة الأوردرات المعلّقة</b> — أي صنف عليه حجز بيفضل «محتاج مراجعة» لحد ما نعرف
+                كام قطعة منه <b>اتغلّفت</b> (خرجت من الرف). المتوقع =
+                <code>available + committed − المغلَّف</code>.</li>
+            <li><b>التنفيذ</b> — بالمجموعات مع شريط تقدّم حقيقي وقفل على كل نقط التعديل،
+                والصف اللي اتنفّذ بيتنزع سلاحه فورًا.</li>
+          </ol>
+
+          <h4>⚠️ فرق جوهري في الكتابة الجماعية</h4>
+          <table>
+            <tr><th></th><th>الجرد الفردي</th><th>الجرد الجماعي</th></tr>
+            <tr><td>الميوتيشن</td><td><code>inventoryAdjustQuantities</code></td><td><code>inventorySetQuantities</code></td></tr>
+            <tr><td>القيمة</td><td>فرق <b>نسبي</b></td><td>رقم <b>مطلق</b> + <code>changeFromQuantity</code></td></tr>
+            <tr><td>إعادة التنفيذ</td><td>بتضاعف التعديل ⛔</td><td>بتترفض من شوبيفاي بلا أي أثر ✅</td></tr>
+            <tr><td>رصيد اتغيّر أثناء الجلسة</td><td>التعديل بيتطبّق على رقم تاني</td><td>الصنف بيترفض ويرجع للموظف</td></tr>
+          </table>
+
           <h4>الـ Endpoints</h4>
           <table>
             <tr><th>action</th><th>بيعمل إيه</th></tr>
@@ -612,6 +757,9 @@ td.centered{text-align:center;}
             <tr><td>get_audit_priorities</td><td>قايمة أولويات الجرد + <code>truncated</code></td></tr>
             <tr><td>adjust_inventory <b>(POST)</b></td><td>تصحيح الرصيد + تسجيل تاريخ الجرد</td></tr>
             <tr><td>set_audit_date <b>(POST)</b></td><td>تأكيد إن الجرد مظبوط من غير تعديل</td></tr>
+            <tr><td>get_bulk_index</td><td>فهرس الجرد الجماعي — باركود/SKU/الرصيد على <code>LOCATION_ID</code> + <code>dupBarcodes</code> + <code>truncated</code> + السقوف</td></tr>
+            <tr><td>bulk_shelf_check <b>(POST)</b></td><td>القطع المغلَّفة مقابل اللي على الرف — استعلام لكل <b>منتج</b> مش لكل مقاس</td></tr>
+            <tr><td>bulk_adjust <b>(POST)</b></td><td>الكتابة الجماعية بقيمة مطلقة + تحقق من الرصيد الحالي (CAS) + صف D1 لكل عنصر</td></tr>
             <tr><td>get_logs / get_logs_count / get_logs_export</td><td>السجل: صفحة · عدّ · تصدير بـ cap/total/truncated</td></tr>
             <tr><td>diag / get_config</td><td>فحص ذاتي · نسخة الـ Worker</td></tr>
           </table>
@@ -636,6 +784,7 @@ td.centered{text-align:center;}
             <li><code>§AUTH-JS</code> — <code>renderLoginMode</code> (٤ حالات) · <code>loadEmployeesList</code> · <code>finishLogin</code></li>
             <li><code>§SCAN</code> — <code>handleBarcodeScan</code> · <code>handleScanCountInput</code> · <code>§SCAN::plausibility</code></li>
             <li><code>§TOOL-JS</code> — الأولويات · بطاقة المنتج · لوحة التعديل · العد بالسكانر · كارت الأوردرات غير المشحونة (<b>عرض فقط</b> — مفيش أي فعل عليها من الأداة دي)</li>
+            <li><code>§BULK-JS</code> — <code>loadBulkIndex</code> · <code>processBulkScanCode</code> · <code>computeBulkRows</code> · <code>runBulkShelfCheck</code> · <code>executeBulk</code> · <code>bms*</code> (فلاتر التاب) · <code>exportBulkXLSX</code></li>
             <li><code>§LOG-JS</code> — <code>logParams</code> · <code>fetchLog</code> · <code>renderLogTable</code> · <code>applySort</code> · <code>exportLogXLSX</code></li>
           </ul>
 
@@ -646,6 +795,9 @@ td.centered{text-align:center;}
             <li><code>TOOL_VERSION</code> / <code>MIN_WORKER_VERSION</code> — مصدر واحد لرقم النسخة وحارس نسخة الـ Worker</li>
             <li><code>currentEmployee</code> — في الذاكرة بس، عمره ما يدخل localStorage</li>
             <li><code>LOG_PAGE_SIZE = 100</code> · <code>msState</code> — حالة فلاتر السجل multi-select</li>
+            <li><code>bulkIndex</code> · <code>bulkScans</code> · <code>bulkShelf</code> · <code>bulkDone</code> — حالة الجلسة الجماعية، كلها في الذاكرة بس</li>
+            <li><code>bulkCaps</code> — السقوف <b>بتيجي من الـ Worker</b> (<code>chunkHint</code>/<code>maxBatch</code>...) عشان مايبقاش فيه مصدرين بيتعتّقوا</li>
+            <li><code>BULK_STATES</code> — سبع حالات، كل واحدة بتقول هل الصف قابل للتنفيذ وهل بيتحدّد افتراضيًا</li>
           </ul>
 
           <h4>NOTES / QUIRKS</h4>
@@ -656,6 +808,11 @@ td.centered{text-align:center;}
             <li><b>التصدير بيقص عند 2000 صف</b> (<code>cap</code> من الـ Worker) — والبانر الأصفر بيقول الرقمين لو حصل.</li>
             <li><b>P0–P6</b> محسوبة من <code>available</code> و<code>committed</code> في الواجهة، والعتبة الزمنية للجرد قابلة للتغيير من التاب.</li>
             <li><b>الصفوف الأقدم من v5.0.0</b> مالهاش <code>extra.result</code> — بتتعرض «—» مش «✓»، لأننا فعليًا مش عارفين.</li>
+            <li><b>الجرد الجماعي مافيهوش قيم <code>type</code> جديدة</b> — بيكتب تحت <code>adjustment</code> و<code>ok</code> زي الفردي، والفرق في <code>extra.mode = 'bulk'</code> و<code>extra.batchId</code>.</li>
+            <li><b>الصنف اللي <code>onHand ≠ available + committed</code></b> (عليه حالات مخزون تانية زي تالف أو فحص جودة) بيتشال من التنفيذ الجماعي — معادلة الرف مابتغطّيهاش.</li>
+            <li><b>الصنف بدون باركود</b> في الوضع الشامل بياخد حالة مستقلة «🚫 بدون باركود» ومش بيتصفّر — لأنه أصلاً مايتجردش بالسكانر.</li>
+            <li><b>كل الفهرس في ذاكرة المتصفح</b> — الجلسة بتضيع مع أي refresh. ده مقصود: مفيش عدّ بيتخزّن في <code>localStorage</code>.</li>
+            <li><b>إعادة تحميل الفهرس بتحافظ على المسحات</b> — ده مسار الإصلاح لو رصيد اتغيّر أثناء جلسة طويلة. اللي بيتمسح هو بيانات الأوردرات المعلّقة بس.</li>
           </ul>
         </div>
       </details>
@@ -694,6 +851,7 @@ td.centered{text-align:center;}
   <div class="main-tabs-bar">
     <button class="main-tab-btn active" id="mainTabAudit" onclick="switchMainTab('audit')"><span class="msb-icon">📦</span><span>الجرد</span></button>
     <button class="main-tab-btn" id="mainTabPriority" onclick="switchMainTab('priority')"><span class="msb-icon">🎯</span><span>أولويات الجرد</span></button>
+    <button class="main-tab-btn" id="mainTabBulk" onclick="switchMainTab('bulk')"><span class="msb-icon">🧾</span><span>الجرد الجماعي</span></button>
     <button class="main-tab-btn" id="mainTabLog" onclick="switchMainTab('log')"><span class="msb-icon">📜</span><span>سجل العمليات</span></button>
   </div>
 </div>
@@ -871,6 +1029,188 @@ td.centered{text-align:center;}
   </div>
 </div>
 
+<!-- §BULK — Bulk Audit Tab (v6.0.0) -->
+<div id="bulkTabContent" style="display:none;">
+  <div class="bulk-wrap">
+
+    <!-- ─── §BULK::index — فهرس المنتجات ─── -->
+    <div class="bulk-toolbar">
+      <button class="bulk-btn primary" id="bulkLoadBtn" onclick="loadBulkIndex()">↺ تحميل فهرس المنتجات</button>
+      <div class="priority-ts-badge" id="bulkIndexTs">
+        <span class="priority-ts-part">📅 <span id="bxDate">—</span></span>
+        <span class="priority-ts-part">🕐 <span id="bxTime">—</span></span>
+        <span class="priority-ts-relative" id="bxRelative"></span>
+      </div>
+      <div class="bulk-idx-stat" id="bulkIdxStat">الفهرس لسه ما اتحملش — حمّله قبل ما تبدأ المسح</div>
+      <div class="bulk-card-spacer"></div>
+      <button class="bulk-btn" id="bulkResetBtn" onclick="confirmResetBulkSession()" disabled>🗑 جلسة جديدة</button>
+    </div>
+
+    <!-- بانر ثابت فوق كل حاجة — التقصّ لازم يبان، مش توست بيختفي -->
+    <div id="bulkIndexWarn" class="export-warn" style="display:none;"></div>
+
+    <!-- ─── §BULK::scan — جلسة المسح المتواصل ─── -->
+    <div class="bulk-card">
+      <div class="bulk-card-hdr">
+        <span class="bulk-card-title">🔫 جلسة المسح</span>
+        <span class="bulk-card-sub" id="bulkScanHint">امسح كل القطع على الرفوف واحدة ورا التانية — من غير توقّف.</span>
+        <div class="bulk-card-spacer"></div>
+        <button class="bulk-btn go" id="bulkScanToggle" onclick="toggleBulkScan()" disabled>▶ ابدأ المسح</button>
+      </div>
+      <div class="bulk-card-body">
+        <div class="bulk-scan-row">
+          <div class="bulk-scan-wrap disabled" id="bulkScanWrap">
+            <span>🔫</span>
+            <input type="text" id="bulkScanInput" placeholder="حمّل الفهرس ثم اضغط «ابدأ المسح»"
+                   autocomplete="off" spellcheck="false" inputmode="numeric" disabled />
+          </div>
+        </div>
+
+        <div class="bulk-live" id="bulkLive">مفيش مسحات لسه.</div>
+
+        <div class="bulk-stats">
+          <div class="bulk-stat accent"><div class="bulk-stat-num" id="bulkStatScans">0</div><div class="bulk-stat-lbl">إجمالي المسحات</div></div>
+          <div class="bulk-stat"><div class="bulk-stat-num" id="bulkStatSkus">0</div><div class="bulk-stat-lbl">أصناف مختلفة</div></div>
+          <div class="bulk-stat"><div class="bulk-stat-num" id="bulkStatPieces">0</div><div class="bulk-stat-lbl">إجمالي القطع المعدودة</div></div>
+          <div class="bulk-stat red"><div class="bulk-stat-num" id="bulkStatProblems">0</div><div class="bulk-stat-lbl">أكواد فيها مشكلة</div></div>
+        </div>
+
+        <!-- إضافة يدوية للقطع اللي باركودها تالف أو مش موجود -->
+        <div class="bulk-manual-add">
+          <div class="uf-fg" style="flex:1;min-width:230px;">
+            <span class="uf-flabel">إضافة صنف يدويًا بالـ SKU (للقطع اللي باركودها تالف)</span>
+            <div class="uf-search"><span>🔎</span><input type="text" class="uf-input" id="bulkSkuAdd"
+                 placeholder="اكتب الـ SKU بالظبط واضغط Enter" onkeydown="if(event.key==='Enter')addBulkBySku()" /></div>
+          </div>
+          <button class="bulk-btn" onclick="addBulkBySku()">➕ أضف</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── §BULK::problems — الأكواد اللي الأداة ما عرفتهاش (Standards #44) ─── -->
+    <div class="bulk-card bulk-prob-card" id="bulkProbCard" style="display:none;">
+      <div class="bulk-card-hdr">
+        <span class="bulk-card-title">🚫 أكواد اتمسحت والأداة ما عرفتهاش</span>
+        <div class="bulk-card-spacer"></div>
+        <button class="bulk-btn danger" onclick="clearBulkProblems()">🗑 شيلهم من القايمة</button>
+      </div>
+      <div class="bulk-card-body">
+        <div class="bulk-note danger">
+          التنفيذ مقفول لحد ما القايمة دي تفضى. كل كود هنا يا إما مش موجود في الفهرس
+          (لاصقة غلط أو منتج مش متتبّع أو الفهرس قديم)، يا إما متكرر على أكتر من صنف
+          فالأداة **مش هتخمّن** على أي صنف تحسبه.
+        </div>
+        <div class="bulk-prob-list" id="bulkProbList"></div>
+      </div>
+    </div>
+
+    <!-- ─── §BULK::scope — نطاق الجرد ─── -->
+    <div class="bulk-card">
+      <div class="bulk-card-hdr">
+        <span class="bulk-card-title">🎯 نطاق الجرد</span>
+        <span class="bulk-card-sub">الفرق بين الوضعين هو إيه اللي بيحصل للصنف اللي **ما اتمسحش**.</span>
+      </div>
+      <div class="bulk-card-body">
+        <div class="bulk-scope-opts">
+          <label class="bulk-scope-opt on" id="bulkScopeScanned">
+            <input type="radio" name="bulkScope" value="scanned" checked onchange="setBulkMode('scanned')" />
+            <span>
+              <span class="bulk-scope-name">🔒 اللي اتمسح بس (الافتراضي)</span>
+              <span class="bulk-scope-desc">الأصناف اللي اتمسحت هي اللي هتتقارن وتتعدّل.
+                أي صنف تاني في المتجر **مايتلمسش خالص**.</span>
+            </span>
+          </label>
+          <label class="bulk-scope-opt" id="bulkScopeFull">
+            <input type="radio" name="bulkScope" value="full" onchange="setBulkMode('full')" />
+            <span>
+              <span class="bulk-scope-name">🧹 جرد شامل للنطاق</span>
+              <span class="bulk-scope-desc">بيقول للأداة إنك مسحت **كل** اللي في النطاق المختار.
+                الصنف اللي ما اتمسحش ورصيده أكبر من صفر هيظهر «مش متسكن» و<b>رصيده هيتصفّر</b> لو حدّدته.</span>
+            </span>
+          </label>
+        </div>
+        <div class="uf-row">
+          <div class="uf-fg">
+            <span class="uf-flabel">النطاق (البراند)</span>
+            <div class="ms-wrap" id="bmsWrap-scope"><button class="ms-btn" id="bmsBtn-scope" onclick="bmsToggle('scope',event)"><span id="bmsLbl-scope">كل البراندات</span><span>▾</span></button><div class="ms-list" id="bmsList-scope"></div></div>
+          </div>
+          <div class="uf-fg" style="flex:1;min-width:240px;align-self:flex-end;">
+            <div class="bulk-note warn" id="bulkScopeNote" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── §BULK::results — القسم الموحّد: فلاتر + جدول ─── -->
+    <div class="unified-section">
+
+      <div class="uf-head" onclick="toggleBulkFilters()">
+        <span class="uf-arrow" id="bulkFltArrow">▼</span>
+        <span class="uf-funnel" id="bulkFunnel" title="الفلاتر">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M3 5h18l-7 8v5l-4 2v-7z"/>
+          </svg>
+        </span>
+        <span class="uf-spacer"></span>
+        <button class="log-clear-btn" onclick="event.stopPropagation();clearBulkFilters()">✕ مسح كل الفلاتر</button>
+      </div>
+
+      <div class="uf-body" id="bulkFltBody">
+        <div class="uf-row">
+          <div class="uf-fg" style="flex:1;min-width:230px;">
+            <span class="uf-flabel">بحث SKU / اسم المنتج</span>
+            <div class="uf-search"><span>🔍</span><input type="text" class="uf-input" id="bulkSearch" /></div>
+          </div>
+          <div class="uf-fg"><span class="uf-flabel">الحالة</span>
+            <div class="ms-wrap" id="bmsWrap-state"><button class="ms-btn" id="bmsBtn-state" onclick="bmsToggle('state',event)"><span id="bmsLbl-state">كل الحالات</span><span>▾</span></button><div class="ms-list" id="bmsList-state"></div></div>
+          </div>
+          <div class="uf-fg"><span class="uf-flabel">البراند</span>
+            <div class="ms-wrap" id="bmsWrap-vendor"><button class="ms-btn" id="bmsBtn-vendor" onclick="bmsToggle('vendor',event)"><span id="bmsLbl-vendor">كل البراندات</span><span>▾</span></button><div class="ms-list" id="bmsList-vendor"></div></div>
+          </div>
+          <div class="uf-fg"><span class="uf-flabel">التحديد</span>
+            <div class="ms-wrap" id="bmsWrap-sel"><button class="ms-btn" id="bmsBtn-sel" onclick="bmsToggle('sel',event)"><span id="bmsLbl-sel">الكل</span><span>▾</span></button><div class="ms-list" id="bmsList-sel"></div></div>
+          </div>
+        </div>
+        <div id="bulkChipsZone"></div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="results-row" onclick="toggleBulkTable()">
+        <span class="uf-arrow" id="bulkTblArrow">▼</span>
+        <span class="results-title">النتائج</span>
+        <span class="results-count" id="bulkResultsCount">—</span>
+        <span class="results-actions">
+          <button class="bulk-btn amber" id="bulkShelfBtn" onclick="event.stopPropagation();runBulkShelfCheck()" disabled>🔍 مراجعة الأوردرات المعلّقة</button>
+          <button class="log-export-btn" id="bulkExportBtn" onclick="event.stopPropagation();exportBulkXLSX()" disabled>⬇ تصدير المقارنة .xlsx</button>
+          <button class="bulk-btn go" id="bulkExecBtn" onclick="event.stopPropagation();confirmBulkExecute()" disabled>✔ نفّذ التعديلات</button>
+        </span>
+      </div>
+
+      <div id="bulkNotices" style="display:none;padding:12px 16px 0;"></div>
+
+      <div class="priority-stats-bar" id="bulkStatsBar" style="display:none;"></div>
+
+      <div class="bulk-progress" id="bulkProgress">
+        <div class="bulk-progress-track"><div class="bulk-progress-bar" id="bulkProgressBar"></div></div>
+        <div class="bulk-progress-txt" id="bulkProgressTxt">—</div>
+      </div>
+
+      <div id="bulkTableZone">
+        <div class="bulk-table-wrap">
+          <table class="bulk-table">
+            <thead><tr id="bulkHeadRow"></tr></thead>
+            <tbody id="bulkBody">
+              <tr><td colspan="12"><div class="state-box"><div class="state-icon">🧾</div><p>حمّل الفهرس وابدأ المسح — المقارنة هتظهر هنا أول بأول</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- §LOG -->
 <div id="logTabContent" style="display:none;">
   <div class="unified-section">
@@ -1027,10 +1367,11 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '5.1.0';
-// أقل نسخة Worker الواجهة دي بتشتغل معاها. الواجهة بتقرا get_config/diag و
-// get_logs_count/get_logs_export و status/actions و orderId — كلهم اتضافوا في 5.0.0.
-const MIN_WORKER_VERSION = '5.0.0';
+const TOOL_VERSION = '6.0.0';
+// أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
+// get_bulk_index و bulk_shelf_check و bulk_adjust — كلهم اتضافوا في 6.0.0.
+// (وقبلهم get_config/diag و get_logs_count/get_logs_export من 5.0.0.)
+const MIN_WORKER_VERSION = '6.0.0';
 
 // السر الوحيد اللي بيتخزّن جهة العميل.
 const LS_SECRET = 'stockaudit_worker_secret';
@@ -1262,7 +1603,7 @@ async function runDiag(){
 }
 
 function switchMainTab(tab){
-  ['audit','priority','log'].forEach(t => {
+  ['audit','priority','bulk','log'].forEach(t => {
     const tid = 'mainTab' + t.charAt(0).toUpperCase() + t.slice(1);
     document.getElementById(tid).classList.toggle('active', t === tab);
     document.getElementById(t + 'TabContent').style.display = t === tab ? 'block' : 'none';
@@ -2284,6 +2625,1020 @@ async function exportLogXLSX(){
       showToast(`تم تصدير ${entries.length.toLocaleString('en-US')} عملية ✓`, 'success');
     }
   } catch (err) {
+    showToast('خطأ في التصدير: ' + err.message, 'error', 6000);
+  } finally { btn.disabled = false; btn.textContent = old; }
+}
+
+// ══════════════════════════════════════════════════════
+// §BULK-JS — الجرد الجماعي (v6.0.0)
+// ══════════════════════════════════════════════════════
+//
+// الفكرة في سطرين: الموظف بيمسح رفوف كاملة من غير توقّف، والأداة بتعدّ محليًا
+// (الفهرس متحمّل مرة واحدة فمفيش نداء شبكة لكل مسحة)، وبعدين بتقارن المعدود
+// بالمتوقع من شوبيفاي وتنفّذ التعديلات دفعة واحدة.
+//
+// 🔴 أخطر سؤال في القسم ده: **الصنف اللي ما اتمسحش معناه إيه؟**
+//    · «اللي اتمسح بس» (الافتراضي) → معناه «مش جزء من الجرد ده» → مايتلمسش.
+//    · «جرد شامل»                   → معناه «مش موجود على الرف»  → رصيده يتصفّر.
+//    الفرق بين التفسيرين هو الفرق بين جرد سليم وتصفير المتجر كله. عشان كده
+//    الوضع الشامل **اختيار صريح**، وصفوفه **مش متحدّدة افتراضيًا**، ونافذة
+//    التأكيد بتقول عدد الأصناف اللي هتتصفّر بالرقم.
+
+// ─── §BULK-JS::state ───
+let bulkIndex      = null;      // { variants, byId, byBarcode, bySku, dupBarcodes, loadedAt, truncated }
+let bulkScans      = new Map(); // variantId → { scanned, manual }
+let bulkShelf      = new Map(); // variantId → { ok, packed, unpacked, orders } | { ok:false, error }
+let bulkResults    = new Map(); // variantId → نتيجة آخر تنفيذ
+let bulkProblems   = new Map(); // code → { code, count, reason, candidates }
+let bulkSelOverride= new Map(); // variantId → اختيار الموظف الصريح (بيغلب الافتراضي)
+let bulkDone       = new Set(); // الأصناف اللي اتنفّذت في الجلسة دي — مش بتترشّح تاني
+let bulkRows = [], bulkFiltered = [];
+let bulkMode = 'scanned';       // 'scanned' | 'full'
+let bulkScanActive = false;
+let isUpdatingBulk = false;     // القفل أثناء أي دفعة (Standards #43)
+let bulkSessionScans = 0, bulkBatchId = null;
+let bulkFltOpen = true, bulkTableOpen = true;
+let _bulkRecomputeTimer = null, _bulkSearchTimer = null;
+let bulkSortState = { key: null, dir: null };
+let bulkOrphanScans = 0;   // قطع اتمسحت وصنفها اختفى من الفهرس بعد تحديثه
+
+// السقوف بتيجي من الـ Worker (`get_bulk_index`) — الواجهة مابتكتبش أرقامها
+// عندها عشان مايبقاش فيه مصدرين بيتعتّقوا. دي قيم أولية لحد ما الفهرس يوصل.
+let bulkCaps = { chunk: 10, shelfChunk: 8, maxBatch: 50, shelfMaxBatch: 30 };
+
+const BULK_STATES = {
+  match:        { label: '✅ مظبوط',            sel: true,  auto: true  },
+  short:        { label: '🔴 عجز',              sel: true,  auto: true  },
+  over:         { label: '🟢 زيادة',            sel: true,  auto: true  },
+  missing:      { label: '⚠️ مش متسكن',          sel: true,  auto: false },
+  no_barcode:   { label: '🚫 بدون باركود',       sel: false, auto: false },
+  needs_check:  { label: '🔍 محتاج مراجعة',      sel: false, auto: false },
+  other_states: { label: '❗ حالات مخزون تانية', sel: false, auto: false },
+};
+
+// ─── §BULK-JS::multiSelect — نفس نمط فلاتر السجل، حالة مستقلة ───
+const bmsState = {
+  state:  { selected: new Set(), options: [], label: 'كل الحالات',   title: 'الحالة' },
+  vendor: { selected: new Set(), options: [], label: 'كل البراندات', title: 'البراند' },
+  sel:    { selected: new Set(), options: [
+              { v:'on', t:'المحدّد' }, { v:'off', t:'غير المحدّد' }, { v:'done', t:'اتنفّذ خلاص' } ],
+            label: 'الكل', title: 'التحديد' },
+  scope:  { selected: new Set(), options: [], label: 'كل البراندات', title: 'النطاق' },
+};
+
+function bmsRenderList(key){
+  const st = bmsState[key], el = document.getElementById('bmsList-' + key);
+  if (!el) return;
+  const items = st.options.length
+    ? st.options.map((o, i) => `<label class="ms-item">
+        <input type="checkbox" ${st.selected.has(o.v) ? 'checked' : ''}
+               onchange="event.stopPropagation();bmsToggleIdx('${key}',${i})">
+        <span>${esc(o.t)}</span></label>`).join('')
+    : '<div class="ms-empty">لا توجد خيارات</div>';
+  el.innerHTML = `<div class="ms-ftr-top"><button onclick="bmsClear('${key}')">✕ مسح الاختيار</button></div>${items}`;
+}
+function bmsToggle(key, ev){
+  ev.stopPropagation();
+  const el = document.getElementById('bmsList-' + key), wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.ms-list').forEach(l => l.classList.remove('open'));
+  if (!wasOpen) { bmsRenderList(key); el.classList.add('open'); }
+}
+// ⚠️ التمرير **بالفهرس** مش بالقيمة: اسم براند فيه علامة اقتباس بيتفك من
+//    الـ attribute وقت ما المتصفح يقراه، فالنص اللي بيوصل للدالة بيبقى مكسور —
+//    والـ onclick نفسه ممكن ما يشتغلش خالص من غير أي رسالة.
+function bmsToggleIdx(key, idx){
+  const o = bmsState[key].options[idx];
+  if (o) bmsToggleItem(key, o.v);
+}
+function bmsToggleItem(key, val){
+  const st = bmsState[key];
+  if (st.selected.has(val)) st.selected.delete(val); else st.selected.add(val);
+  bmsRenderList(key); bmsSyncBtn(key); renderBulkChips();
+  if (key === 'scope') { computeBulkRows(); }
+  applyBulkFilters();
+}
+function bmsClear(key){
+  bmsState[key].selected.clear();
+  bmsRenderList(key); bmsSyncBtn(key); renderBulkChips();
+  if (key === 'scope') { computeBulkRows(); }
+  applyBulkFilters();
+}
+function bmsSyncBtn(key){
+  const st = bmsState[key], n = st.selected.size;
+  const lbl = document.getElementById('bmsLbl-' + key), btn = document.getElementById('bmsBtn-' + key);
+  if (!lbl || !btn) return;
+  lbl.textContent = n ? `${n} مختار` : st.label;
+  btn.classList.toggle('active', n > 0);
+}
+// 🔴 نفس حارس فلاتر السجل: العنصر المضغوط بيتشال من الـ DOM قبل ما الحدث
+//    يوصل هنا، و contains(detached) بترجّع false فالقائمة كانت بتتقفل بعد
+//    **أول** اختيار.
+document.addEventListener('click', (e) => {
+  if (!document.contains(e.target)) return;
+  Object.keys(bmsState).forEach(k => {
+    const wrap = document.getElementById('bmsWrap-' + k);
+    const list = document.getElementById('bmsList-' + k);
+    if (wrap && list && !wrap.contains(e.target)) list.classList.remove('open');
+  });
+});
+
+function renderBulkChips(){
+  const zone = document.getElementById('bulkChipsZone');
+  if (!zone) return;
+  let html = '';
+  for (const key of ['state','vendor','sel']){
+    const st = bmsState[key];
+    if (!st.selected.size) continue;
+    const chips = [...st.selected].map(v => {
+      const i = st.options.findIndex(x => x.v === v);
+      const o = i >= 0 ? st.options[i] : null;
+      return `<span class="ms-chip">${esc(o ? o.t : v)}<button onclick="bmsToggleIdx('${key}',${i})">✕</button></span>`;
+    }).join('');
+    html += `<div class="ms-chips-row"><span class="chips-label">${esc(st.title)}:</span>${chips}</div>`;
+  }
+  zone.innerHTML = html;
+  document.getElementById('bulkFunnel').classList.toggle('active', anyBulkFilterActive());
+}
+// ⚠️ !!value مش !== null
+function anyBulkFilterActive(){
+  if (['state','vendor','sel'].some(k => bmsState[k].selected.size > 0)) return true;
+  return !!document.getElementById('bulkSearch').value.trim();
+}
+function clearBulkFilters(){
+  ['state','vendor','sel'].forEach(k => { bmsState[k].selected.clear(); bmsSyncBtn(k); bmsRenderList(k); });
+  document.getElementById('bulkSearch').value = '';
+  document.getElementById('bulkSearch').classList.remove('has-value');
+  renderBulkChips(); applyBulkFilters();
+}
+function toggleBulkFilters(){
+  bulkFltOpen = !bulkFltOpen;
+  document.getElementById('bulkFltBody').classList.toggle('closed', !bulkFltOpen);
+  document.getElementById('bulkFltArrow').classList.toggle('closed', !bulkFltOpen);
+}
+function toggleBulkTable(){
+  bulkTableOpen = !bulkTableOpen;
+  document.getElementById('bulkTableZone').style.display = bulkTableOpen ? '' : 'none';
+  document.getElementById('bulkTblArrow').classList.toggle('closed', !bulkTableOpen);
+}
+
+// ─── §BULK-JS::index — تحميل الفهرس ───
+// ⚠️ إعادة التحميل **بتحافظ على المسحات** عن قصد: ده مسار الإصلاح لما رصيد
+//    يتغيّر أثناء جلسة طويلة. اللي بيتمسح هو بيانات الأوردرات المعلّقة
+//    (`bulkShelf`) لأنها بقت قديمة زيّها زي الأرصدة.
+async function loadBulkIndex(){
+  if (isUpdatingBulk) return;
+  const btn = document.getElementById('bulkLoadBtn');
+  btn.disabled = true; const old = btn.textContent; btn.textContent = '⏳ جاري التحميل...';
+  try {
+    const data = await apiGet('get_bulk_index');
+    const variants = data.variants || [];
+    const byId = new Map(), byBarcode = new Map(), bySku = new Map();
+    for (const v of variants){
+      byId.set(v.variantId, v);
+      if (v.sku) bySku.set(v.sku.toUpperCase(), v);
+      if (v.barcode){
+        if (!byBarcode.has(v.barcode)) byBarcode.set(v.barcode, []);
+        byBarcode.get(v.barcode).push(v);
+      }
+    }
+    bulkIndex = {
+      variants, byId, byBarcode, bySku,
+      dupBarcodes: data.dupBarcodes || {},
+      loadedAt: new Date(),
+      truncated: data.truncated === true,
+      cap: data.cap, scanned: data.scanned,
+      skippedNoLevel: data.skippedNoLevel || 0,
+    };
+    bulkCaps = {
+      chunk:         data.chunkHint      || bulkCaps.chunk,
+      shelfChunk:    data.shelfChunkHint || bulkCaps.shelfChunk,
+      maxBatch:      data.maxBatch       || bulkCaps.maxBatch,
+      shelfMaxBatch: data.shelfMaxBatch  || bulkCaps.shelfMaxBatch,
+    };
+    bulkShelf.clear();     // الأرصدة اتجدّدت → بيانات التغليف القديمة بقت قديمة
+
+    // خيارات البراند للفلتر وللنطاق
+    const vendors = [...new Set(variants.map(v => v.vendor || '—'))].sort((a,b) => a.localeCompare(b,'ar'));
+    const opts = vendors.map(v => ({ v, t: v }));
+    bmsState.vendor.options = opts;
+    bmsState.scope.options  = opts;
+    bmsRenderList('vendor'); bmsRenderList('scope');
+    bmsState.state.options = Object.keys(BULK_STATES).map(k => ({ v:k, t:BULK_STATES[k].label }));
+    bmsRenderList('state'); bmsRenderList('sel');
+
+    renderBulkIndexWarn();
+    updateBulkIndexTs();
+    document.getElementById('bulkIdxStat').innerHTML =
+      `الفهرس: <b>${variants.length.toLocaleString('en-US')}</b> صنف صالح للجرد · `
+      + `<b>${byBarcode.size.toLocaleString('en-US')}</b> باركود`
+      + (bulkIndex.skippedNoLevel
+          ? ` · <b>${bulkIndex.skippedNoLevel.toLocaleString('en-US')}</b> صنف مش مخزّن في الموقع ده (اتشالوا)`
+          : '');
+    document.getElementById('bulkScanToggle').disabled = false;
+    document.getElementById('bulkResetBtn').disabled   = false;
+    computeBulkRows(); applyBulkFilters();
+    showToast(`✓ الفهرس اتحمّل — ${variants.length.toLocaleString('en-US')} صنف`, 'success');
+  } catch (e){
+    showToast('تعذّر تحميل الفهرس: ' + e.message, 'error', 9000);
+  } finally { btn.disabled = false; btn.textContent = old; }
+}
+
+// بانر ثابت — التقصّ لازم يبان، والوضع الشامل بيتقفل معاه:
+// «جرد شامل» على فهرس ناقص ادّعاء، مش جرد.
+function renderBulkIndexWarn(){
+  const box  = document.getElementById('bulkIndexWarn');
+  const full = document.getElementById('bulkScopeFull');
+  if (!bulkIndex || !bulkIndex.truncated){ box.style.display = 'none'; box.innerHTML = '';
+    full.classList.remove('locked'); full.querySelector('input').disabled = false; return; }
+  box.innerHTML = `⚠️ <b>الفهرس اتقص</b> — الأداة وقفت عند <b>${Number(bulkIndex.cap || 0).toLocaleString('en-US')}</b> متغيّر، `
+    + `يعني فيه أصناف في المتجر مش في الفهرس ده. المسح والمقارنة شغّالين عادي على اللي اتحمّل، `
+    + `لكن <b>وضع «الجرد الشامل» متقفل</b> — جرد شامل على فهرس ناقص بيقول «مفيش» على أصناف الأداة أصلاً ما شافتهاش.`;
+  box.style.display = '';
+  full.classList.add('locked');
+  full.querySelector('input').disabled = true;
+  if (bulkMode === 'full') setBulkMode('scanned');
+}
+
+function updateBulkIndexTs(){
+  if (!bulkIndex) return;
+  const el = document.getElementById('bulkIndexTs');
+  el.style.display = 'flex';
+  const d = bulkIndex.loadedAt;
+  document.getElementById('bxDate').textContent = formatDate(d.toISOString()).replace('📅 ','');
+  document.getElementById('bxTime').textContent = formatTimeOnly(d.toISOString()).replace('🕐 ','');
+  const mins = Math.floor((Date.now() - d.getTime()) / 60000);
+  const rel  = mins < 1 ? 'دلوقتي' : mins < 60 ? `منذ ${mins} دقيقة` : `منذ ${Math.floor(mins/60)} ساعة`;
+  const relEl = document.getElementById('bxRelative');
+  relEl.textContent = '· ' + rel;
+  // الأرصدة بتقدم: بعد ساعتين التحذير بيبان بدل ما الموظف يفترض إنها لايف
+  el.style.borderColor = mins >= 120 ? 'var(--amber)' : 'var(--accent-border)';
+}
+setInterval(() => { if (bulkIndex) updateBulkIndexTs(); }, 60000);
+
+// ─── §BULK-JS::scan — جلسة المسح ───
+// نفس نمط السكانر المعتمد: الـ listener بيحط مؤقّت بس، والقراية والمسح جوّه
+// الـ handler — المسح في الـ listener بيمسح الإدخال في نص دفعة السكانر.
+const bulkScanInputEl = document.getElementById('bulkScanInput');
+let _bulkScanTimer = null;
+bulkScanInputEl.addEventListener('input', () => {
+  if (!bulkScanActive) return;
+  clearTimeout(_bulkScanTimer);
+  document.getElementById('bulkScanWrap').classList.add('scanning');
+  const isBurst = bulkScanInputEl.value.length > 3;
+  _bulkScanTimer = setTimeout(handleBulkScanInput, isBurst ? SCAN_BURST_MS : SCAN_TYPE_MS);
+});
+function handleBulkScanInput(){
+  const val = bulkScanInputEl.value.trim();   // القراية هنا
+  bulkScanInputEl.value = '';                 // والمسح هنا
+  bulkScanInputEl.focus();
+  const wrap = document.getElementById('bulkScanWrap');
+  wrap.classList.remove('scanning'); wrap.classList.add('armed');
+  if (!val) return;
+  if (!scanIsPlausible(val)) return;          // نفس حارس الطول المعتمد
+  processBulkScanCode(val);
+}
+
+function toggleBulkScan(){
+  if (!bulkIndex){ showToast('حمّل الفهرس الأول', 'warning'); return; }
+  if (isUpdatingBulk){ showToast('في تنفيذ شغّال — استنى لما يخلص', 'warning'); return; }
+  bulkScanActive = !bulkScanActive;
+  const wrap = document.getElementById('bulkScanWrap');
+  const btn  = document.getElementById('bulkScanToggle');
+  bulkScanInputEl.disabled = !bulkScanActive;
+  wrap.classList.toggle('disabled', !bulkScanActive);
+  wrap.classList.toggle('armed', bulkScanActive);
+  btn.textContent = bulkScanActive ? '⏸ إيقاف المسح' : '▶ ابدأ المسح';
+  btn.classList.toggle('go', !bulkScanActive);
+  btn.classList.toggle('amber', bulkScanActive);
+  bulkScanInputEl.placeholder = bulkScanActive
+    ? 'امسح... (سيب المؤشر هنا)'
+    : 'اضغط «ابدأ المسح» قبل ما تمسح';
+  if (bulkScanActive) setTimeout(() => bulkScanInputEl.focus(), 40);
+}
+
+function setBulkLive(kind, text, count){
+  const el = document.getElementById('bulkLive');
+  el.className = 'bulk-live' + (kind ? ' ' + kind : '');
+  el.innerHTML = esc(text) + (count != null
+    ? ` <span class="bulk-live-count">${Number(count).toLocaleString('en-US')}</span>` : '');
+}
+
+function processBulkScanCode(raw){
+  if (isUpdatingBulk) return;          // القفل البصري لوحده مابيمنعش النداء البرمجي
+  const code = String(raw || '').trim();
+  if (!bulkIndex){ showToast('حمّل الفهرس الأول', 'warning'); return; }
+
+  const list = bulkIndex.byBarcode.get(code) || [];
+  if (list.length === 0){ addBulkProblem(code, 'unknown', []); return; }
+  // 🔴 باركود على أكتر من صنف: الأداة **مش هتخمّن**. من غير الحارس ده المسحة
+  //    كانت هتتحسب على أول صنف نلاقيه، والرصيد يتعدّل على صنف تاني خالص.
+  if (list.length > 1){ addBulkProblem(code, 'ambiguous', list); return; }
+
+  const v = list[0];
+  if (bulkDone.has(v.variantId)){
+    playBeep('error'); vibrateDevice([100,50,100]);
+    setBulkLive('bad', `${v.sku} اتنفّذ خلاص في الجلسة دي — ابدأ جلسة جديدة لو عايز تعدّه تاني`, null);
+    return;
+  }
+  const rec = bulkScans.get(v.variantId) || { scanned: 0, manual: 0 };
+  rec.scanned++;
+  bulkScans.set(v.variantId, rec);
+  bulkSessionScans++;
+  playBeep('success'); vibrateDevice(40);
+  setBulkLive('ok', `${v.sku} — ${v.productTitle}${v.variantTitle ? ' · ' + v.variantTitle : ''}`, rec.scanned + rec.manual);
+  updateBulkScanStats();
+  scheduleBulkRecompute();
+}
+
+// المسح ممكن يجي ١٠ مرات في الثانية — إعادة بناء الجدول مع كل مسحة بتخنق
+// الـ main thread وبتكسر توقيت السكانر نفسه. العدّادات بتتحدّث فورًا،
+// والجدول بعد ٣٠٠ms من آخر مسحة.
+function scheduleBulkRecompute(){
+  clearTimeout(_bulkRecomputeTimer);
+  _bulkRecomputeTimer = setTimeout(() => { computeBulkRows(); applyBulkFilters(); }, 300);
+}
+
+function updateBulkScanStats(){
+  let pieces = 0;
+  for (const r of bulkScans.values()) pieces += r.scanned + r.manual;
+  document.getElementById('bulkStatScans').textContent    = bulkSessionScans.toLocaleString('en-US');
+  document.getElementById('bulkStatSkus').textContent     = bulkScans.size.toLocaleString('en-US');
+  document.getElementById('bulkStatPieces').textContent   = pieces.toLocaleString('en-US');
+  document.getElementById('bulkStatProblems').textContent = bulkProblems.size.toLocaleString('en-US');
+}
+
+// إضافة صنف يدويًا — للقطع اللي باركودها تالف أو منتج بلا باركود
+function addBulkBySku(){
+  const inp = document.getElementById('bulkSkuAdd');
+  const sku = inp.value.trim();
+  if (!sku) return;
+  if (!bulkIndex){ showToast('حمّل الفهرس الأول', 'warning'); return; }
+  if (isUpdatingBulk){ showToast('في تنفيذ شغّال — استنى لما يخلص', 'warning'); return; }
+  const v = bulkIndex.bySku.get(sku.toUpperCase());
+  if (!v){ showToast(`مفيش صنف بالـ SKU ده في الفهرس: ${sku}`, 'error', 6000); playBeep('error'); return; }
+  const rec = bulkScans.get(v.variantId) || { scanned: 0, manual: 0 };
+  rec.manual++;
+  bulkScans.set(v.variantId, rec);
+  inp.value = '';
+  playBeep('success');
+  setBulkLive('ok', `(يدوي) ${v.sku} — ${v.productTitle}`, rec.scanned + rec.manual);
+  updateBulkScanStats(); computeBulkRows(); applyBulkFilters();
+}
+
+// تعديل العدد اليدوي من جوّه الجدول
+function setBulkManual(variantId, val){
+  if (isUpdatingBulk) return;
+  const n = Math.max(0, parseInt(val, 10) || 0);
+  const rec = bulkScans.get(variantId) || { scanned: 0, manual: 0 };
+  rec.manual = n;
+  bulkScans.set(variantId, rec);
+  updateBulkScanStats(); computeBulkRows(); applyBulkFilters();
+}
+
+// ─── §BULK-JS::problems — المدخل اللي الأداة ما عرفتهوش (Standards #44) ───
+function addBulkProblem(code, reason, candidates){
+  const rec = bulkProblems.get(code) || { code, count: 0, reason, candidates: candidates || [] };
+  rec.count++; rec.reason = reason; rec.candidates = candidates || [];
+  bulkProblems.set(code, rec);
+  playBeep('error'); vibrateDevice([100,50,100]);
+  setBulkLive('bad', reason === 'unknown'
+    ? `الكود ${code} مش موجود في الفهرس — لاصقة غلط أو صنف مش متتبّع أو الفهرس قديم`
+    : `الكود ${code} متكرر على ${(candidates||[]).length} أصناف — الأداة مش هتخمّن`, null);
+  renderBulkProblems(); updateBulkScanStats(); updateBulkButtons();
+}
+function renderBulkProblems(){
+  const card = document.getElementById('bulkProbCard');
+  const list = document.getElementById('bulkProbList');
+  if (!bulkProblems.size){ card.style.display = 'none'; list.innerHTML = ''; return; }
+  card.style.display = '';
+  const arr = [...bulkProblems.values()];
+  list.innerHTML = arr.map((p, i) => {
+    const why = p.reason === 'unknown'
+      ? 'مش موجود في الفهرس'
+      : 'متكرر على: ' + p.candidates.map(c => c.sku).join(' · ');
+    return `<div class="bulk-prob-row">
+      <span class="bulk-prob-code">${esc(p.code)}</span>
+      <span class="bulk-prob-why">${esc(why)}</span>
+      <span class="log-count-badge">${p.count.toLocaleString('en-US')}×</span>
+      <button class="bulk-prob-x" title="شيل الكود ده" onclick="removeBulkProblemIdx(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+// نفس سبب `bmsToggleIdx` — الكود المسحوب نص حر جاي من جهاز بره الصفحة.
+function removeBulkProblemIdx(idx){
+  const p = [...bulkProblems.values()][idx];
+  if (p) removeBulkProblem(p.code);
+}
+function removeBulkProblem(code){
+  bulkProblems.delete(code);
+  renderBulkProblems(); updateBulkScanStats(); updateBulkButtons();
+}
+function clearBulkProblems(){
+  bulkProblems.clear();
+  renderBulkProblems(); updateBulkScanStats(); updateBulkButtons();
+  showToast('اتشالوا من القايمة — التنفيذ اتفتح', 'neutral');
+}
+
+// ─── §BULK-JS::scope ───
+function setBulkMode(mode){
+  if (mode === 'full' && bulkIndex && bulkIndex.truncated){
+    showToast('الوضع الشامل متقفل — الفهرس اتقص', 'warning', 6000);
+    document.querySelector('input[name="bulkScope"][value="scanned"]').checked = true;
+    mode = 'scanned';
+  }
+  bulkMode = mode;
+  document.getElementById('bulkScopeScanned').classList.toggle('on', mode === 'scanned');
+  document.getElementById('bulkScopeFull').classList.toggle('on', mode === 'full');
+  const note = document.getElementById('bulkScopeNote');
+  if (mode === 'full'){
+    note.style.display = '';
+    note.innerHTML = '🧹 <b>الوضع الشامل شغّال.</b> أي صنف في النطاق ما اتمسحش ورصيده أكبر من صفر '
+      + 'هيظهر «⚠️ مش متسكن». الصفوف دي <b>مش متحدّدة افتراضيًا</b> — حدّدها بنفسك بس لو إنت متأكد '
+      + 'إنك مسحت كل حاجة في النطاق ده.';
+  } else { note.style.display = 'none'; note.innerHTML = ''; }
+  computeBulkRows(); applyBulkFilters();
+}
+
+// ─── §BULK-JS::compare — المقارنة ───
+//
+// المتوقع على الرف = available + committed − المغلَّف
+// نفس معادلة تاب الجرد الفردي بالظبط (`currentShelfQty = available + unpackedCommitted`)
+// — القطع المحجوزة لأوردر لسه ما اتغلّفش **لسه على الرف**، واللي اتغلّفت لأ.
+// عشان كده أي صنف عليه حجز (`committed > 0`) بيفضل «محتاج مراجعة» ومش بيتنفّذ
+// لحد ما `bulk_shelf_check` يجيب رقم المغلَّف الحقيقي.
+function computeBulkRows(){
+  bulkRows = [];
+  if (!bulkIndex) return;
+
+  const scopeSel = bmsState.scope.selected;
+  const inScope  = v => !scopeSel.size || scopeSel.has(v.vendor || '—');
+
+  const build = (v, scanned, manual) => {
+    const counted   = scanned + manual;
+    const shelf     = bulkShelf.get(v.variantId) || null;
+    const refined   = !!(shelf && shelf.ok);
+    const packed    = refined ? shelf.packed : 0;
+    const available = v.available ?? 0;
+    const committed = v.committed ?? 0;
+    const expected  = available + committed - packed;
+    const diff      = counted - expected;
+
+    // onHand مش مساوي available+committed معناه إن الصنف عليه حالات مخزون تانية
+    // (تالف · محجوز · فحص جودة) — معادلة الرف مش بتغطّيها، فالصنف بيتشال من
+    // التنفيذ الجماعي بدل ما يتعدّل برقم ناقص.
+    const otherStates = v.onHand != null && v.onHand !== available + committed;
+    const untouched   = counted === 0 && scanned === 0 && manual === 0 && !bulkScans.has(v.variantId);
+
+    let state;
+    if (otherStates)                     state = 'other_states';
+    else if (untouched && !v.barcode)    state = 'no_barcode';
+    else if (committed > 0 && !refined)  state = 'needs_check';
+    else if (untouched)                  state = 'missing';
+    else if (diff === 0)                 state = 'match';
+    else if (diff < 0)                   state = 'short';
+    else                                 state = 'over';
+
+    bulkRows.push({
+      variantId: v.variantId, productId: v.productId, inventoryItemId: v.inventoryItemId,
+      sku: v.sku, barcode: v.barcode, productTitle: v.productTitle,
+      variantTitle: v.variantTitle, vendor: v.vendor || '—',
+      lastAuditDate: v.lastAuditDate,
+      scanned, manual, counted, expected, diff, state,
+      available, committed, onHand: v.onHand, packed,
+      // المحاولة الفاشلة بتفضل في القايمة — الزرار بيعيدها. «تعذّر الاستعلام»
+      // مش «مفيش مغلَّف»، والصف بيفضل مقفول لحد ما نعرف الرقم الحقيقي.
+      needsShelf: committed > 0 && !refined,
+      shelfError: shelf && shelf.ok === false ? shelf.error : null,
+      result: bulkResults.get(v.variantId) || null,
+    });
+  };
+
+  bulkOrphanScans = 0;
+  for (const [vid, rec] of bulkScans){
+    const v = bulkIndex.byId.get(vid);
+    // الصنف اتشال من الفهرس بعد تحديثه (بقى Suspended · اتوقف · اتشال من الموقع).
+    // ⛔ ممنوع يختفي في صمت — بيتعدّ وبيظهر تحذير فوق الجدول.
+    if (!v){ bulkOrphanScans += rec.scanned + rec.manual; continue; }
+    build(v, rec.scanned, rec.manual);
+  }
+
+  if (bulkMode === 'full'){
+    for (const v of bulkIndex.variants){
+      if (bulkScans.has(v.variantId)) continue;
+      if (!inScope(v)) continue;
+      if (((v.available ?? 0) + (v.committed ?? 0)) <= 0) continue;   // رصيده صفر أصلاً
+      build(v, 0, 0);
+    }
+  }
+}
+
+function isBulkSelected(r){
+  if (bulkDone.has(r.variantId)) return false;
+  if (!BULK_STATES[r.state]?.sel) return false;
+  if (bulkSelOverride.has(r.variantId)) return bulkSelOverride.get(r.variantId);
+  return !!BULK_STATES[r.state]?.auto;
+}
+function bulkExecutableRows(){
+  return bulkRows.filter(r => isBulkSelected(r));
+}
+function toggleBulkRowIdx(idx){
+  const r = bulkFiltered[idx];
+  if (r) toggleBulkRowSel(r.variantId);
+}
+function setBulkManualIdx(idx, val){
+  const r = bulkFiltered[idx];
+  if (r) setBulkManual(r.variantId, val);
+}
+function toggleBulkRowSel(variantId){
+  if (isUpdatingBulk) return;
+  const r = bulkRows.find(x => x.variantId === variantId);
+  if (!r) return;
+  bulkSelOverride.set(variantId, !isBulkSelected(r));
+  applyBulkFilters();
+}
+function bulkSelectAll(on){
+  if (isUpdatingBulk) return;
+  for (const r of bulkFiltered){
+    if (bulkDone.has(r.variantId)) continue;
+    if (!BULK_STATES[r.state]?.sel) continue;
+    bulkSelOverride.set(r.variantId, !!on);
+  }
+  applyBulkFilters();
+}
+
+// ─── §BULK-JS::filters+table ───
+document.getElementById('bulkSearch').addEventListener('input', (e) => {
+  e.target.classList.toggle('has-value', !!e.target.value.trim());
+  clearTimeout(_bulkSearchTimer);
+  _bulkSearchTimer = setTimeout(() => { renderBulkChips(); applyBulkFilters(); }, 250);
+});
+
+const BULK_SORT_CFG = {
+  sku:{type:'string'}, productTitle:{type:'string'}, vendor:{type:'string'},
+  scanned:{type:'number'}, manual:{type:'number'}, counted:{type:'number'},
+  expected:{type:'number'}, diff:{type:'number'}, state:{type:'string'},
+};
+function toggleBulkSort(key){
+  if (bulkSortState.key !== key){ bulkSortState.key = key; bulkSortState.dir = 'asc'; }
+  else if (bulkSortState.dir === 'asc'){ bulkSortState.dir = 'desc'; }
+  else { bulkSortState.key = null; bulkSortState.dir = null; }
+  applyBulkFilters();
+}
+// ⚠️ الترتيب دايمًا على **نسخة** من المصفوفة — الترتيب في المكان بيعدّل مصدر
+//    البيانات نفسه، فحالة «بلا ترتيب» عمرها ما هترجع للترتيب الأصلي.
+function applyBulkSort(rows){
+  if (!bulkSortState.key) return rows;
+  const cfg = BULK_SORT_CFG[bulkSortState.key];
+  const dir = bulkSortState.dir === 'asc' ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    const av = a[bulkSortState.key], bv = b[bulkSortState.key];
+    if (cfg.type === 'string') return String(av ?? '').localeCompare(String(bv ?? ''), 'ar') * dir;
+    return ((av ?? 0) - (bv ?? 0)) * dir;
+  });
+}
+
+function applyBulkFilters(){
+  const q     = document.getElementById('bulkSearch').value.trim().toLowerCase();
+  const stSel = bmsState.state.selected, vnSel = bmsState.vendor.selected, seSel = bmsState.sel.selected;
+  const filtered = bulkRows.filter(r => {
+    if (stSel.size && !stSel.has(r.state)) return false;
+    if (vnSel.size && !vnSel.has(r.vendor)) return false;
+    if (seSel.size){
+      const k = bulkDone.has(r.variantId) ? 'done' : (isBulkSelected(r) ? 'on' : 'off');
+      if (!seSel.has(k)) return false;
+    }
+    if (q && !(`${r.sku} ${r.productTitle} ${r.variantTitle}`.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  bulkFiltered = applyBulkSort(filtered);
+  renderBulkTable();
+  renderBulkStats();
+  updateBulkButtons();
+  document.getElementById('bulkResultsCount').textContent = filtered.length.toLocaleString('en-US');
+}
+
+const BULK_COLS = [
+  { key:null,           label:'', sortable:false },
+  { key:'sku',          label:'SKU' },
+  { key:'productTitle', label:'المنتج' },
+  { key:'vendor',       label:'البراند' },
+  { key:'scanned',      label:'سكانر' },
+  { key:'manual',       label:'يدوي' },
+  { key:'counted',      label:'المعدود' },
+  { key:'expected',     label:'المتوقع' },
+  { key:'diff',         label:'الفرق' },
+  { key:'state',        label:'الحالة' },
+  { key:null,           label:'النتيجة', sortable:false },
+];
+function renderBulkHead(){
+  const row = document.getElementById('bulkHeadRow');
+  row.innerHTML = BULK_COLS.map((c, i) => {
+    if (i === 0){
+      const pick = bulkFiltered.filter(r => BULK_STATES[r.state]?.sel && !bulkDone.has(r.variantId));
+      const all  = pick.length > 0 && pick.every(isBulkSelected);
+      const dis  = isUpdatingBulk || !pick.length ? 'disabled' : '';
+      return `<th style="width:34px;"><input type="checkbox" id="bulkSelAll" ${dis} ${all ? 'checked' : ''}
+                onchange="bulkSelectAll(this.checked)" title="تحديد/إلغاء كل المعروض"></th>`;
+    }
+    if (c.sortable === false) return `<th>${esc(c.label)}</th>`;
+    const on  = bulkSortState.key === c.key;
+    const ind = on ? `<span class="sort-ind">${bulkSortState.dir === 'asc' ? '▲' : '▼'}</span>` : '';
+    return `<th class="sortable-th" data-sort-key="${esc(c.key)}" onclick="toggleBulkSort('${esc(c.key)}')">${esc(c.label)}${ind}</th>`;
+  }).join('');
+}
+
+function renderBulkTable(){
+  renderBulkHead();
+  const body = document.getElementById('bulkBody');
+  if (!bulkRows.length){
+    body.innerHTML = `<tr><td colspan="${BULK_COLS.length}"><div class="state-box"><div class="state-icon">🧾</div>`
+      + `<p>${bulkIndex ? 'ابدأ المسح — المقارنة هتظهر هنا أول بأول' : 'حمّل الفهرس الأول'}</p></div></td></tr>`;
+    return;
+  }
+  if (!bulkFiltered.length){
+    body.innerHTML = `<tr><td colspan="${BULK_COLS.length}"><div class="log-empty">مفيش صفوف مطابقة للفلاتر</div></td></tr>`;
+    return;
+  }
+  body.innerHTML = bulkFiltered.map((r, i) => {
+    const done = bulkDone.has(r.variantId);
+    const sel  = isBulkSelected(r);
+    const selectable = BULK_STATES[r.state]?.sel && !done && !isUpdatingBulk;
+    const diffCls = r.diff > 0 ? 'pos' : r.diff < 0 ? 'neg' : 'zero';
+    const diffTxt = r.state === 'no_barcode' || r.state === 'needs_check' || r.state === 'other_states'
+      ? '—' : (r.diff > 0 ? '+' : '') + r.diff.toLocaleString('en-US');
+    const res = r.result;
+    const resHtml = res
+      ? `<span class="log-res-badge res-${esc(res.status)}" title="${esc((res.warnings||[]).join(' · ') || res.error || (res.actions||[]).join(' · '))}">${esc(resultLabel(res.status))}</span>`
+      : (r.shelfError ? `<span class="log-res-badge res-error" title="${esc(r.shelfError)}">تعذّر الاستعلام</span>` : '<span class="res-none">—</span>');
+    return `<tr class="${done ? 'is-done' : ''}${!BULK_STATES[r.state]?.sel ? ' is-blocked' : ''}">
+      <td><input type="checkbox" ${sel ? 'checked' : ''} ${selectable ? '' : 'disabled'}
+           onchange="toggleBulkRowIdx(${i})"></td>
+      <td><span class="log-sku-badge">${esc(r.sku)}</span></td>
+      <td>${esc(r.productTitle)}${r.variantTitle ? ` <span class="bulk-card-sub">· ${esc(r.variantTitle)}</span>` : ''}</td>
+      <td>${esc(r.vendor)}</td>
+      <td class="col-num">${r.scanned.toLocaleString('en-US')}</td>
+      <td><input type="number" min="0" class="bulk-manual-cell" value="${r.manual}" ${isUpdatingBulk || done ? 'disabled' : ''}
+           onchange="setBulkManualIdx(${i}, this.value)"></td>
+      <td class="col-num">${r.counted.toLocaleString('en-US')}</td>
+      <td class="col-num" title="available ${r.available} + committed ${r.committed} − مغلَّف ${r.packed}">${r.expected.toLocaleString('en-US')}</td>
+      <td class="col-num"><span class="bulk-diff ${diffCls}">${esc(diffTxt)}</span></td>
+      <td><span class="bulk-state st-${esc(r.state)}">${esc(BULK_STATES[r.state]?.label || r.state)}</span></td>
+      <td>${resHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderBulkStats(){
+  renderBulkNotices();
+  const bar = document.getElementById('bulkStatsBar');
+  if (!bulkRows.length){ bar.style.display = 'none'; bar.innerHTML = ''; return; }
+  const by = {};
+  let plus = 0, minus = 0;
+  for (const r of bulkRows){
+    by[r.state] = (by[r.state] || 0) + 1;
+    if (BULK_STATES[r.state]?.sel && isBulkSelected(r)){
+      if (r.diff > 0) plus += r.diff; else if (r.diff < 0) minus += -r.diff;
+    }
+  }
+  const chips = Object.keys(BULK_STATES).filter(k => by[k]).map(k =>
+    `<span class="bulk-state st-${k}">${esc(BULK_STATES[k].label)}: ${by[k].toLocaleString('en-US')}</span>`).join('');
+  bar.style.display = 'flex';
+  bar.innerHTML = chips
+    + `<span class="bulk-card-spacer"></span>`
+    + `<span class="bulk-diff pos">+${plus.toLocaleString('en-US')}</span>`
+    + `<span class="bulk-diff neg">−${minus.toLocaleString('en-US')}</span>`
+    + `<span class="bulk-card-sub">قطعة في التحديد الحالي</span>`;
+}
+
+// تحذيرات دايمة فوق الجدول — مش توست بيختفي
+function renderBulkNotices(){
+  const box = document.getElementById('bulkNotices');
+  const out = [];
+  if (bulkOrphanScans)
+    out.push(`⚠️ <b>${bulkOrphanScans.toLocaleString('en-US')}</b> قطعة اتمسحت على أصناف مش موجودة في الفهرس الحالي `
+      + `(اتشالت من شوبيفاي أو بقت Suspended بعد آخر تحميل) — <b>مش ظاهرة في الجدول ومش هتتنفّذ</b>.`);
+  const dups = bulkIndex ? Object.keys(bulkIndex.dupBarcodes || {}) : [];
+  if (dups.length)
+    out.push(`ℹ️ في <b>${dups.length.toLocaleString('en-US')}</b> باركود متكرر على أكتر من صنف في المتجر — `
+      + `مسح أي واحد منهم هيروح لقايمة «أكواد فيها مشكلة» بدل ما الأداة تخمّن، `
+      + `وهتحتاج تضيف الصنف الصح يدويًا بالـ SKU.`);
+  box.innerHTML = out.map(t => `<div class="export-warn">${t}</div>`).join('');
+  box.style.display = out.length ? '' : 'none';
+}
+
+function updateBulkButtons(){
+  const execBtn  = document.getElementById('bulkExecBtn');
+  const shelfBtn = document.getElementById('bulkShelfBtn');
+  const expBtn   = document.getElementById('bulkExportBtn');
+  const n        = bulkExecutableRows().length;
+  const nShelf   = bulkRows.filter(r => r.needsShelf).length;
+  const blocked  = bulkProblems.size > 0;
+
+  execBtn.disabled = isUpdatingBulk || blocked || n === 0;
+  execBtn.textContent = blocked
+    ? '🔒 شيل الأكواد المجهولة الأول'
+    : `✔ نفّذ التعديلات${n ? ` (${n.toLocaleString('en-US')})` : ''}`;
+
+  shelfBtn.disabled = isUpdatingBulk || nShelf === 0;
+  shelfBtn.textContent = nShelf
+    ? `🔍 مراجعة الأوردرات المعلّقة (${nShelf.toLocaleString('en-US')})`
+    : '🔍 مراجعة الأوردرات المعلّقة';
+
+  expBtn.disabled = isUpdatingBulk || !bulkRows.length;
+}
+
+// ─── §BULK-JS::lock — القفل واللقطة أثناء أي دفعة (Standards #43) ───
+// القفل البصري لوحده مابيمنعش النداء البرمجي — كل دالة تعديل فيها
+// `if (isUpdatingBulk) return;` كمان.
+function setBulkUpdateLock(on){
+  // ⚠️ إيقاف المسح **قبل** رفع العلم — `toggleBulkScan` نفسها بترجع بدري لو
+  //    العلم مرفوع، فالترتيب المعكوس كان بيسيب السكانر شغّال أثناء الكتابة.
+  if (on && bulkScanActive) toggleBulkScan();
+  isUpdatingBulk = on;
+  document.getElementById('bulkScanToggle').disabled = on || !bulkIndex;
+  document.getElementById('bulkLoadBtn').disabled    = on;
+  document.getElementById('bulkResetBtn').disabled   = on || !bulkIndex;
+  document.getElementById('bulkSkuAdd').disabled     = on;
+  bulkScanInputEl.disabled = on || !bulkScanActive;
+  bulkScanInputEl.placeholder = on ? '⏳ في تنفيذ شغّال — المسح متوقّف'
+    : bulkScanActive ? 'امسح... (سيب المؤشر هنا)' : 'اضغط «ابدأ المسح» قبل ما تمسح';
+  updateBulkButtons();
+  // (9) الجدول لازم يعكس القفل فورًا — من غير كده الخانات تفضل شكلها مفتوح
+  //     لحد أول مجموعة ما تخلص.
+  if (bulkRows.length) renderBulkTable();
+}
+function showBulkProgress(on){
+  document.getElementById('bulkProgress').classList.toggle('on', on);
+  if (!on){ document.getElementById('bulkProgressBar').style.width = '0'; }
+}
+function setBulkProgress(done, total, label){
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('bulkProgressBar').style.width = pct + '%';
+  document.getElementById('bulkProgressTxt').textContent =
+    `${label}: ${done.toLocaleString('en-US')} / ${total.toLocaleString('en-US')} (${pct}%)`;
+}
+
+// ─── §BULK-JS::shelfCheck — القطع المغلَّفة ───
+// ⛔ فشل الاستعلام **مايتحوّلش** لـ «مفيش مغلَّف» — الصنف بيفضل «محتاج مراجعة»
+//    ومش بيتنفّذ، والسبب بيظهر في عمود النتيجة.
+async function runBulkShelfCheck(){
+  if (isUpdatingBulk) return;
+  const batch = bulkRows.filter(r => r.needsShelf).slice();   // ① لقطة
+  if (!batch.length) return;
+
+  setBulkUpdateLock(true); showBulkProgress(true);
+  setBulkProgress(0, batch.length, 'مراجعة الأوردرات المعلّقة');
+  let failed = 0, mismatched = 0, netErr = null;
+  try {
+    for (let i = 0; i < batch.length; i += bulkCaps.shelfChunk){
+      const chunk = batch.slice(i, i + bulkCaps.shelfChunk);
+      const data  = await apiPost('bulk_shelf_check', {
+        items: chunk.map(r => ({ variantId: r.variantId, productId: r.productId })),
+      });
+      const results = data.results || [];
+      chunk.forEach((r, idx) => {
+        const res = results[idx];
+        // العقد: نتيجة لكل عنصر بنفس الترتيب — والتأكيد بالـ variantId كمان،
+        // عشان نتيجة ما تتنسبش لصف غلط لو العقد اتكسر يومًا ما.
+        if (!res || (res.variantId && res.variantId !== r.variantId)){ mismatched++; return; }
+        if (res.ok) bulkShelf.set(r.variantId, { ok:true, packed:res.packed, unpacked:res.unpacked, orders:res.orders });
+        else { bulkShelf.set(r.variantId, { ok:false, error: res.error || 'تعذّر الاستعلام' }); failed++; }
+      });
+      setBulkProgress(Math.min(i + chunk.length, batch.length), batch.length, 'مراجعة الأوردرات المعلّقة');
+    }
+  } catch (e){
+    netErr = e.message;
+  } finally {
+    setBulkUpdateLock(false); showBulkProgress(false);
+    computeBulkRows(); applyBulkFilters();
+  }
+  if (netErr)          showToast('خطأ في مراجعة الأوردرات: ' + netErr, 'error', 9000);
+  else if (mismatched) showToast(`⚠️ ${mismatched} صنف رد الـ Worker عليه مش مطابق للترتيب — راجعهم فرديًا`, 'error', 9000);
+  else if (failed)     showToast(`⚠️ ${failed} صنف تعذّر الاستعلام عنه — بيفضل «محتاج مراجعة» ومش هيتنفّذ`, 'warning', 8000);
+  else                 showToast('✓ تمت مراجعة الأوردرات المعلّقة', 'success');
+}
+
+// ─── §BULK-JS::execute — التنفيذ الجماعي ───
+function bulkNoteFor(r){
+  let s = `جرد جماعي — معدود ${r.counted} مقابل المتوقع ${r.expected}`;
+  s += ` (سكانر ${r.scanned}${r.manual ? ` + يدوي ${r.manual}` : ''})`;
+  if (r.packed)             s += ` · مغلَّف ${r.packed}`;
+  if (r.state === 'missing') s += ' · مش متسكن في الجرد الشامل';
+  return s;
+}
+
+// 🔴 تأكيد بيسمّي الأثر بالأرقام، مش «متأكد؟» (Step 3C)
+function confirmBulkExecute(){
+  if (isUpdatingBulk) return;
+  if (bulkProblems.size){
+    showToast('في أكواد الأداة ما عرفتهاش — شيلها من القايمة قبل التنفيذ', 'warning', 7000);
+    return;
+  }
+  const rows = bulkExecutableRows();
+  if (!rows.length){ showToast('مفيش أصناف محدّدة للتنفيذ', 'warning'); return; }
+
+  const nAdjust  = rows.filter(r => r.diff !== 0).length;
+  const nOk      = rows.filter(r => r.diff === 0).length;
+  const nMissing = rows.filter(r => r.state === 'missing').length;
+  const plus     = rows.reduce((s, r) => s + (r.diff > 0 ?  r.diff : 0), 0);
+  const minus    = rows.reduce((s, r) => s + (r.diff < 0 ? -r.diff : 0), 0);
+  const nNeg     = rows.filter(r => r.available + r.diff < 0).length;
+
+  const line = (label, val, cls) =>
+    `<div class="confirm-detail-row"><span class="confirm-detail-label">${label}</span>`
+    + `<span class="confirm-detail-val${cls ? ' ' + cls : ''}">${val}</span></div>`;
+
+  let body = line('الموظف', esc(currentEmployee?.displayName || '—'), 'accent')
+    + line('أصناف هيتعدّل رصيدها', `${nAdjust.toLocaleString('en-US')} صنف`, 'red')
+    + line('أصناف هتتسجّل «مظبوط» بس', `${nOk.toLocaleString('en-US')} صنف`, 'green')
+    + line('إجمالي القطع', `+${plus.toLocaleString('en-US')} / −${minus.toLocaleString('en-US')}`, '');
+  if (nMissing)
+    body += `<div class="confirm-note">⚠️ من ضمنهم <b>${nMissing.toLocaleString('en-US')}</b> صنف «مش متسكن» — `
+          + `رصيدهم هينزل لحد المغلَّف بس. لو فيهم حاجة على رف ما مسحتهوش، شيله من التحديد الأول.</div>`;
+  if (nNeg)
+    body += `<div class="confirm-note">⚠️ <b>${nNeg.toLocaleString('en-US')}</b> صنف رصيده المتاح هيبقى بالسالب بعد التعديل — `
+          + `شوبيفاي ممكن ترفضهم، وهيظهروا «فشل» بسببهم بس.</div>`;
+  body += `<div class="confirm-note">التعديل بيتبعت كقيمة مطلقة مع تحقق من الرصيد الحالي — `
+        + `أي صنف رصيده اتغيّر بعد ما عدّيته هيترفض <b>من غير أي تعديل عليه</b> بدل ما يتعدّل غلط.</div>`;
+
+  openConfirm('🧾 تأكيد الجرد الجماعي', body,
+    `تأكيد — نفّذ على ${rows.length.toLocaleString('en-US')} صنف`, 'btn-red', executeBulk);
+}
+
+async function executeBulk(){
+  if (isUpdatingBulk) return;
+  // ① لقطة + ② تنضيف تكرار بالكيان (الطرف الأول — الـ Worker حارس أخير)
+  const snapshot = bulkExecutableRows().slice();
+  const seen = new Set(), batch = [];
+  for (const r of snapshot){
+    if (seen.has(r.variantId)) continue;
+    seen.add(r.variantId); batch.push(r);
+  }
+  if (!batch.length) return;
+
+  bulkBatchId = 'bulk-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+  const counts = { success: 0, warning: 0, error: 0, stale: 0, mismatched: 0 };
+  let netErr = null, doneCount = 0;
+
+  setBulkUpdateLock(true); showBulkProgress(true);
+  setBulkProgress(0, batch.length, 'تنفيذ التعديلات');
+  try {
+    for (let i = 0; i < batch.length; i += bulkCaps.chunk){
+      const chunk = batch.slice(i, i + bulkCaps.chunk);
+      const data  = await apiPost('bulk_adjust', {
+        employee: currentEmployee?.username || '',
+        batchId:  bulkBatchId,
+        items: chunk.map(r => ({
+          variantId: r.variantId, inventoryItemId: r.inventoryItemId,
+          sku: r.sku, productTitle: r.productTitle,
+          counted: r.counted, expected: r.expected, delta: r.diff,
+          availableAtScan: r.available, committedAtScan: r.committed, packedAtScan: r.packed,
+          notes: bulkNoteFor(r),
+        })),
+      });
+      const results = data.results || [];
+      chunk.forEach((r, idx) => {
+        const res = results[idx];
+        if (!res || (res.variantId && res.variantId !== r.variantId)){
+          counts.mismatched++;
+          bulkResults.set(r.variantId, { status:'error',
+            error:'رد الـ Worker مش مطابق لترتيب الطلب — راجع تاب السجل قبل أي إعادة محاولة' });
+          return;
+        }
+        bulkResults.set(r.variantId, res);
+        counts[res.status] = (counts[res.status] || 0) + 1;
+        if (res.stale) counts.stale++;
+        // 🔴 الصف اللي اتنفّذ بيتنزع سلاحه فورًا — الشاشة بعد النجاح شكلها
+        //    زي قبل الضغط بالظبط، وده وقود الضغطة التانية.
+        if (res.status !== 'error'){ bulkDone.add(r.variantId); bulkSelOverride.set(r.variantId, false); }
+        // الرصيد اتغيّر تحتنا: إعادة المحاولة بنفس اللقطة هتترفض برضه،
+        // فبنشيله من التحديد ونقول للموظف يحدّث الأرصدة.
+        else if (res.stale) bulkSelOverride.set(r.variantId, false);
+      });
+      doneCount = Math.min(i + chunk.length, batch.length);
+      setBulkProgress(doneCount, batch.length, 'تنفيذ التعديلات');
+      computeBulkRows(); applyBulkFilters();          // الجدول بيتلوّن أول بأول
+    }
+  } catch (e){
+    netErr = e.message;
+  } finally {
+    setBulkUpdateLock(false); showBulkProgress(false);
+    computeBulkRows(); applyBulkFilters(); updateBulkScanStats();
+  }
+  showBulkSummary(counts, batch.length, doneCount, netErr);
+}
+
+// نافذة ملخّص **إجبارية** — التوست بيختفي في ثواني وفي مخزن دي مدة كافية
+// إن النتيجة تضيع بالكامل.
+function showBulkSummary(counts, total, doneCount, netErr){
+  const line = (label, val, cls) =>
+    `<div class="confirm-detail-row"><span class="confirm-detail-label">${label}</span>`
+    + `<span class="confirm-detail-val${cls ? ' ' + cls : ''}">${val}</span></div>`;
+
+  let body = line('اتبعت', `${doneCount.toLocaleString('en-US')} من ${total.toLocaleString('en-US')}`, '')
+    + line('✓ تم',        (counts.success || 0).toLocaleString('en-US'), 'green')
+    + line('⚠ تم جزئيًا', (counts.warning || 0).toLocaleString('en-US'), 'amber')
+    + line('✗ فشل',      (counts.error   || 0).toLocaleString('en-US'), 'red');
+
+  if (counts.stale)
+    body += `<div class="confirm-note">🔄 <b>${counts.stale.toLocaleString('en-US')}</b> صنف رصيده اتغيّر على شوبيفاي `
+          + `بعد ما عدّيته — <b>مفيش أي تعديل اتعمل عليهم</b>. اضغط «↺ تحميل فهرس المنتجات» `
+          + `(المسحات بتفضل زي ما هي) وبعدين نفّذ عليهم تاني.</div>`;
+  if (counts.mismatched)
+    body += `<div class="confirm-note">🔴 <b>${counts.mismatched.toLocaleString('en-US')}</b> صنف رد الـ Worker عليه `
+          + `مش مطابق لترتيب الطلب — <b>راجع تاب السجل</b> قبل أي إعادة محاولة.</div>`;
+  if (netErr)
+    body += `<div class="confirm-note">⚠️ الدفعة اتقطعت: ${esc(netErr)} — `
+          + `<b>راجع تاب السجل</b> قبل ما تعيد المحاولة، ممكن تكون آخر مجموعة تمّت.</div>`;
+  if (counts.warning)
+    body += `<div class="confirm-note">⚠️ صفوف «تم جزئيًا» الكمية فيها <b>اتعدّلت فعلاً</b> وتاريخ الجرد بس هو اللي ما اتكتبش — `
+          + `<b>متعيدش التعديل عليهم</b>، سجّل الجرد يدويًا من تاب الجرد.</div>`;
+
+  const bad = (counts.error || 0) + (counts.warning || 0) + (counts.mismatched || 0) + (netErr ? 1 : 0);
+  showToast(bad ? `الدفعة خلصت — ${counts.success || 0} تم · ${counts.warning || 0} جزئيًا · ${counts.error || 0} فشل`
+                : `✓ تمت الدفعة بالكامل — ${counts.success || 0} صنف`,
+            bad ? 'warning' : 'success', bad ? 9000 : 4000);
+  if (counts.warning) playBeep('error');
+  openConfirm(bad ? '⚠️ نتيجة الجرد الجماعي' : '✅ نتيجة الجرد الجماعي', body, 'تمام',
+              bad ? 'btn-red' : 'green-btn', () => {});
+}
+
+// ─── §BULK-JS::session ───
+function confirmResetBulkSession(){
+  if (isUpdatingBulk) return;
+  const n = bulkScans.size;
+  openConfirm('🗑 جلسة جديدة',
+    `<div class="confirm-detail-row"><span class="confirm-detail-label">هيتمسح</span>`
+    + `<span class="confirm-detail-val red">${n.toLocaleString('en-US')} صنف معدود</span></div>`
+    + `<div class="confirm-note">العدّ والمشاكل والنتايج كلها هتتمسح من الشاشة. `
+    + `التعديلات اللي اتنفّذت خلاص على شوبيفاي <b>مابتترجعش</b> — دي مسح للشاشة بس.</div>`,
+    'امسح وابدأ من جديد', 'btn-red', resetBulkSession);
+}
+function resetBulkSession(){
+  bulkScans.clear(); bulkShelf.clear(); bulkResults.clear();
+  bulkProblems.clear(); bulkSelOverride.clear(); bulkDone.clear();
+  bulkSessionScans = 0; bulkBatchId = null;
+  setBulkLive('', 'مفيش مسحات لسه.', null);
+  renderBulkProblems(); updateBulkScanStats();
+  computeBulkRows(); applyBulkFilters();
+  showToast('جلسة جديدة — الشاشة اتمسحت', 'neutral');
+}
+
+// ─── §BULK-JS::export ───
+async function exportBulkXLSX(){
+  const btn = document.getElementById('bulkExportBtn');
+  if (!bulkFiltered.length){ showToast('مفيش صفوف مطابقة للفلاتر', 'warning'); return; }
+  btn.disabled = true; const old = btn.textContent; btn.textContent = '⏳ جاري التصدير...';
+  try {
+    // 🔴 نفس ماب الشاشة — '—' معناها «ما اتحاولش»، مش «تم جزئيًا» (Step 3C)
+    const rows = bulkFiltered.map(r => ({
+      'SKU':            r.sku || null,
+      'المنتج':         r.productTitle || null,
+      'المقاس':         r.variantTitle || null,
+      'البراند':        r.vendor || null,
+      'الباركود':       r.barcode || null,
+      'سكانر':          r.scanned,
+      'يدوي':           r.manual,
+      'المعدود':        r.counted,
+      'المتوقع':        r.expected,
+      'الفرق':          r.diff,
+      'available':      r.available,
+      'committed':      r.committed,
+      'مغلَّف':          r.packed,
+      'الحالة':         BULK_STATES[r.state]?.label || r.state,
+      'النتيجة':        r.result ? resultLabel(r.result.status) : '—',
+      'ملاحظة النتيجة': r.result
+                          ? ((r.result.warnings || []).join(' · ') || r.result.error || (r.result.actions || []).join(' · ') || null)
+                          : (r.shelfError || null),
+      'آخر جرد':        r.lastAuditDate ? formatDateForExport(r.lastAuditDate) : null,
+    }));
+
+    const wb = new ExcelJS.Workbook(); wb.views = [{ rightToLeft: true }];
+    const ws = wb.addWorksheet('الجرد الجماعي');
+    ws.views = [{ state:'frozen', ySplit:1, rightToLeft:true }];
+    ws.columns = Object.keys(rows[0]).map(k => ({
+      header:k, key:k,
+      width: k === 'المنتج' ? 42 : k === 'ملاحظة النتيجة' ? 40 : k === 'SKU' ? 22 : 14,
+    }));
+    rows.forEach(r => ws.addRow(r));
+    ws.eachRow((r, idx) => { if (idx === 1) return; r.eachCell(c => { if (typeof c.value === 'number') c.numFmt = '#,##0'; }); });
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url;
+    // ⚠️ cairoDateStr مش toISOString
+    a.download = 'bulk-audit-' + cairoDateStr() + '.xlsx';
+    a.click(); URL.revokeObjectURL(url);
+    // الملف بيتصدّر من نفس الصفوف المعروضة — مفيش سقف سيرفر هنا. الحاجة
+    // الوحيدة اللي ممكن تخلّيه ناقص هي فهرس مقصوص، وده بيتقال صراحةً.
+    if (bulkIndex && bulkIndex.truncated){
+      showToast(`⚠️ اتصدّر ${rows.length.toLocaleString('en-US')} صف — بس الفهرس نفسه مقصوص، `
+        + `فالملف ده مش كل المتجر`, 'warning', 8000);
+    } else {
+      showToast(`تم تصدير ${rows.length.toLocaleString('en-US')} صف ✓`, 'success');
+    }
+  } catch (err){
     showToast('خطأ في التصدير: ' + err.message, 'error', 6000);
   } finally { btn.disabled = false; btn.textContent = old; }
 }
