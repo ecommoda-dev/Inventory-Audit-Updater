@@ -1,10 +1,25 @@
 // ══════════════════════════════════════════════════════════════
 // §HEADER
-// inventory-audit-updater-worker — EcomModa v5.0.0
+// inventory-audit-updater-worker — EcomModa v6.0.0
 // Account: ecommoda-dev (762c353004e8472b20261fba273bfe8d)
 // D1: DB → ecommoda-dev-logs
 //
-// skills: worker-builder v3.0.0 · constants v2.1.0 · shopify-graphql-helper v1.0.0 — 12-09-2026
+// skills: worker-builder v3.3.0 · constants v2.1.0 · shopify-graphql-helper v1.0.0 — 18-09-2026
+//
+// CHANGELOG v6.0.0 (18-09-2026) — قسم الجرد الجماعي (§BULK)
+//   🟢 get_bulk_index: فهرس كل المتغيّرات الصالحة للجرد (باركود + SKU + الرصيد
+//      + آخر جرد) في نداء واحد — كل مسحة بقت بحث محلي مش نداء شبكة.
+//      + `dupBarcodes`: الباركود المتكرر على أكتر من متغيّر بيرجع صريح بدل ما
+//        المسحة تتحسب على أول واحد نلاقيه.
+//   🟢 bulk_shelf_check: القطع المغلَّفة مقابل اللي لسه على الرف، باستعلام
+//      **لكل منتج** مش لكل مقاس. فشل استعلام بيرجع ok:false مش packed=0.
+//   🟢 bulk_adjust: كتابة جماعية بـ `inventorySetQuantities` + `changeFromQuantity`
+//      (compare-and-swap) بدل الـ delta النسبي — الصنف اللي رصيده اتغيّر بين
+//      العدّ والتنفيذ بيترفض من شوبيفاي **من غير أي أثر على المخزون** بدل ما
+//      التعديل يتطبّق على رصيد تاني. ودي كمان الحماية من الضغطة التانية.
+//      صف D1 واحد بالظبط لكل عنصر · التحقق كله قبل أول كتابة · حارس تكرار
+//      بالكيان · عقد ترتيب `results[]` معلن.
+//   ℹ️ مفيش قيمة `type` جديدة — الجماعي بيكتب تحت `adjustment` و`ok` زي الفردي.
 //
 // CHANGELOG v5.0.0 (12-09-2026) — مراجعة شاملة مقابل المهارات، التفاصيل في AUDIT-12-09-2026.md
 //   🔴 adjust_inventory: التسلسل بدل Promise.all + أربع حالات نتيجة
@@ -41,7 +56,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const TOOL_NAME      = 'inventory_audit';
-const WORKER_VERSION = '5.0.0';
+const WORKER_VERSION = '6.0.0';
 
 // قيم `type` المسجّلة لهذه الأداة في ecommoda-constants §7:
 //   ok · adjustment · login · logout
@@ -640,6 +655,10 @@ async function getAllVariantsForAudit(env, token) {
 }
 
 // ── Get unfulfilled orders — v2.5.0 ──────────────────────────────────────────
+// ⚠️ **توأم:** `getShelfBreakdown` في §BULK بيحسب نفس منطق التغليف بالظبط
+//    (نفس الاستعلام · نفس استبعاد الملغي والمرتجع · نفس قاعدة S1/S2) بس على
+//    المنتج كله مرة واحدة. أي تعديل على المنطق ده لازم يتعمل في الاتنين معًا —
+//    اختلافهم = «المتوقع» يطلع رقمين مختلفين في تاب الجرد وفي التاب الجماعي.
 // v5.0.0: بيرجّع `orderId` الرقمي جنب `name` عشان الواجهة تبني لينك شوبيفاي
 async function getUnfulfilledOrders(env, token, variantId, productId) {
   const productIdNumeric = productId.split('/').pop();
@@ -861,6 +880,336 @@ async function adjustInventory(env, token, inventoryItemId, delta) {
   const group = result?.inventoryAdjustmentGroup;
   if (!group?.changes?.length) {
     throw new Error('inventoryAdjustQuantities: شوبيفاي ما أكدتش تعديل الكمية');
+  }
+  return group;
+}
+
+// ══════════════════════════════════════════════════════════════
+// §BULK — الجرد الجماعي (v6.0.0)
+// ══════════════════════════════════════════════════════════════
+//
+// الفرق الجوهري عن مسار الصنف الواحد فوق:
+//
+//   مسار الصنف الواحد : `inventoryAdjustQuantities` بـ delta **نسبي**.
+//                        إعادة التنفيذ بتضاعف التعديل (فخ موثّق في CLAUDE.md).
+//   المسار الجماعي     : `inventorySetQuantities` بقيمة **مطلقة** +
+//                        `changeFromQuantity` = compare-and-swap.
+//
+// ليه الفرق ده إلزامي هنا تحديدًا: في الجرد الجماعي بيعدّي وقت طويل بين لحظة
+// العدّ على الرف ولحظة الضغط على «نفّذ» (جلسة مسح كاملة = دقايق لساعات)، وفي
+// الوقت ده ممكن تتباع قطعة أو تتشحن. مع الـ delta النسبي الفرق ده بيتطبّق على
+// رصيد اتغيّر — يعني **تعديل غلط بصمت**. مع الـ CAS شوبيفاي نفسها بترفض الصنف
+// اللي رصيده اتغيّر (`CHANGE_FROM_QUANTITY_STALE`) و**مفيش أي أثر على المخزون**،
+// والصنف بيرجع للموظف بـ `error` ورسالة بتقوله يعيد عدّه لوحده.
+//
+// ⚠️ ودي كمان الحماية من الضغطة التانية: إعادة تنفيذ نفس الدفعة **بتفشل**
+//    على الأصناف اللي اتنفّذت خلاص بدل ما تضاعف التعديل.
+
+// ─── سلسلة السقوف التلاتة للقسم الجماعي (worker-builder Step 5A ⑪) ───
+// ⛔ ولا رقم منهم يتقال لوحده — تلات حدود فيزيائية على تلات محطات.
+//
+// ① الواجهة  BULK_CHUNK          = 10  ← **وقت**: الصنف بياخد نداءين متتابعين
+//                                  (inventorySetQuantities + metafieldsSet)
+//                                  ≈ ٠٫٩ ث/صنف → ٩ ث للنداء الواحد.
+//                                  الرقم عايش في الواجهة، وبيترجع هنا في
+//                                  `get_bulk_index.chunkHint` عشان مصدر واحد.
+// ② الـ Worker BULK_MAX_BATCH     = 50  ← **حارس لصق** (Paid: 10k subrequest).
+//                                  الواجهة الملتزمة عمرها ما هتبعت أكتر من ①.
+// ③ شوبيفاي   —                      ← الكتابة **ميوتيشن لكل صنف**، مش دفعة
+//                                  واحدة، فمفيش `ITEMS_PER_QUERY` هنا:
+//                                  `inventorySetQuantities` بترفض الدفعة
+//                                  **بالكامل** لو صنف واحد جواها stale
+//                                  (`NO_DUPLICATE_INVENTORY_ITEM_ID_GROUP_ID_PAIR`
+//                                  و`CHANGE_FROM_QUANTITY_STALE` على مستوى
+//                                  الميوتيشن)، ولمّ نتيجة الدفعة في علم واحد
+//                                  ممنوع (Step 5A ② «تحقق لكل كيان»).
+const BULK_CHUNK          = 10;
+const BULK_MAX_BATCH      = 50;
+
+// ④ مراجعة الأوردرات المعلّقة: استعلام `orders` لكل **منتج** (مش لكل متغيّر)،
+//    وفيه بلوك `returns` الغالي (~١٠٨ نقطة للأوردر). السقف على عدد المتغيّرات
+//    في النداء، وعدد المنتجات الفريدة ≤ نفس الرقم.
+const BULK_SHELF_MAX_BATCH = 30;
+const BULK_SHELF_CHUNK     = 8;    // الواجهة: ≈١٫٢ ث/صنف → ≈١٠ ث للنداء
+
+// سبب التعديل في سجل مخزون شوبيفاي — القيمة الرسمية لجرد الرفوف.
+// (مسار الصنف الواحد بيستخدم `correction`؛ الفصل مقصود عشان تاريخ المخزون
+//  في شوبيفاي يفرّق بين التصحيح الفردي والجرد الجماعي.)
+const BULK_ADJUST_REASON = 'cycle_count_available';
+
+// ─── §BULK::getBulkIndex — فهرس الباركود لجلسة المسح ───
+// بيرجّع **كل** متغيّر صالح للجرد مرة واحدة، عشان كل مسحة تبقى بحث محلي في
+// Map بدل نداء شبكة. نفس استثناءات `getAllVariantsForAudit`:
+//   غير ACTIVE · بدون SKU · Inventory not tracked · تاج Suspended
+//
+// 🔴 `dupBarcodes` مش تفصيلة — هو الحارس اللي بيمنع أخطر فشل صامت في القسم ده:
+//    باركود واحد على أكتر من متغيّر (مقاسين بنفس الباركود مثلاً). من غيره
+//    المسحة كانت هتتحسب على **أول** متغيّر لاقيناه، فالجرد يطلع مظبوط على
+//    الغلط والرصيد يتعدّل على متغيّر تاني خالص.
+async function getBulkIndex(env, token) {
+  // 🔴 الأرقام لازم تبقى بتاعة **الموقع اللي هنكتب عليه**، مش أول موقع في القايمة.
+  //    باقي الأداة بتستخدم `inventoryLevels(first: 1)` — وده مقبول في متجر بموقع
+  //    واحد، لكن في الجرد الجماعي معناه مئات التعديلات محسوبة على أرقام موقع تاني.
+  //    هنا الاستعلام مربوط بـ LOCATION_ID صراحةً.
+  const locationGid = requireLocationId(env);
+  const variants = [];
+  let cursor  = null;
+  let hasNext = true;
+  let pages   = 0;
+  let scanned = 0;
+  let skippedNoLevel = 0;   // مخزّن في مواقع تانية بس — بيترجع للواجهة، مايتبلعش
+
+  while (hasNext) {
+    if (pages >= MAX_VARIANT_PAGES) {
+      return { variants, truncated: true, scanned, pages, skippedNoLevel,
+               dupBarcodes: collectDupBarcodes(variants) };
+    }
+
+    const gql = `
+      query BulkIndex($cursor: String, $n: Int!, $loc: ID!) {
+        productVariants(first: $n, after: $cursor) {
+          nodes {
+            id
+            sku
+            barcode
+            title
+            product { id status tags title vendor }
+            last_audit_date: metafield(namespace: "custom", key: "last_stock_audit_date") { value }
+            inventoryItem {
+              id
+              tracked
+              inventoryLevel(locationId: $loc) {
+                quantities(names: ["available", "committed", "on_hand"]) {
+                  name quantity
+                }
+              }
+            }
+          }
+          pageInfo { hasNextPage endCursor }
+        }
+      }
+    `;
+
+    const data = await shopifyGQL(
+      env, token, gql, { cursor, n: VARIANTS_PER_PAGE, loc: locationGid }, 'getBulkIndex'
+    );
+
+    const { nodes, pageInfo } = data.data.productVariants;
+    pages++;
+    scanned += nodes.length;
+
+    for (const v of nodes) {
+      if (v.product?.status !== 'ACTIVE')                    continue;
+      if (!v.sku?.trim())                                    continue;
+      if (!v.inventoryItem?.tracked)                         continue;
+      if ((v.product?.tags || []).includes('Suspended'))      continue;
+
+      // مش مخزّن في الموقع ده خالص → الكتابة عليه هترجع ITEM_NOT_STOCKED_AT_LOCATION.
+      // بيتشال من الفهرس وبيتعدّ، عشان العدد يبان للموظف بدل ما يختفي في صمت.
+      if (!v.inventoryItem.inventoryLevel) { skippedNoLevel++; continue; }
+
+      const levels = v.inventoryItem.inventoryLevel.quantities || [];
+      const getQty = name => {
+        const found = levels.find(l => l.name === name);
+        return found !== undefined ? found.quantity : null;
+      };
+
+      variants.push({
+        variantId:       v.id,
+        productId:       v.product.id,
+        inventoryItemId: v.inventoryItem.id,
+        sku:             v.sku.trim(),
+        barcode:         (v.barcode || '').trim() || null,
+        variantTitle:    v.title || '',
+        productTitle:    v.product.title || '',
+        vendor:          v.product.vendor || '',
+        available:       getQty('available'),
+        committed:       getQty('committed'),
+        onHand:          getQty('on_hand'),
+        lastAuditDate:   v.last_audit_date?.value || null,
+      });
+    }
+
+    hasNext = pageInfo.hasNextPage;
+    cursor  = pageInfo.endCursor;
+  }
+
+  return { variants, truncated: false, scanned, pages, skippedNoLevel,
+           dupBarcodes: collectDupBarcodes(variants) };
+}
+
+// باركود بيتكرر على أكتر من متغيّر → اسمه + الـ SKUs بتاعته، عشان الواجهة
+// تعرض للموظف الاختيارين بدل ما تخمّن.
+function collectDupBarcodes(variants) {
+  const seen = new Map();
+  for (const v of variants) {
+    if (!v.barcode) continue;
+    if (!seen.has(v.barcode)) seen.set(v.barcode, []);
+    seen.get(v.barcode).push({ variantId: v.variantId, sku: v.sku, productTitle: v.productTitle });
+  }
+  const dups = {};
+  for (const [bc, list] of seen) if (list.length > 1) dups[bc] = list;
+  return dups;
+}
+
+// ─── §BULK::getShelfBreakdown — القطع المغلَّفة مقابل اللي لسه على الرف ───
+//
+// 🔴 التوأم المقصود لـ `getUnfulfilledOrders` فوق — **نفس المنطق بالحرف**
+//    (نفس الاستعلام · نفس استبعاد الملغي والمرتجع · نفس قاعدة S1/S2)،
+//    والفرق الوحيد إنه بيشتغل على **المنتج كله مرة واحدة** ويرجّع مجاميع
+//    رقمية لكل متغيّر بدل قايمة أوردرات لمتغيّر واحد.
+//
+// ليه منتج مش متغيّر: المنتج الواحد فيه ٨ مقاسات، والاستعلام أصلاً بيفلتر بـ
+// `product_id` — فاستدعاؤه لكل مقاس = ٨ نداءات لنفس البيانات.
+//
+// ⚠️ **أي تعديل على منطق التغليف لازم يتعمل في الدالتين مع بعض.** اختلافهم
+//    معناه إن نفس الصنف يدّي «متوقع» مختلف في تاب الجرد وفي التاب الجماعي —
+//    والموظف مش هيشوف غير رقمين مش متفقين بلا أي رسالة.
+async function getShelfBreakdown(env, token, productId) {
+  const productIdNumeric = productId.split('/').pop();
+  const perVariant = new Map();   // variantId → { packed, unpacked, orders }
+  let cursor  = null;
+  let hasNext = true;
+
+  const bump = (variantId, field, qty) => {
+    if (!perVariant.has(variantId)) perVariant.set(variantId, { packed: 0, unpacked: 0, orders: 0 });
+    const rec = perVariant.get(variantId);
+    rec[field] += qty;
+    return rec;
+  };
+
+  while (hasNext) {
+    const gql = `
+      query ShelfBreakdown($q: String!, $after: String) {
+        orders(first: 50, query: $q, after: $after, sortKey: CREATED_AT, reverse: true) {
+          nodes {
+            id cancelledAt
+            status_2_r_e: metafield(namespace: "custom", key: "status_2_r_e") { value }
+            s1_packed_by: metafield(namespace: "custom", key: "s1_packed_by") { value }
+            s2_packed_by: metafield(namespace: "custom", key: "s2_packed_by") { value }
+            lineItems(first: 20) {
+              nodes {
+                id
+                unfulfilledQuantity
+                fulfillableQuantity
+                variant { id }
+              }
+            }
+            returns(first: 3) {
+              nodes {
+                id status
+                returnLineItems(first: 10) {
+                  nodes {
+                    ... on ReturnLineItem {
+                      quantity
+                      fulfillmentLineItem { lineItem { id } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          pageInfo { hasNextPage endCursor }
+        }
+      }
+    `;
+
+    const data = await shopifyGQL(env, token, gql, {
+      q: `product_id:${productIdNumeric} fulfillment_status:unfulfilled`,
+      after: cursor,
+    }, 'getShelfBreakdown');
+    const { nodes, pageInfo } = data.data.orders;
+
+    for (const order of nodes) {
+      if (order.cancelledAt) continue;
+
+      const status2re  = order.status_2_r_e?.value || null;
+      const orderStage = S2_VALUES.includes(status2re) ? 'S2' : 'S1';
+      const packedBy   = orderStage === 'S2'
+        ? (order.s2_packed_by?.value || null)
+        : (order.s1_packed_by?.value || null);
+
+      const returnedIds = new Set();
+      for (const ret of (order.returns?.nodes || [])) {
+        for (const rli of (ret.returnLineItems?.nodes || [])) {
+          const li = rli.fulfillmentLineItem?.lineItem;
+          if (li?.id && (rli.quantity || 0) > 0) returnedIds.add(li.id);
+        }
+      }
+
+      const touched = new Set();
+      for (const li of (order.lineItems?.nodes || [])) {
+        const vId = li.variant?.id;
+        if (!vId)                   continue;
+        if (returnedIds.has(li.id)) continue;
+        const qty = orderStage === 'S2' ? li.fulfillableQuantity : li.unfulfilledQuantity;
+        if (!(qty > 0))             continue;
+
+        bump(vId, packedBy ? 'packed' : 'unpacked', qty);
+        touched.add(vId);
+      }
+      for (const vId of touched) bump(vId, 'orders', 1);
+    }
+
+    hasNext = pageInfo.hasNextPage;
+    cursor  = pageInfo.endCursor;
+  }
+
+  return perVariant;
+}
+
+// ─── §BULK::setInventoryAbsolute — الكتابة المطلقة بـ compare-and-swap ───
+// ⚠️ الفعل ده **مالوش رجعة** — أي تحقق ممكن يتعمل بيتعمل قبله (Step 5A ⑩①).
+// الفحوصات التلاتة (Step 5A ②): top-level → userErrors → تأكيد الـ payload.
+async function setInventoryAbsolute(env, token, inventoryItemId, quantity, changeFromQuantity) {
+  const locationId   = requireLocationId(env);
+  const now          = new Date().toISOString();
+  const referenceUri = `gid://Stock-Audit-Tool/BulkStockCount/${now}`;
+
+  const gql = `
+    mutation inventorySetQuantities($input: InventorySetQuantitiesInput!) {
+      inventorySetQuantities(input: $input) {
+        userErrors { field message code }
+        inventoryAdjustmentGroup {
+          createdAt reason
+          changes { name delta }
+        }
+      }
+    }
+  `;
+  const data = await shopifyGQL(env, token, gql, {
+    input: {
+      reason:               BULK_ADJUST_REASON,
+      name:                 'available',
+      referenceDocumentUri: referenceUri,
+      quantities: [{
+        inventoryItemId,
+        locationId,
+        quantity,
+        // 🔴 القلب: لو الرصيد الحالي على شوبيفاي مش مطابق للي الموظف عدّ عليه،
+        //    الميوتيشن بترفض بـ CHANGE_FROM_QUANTITY_STALE و**مفيش أي كتابة**.
+        //    تمرير null هنا كان هيلغي الحماية بالكامل.
+        changeFromQuantity,
+      }],
+    },
+  }, 'inventorySetQuantities');
+
+  const result     = data.data?.inventorySetQuantities;
+  const userErrors = result?.userErrors || [];
+  if (userErrors.length > 0) {
+    const stale = userErrors.some(e => e.code === 'CHANGE_FROM_QUANTITY_STALE');
+    const msg   = userErrors.map(e => e.message).join(' | ');
+    const err   = new Error(stale
+      ? `الرصيد على شوبيفاي اتغيّر بعد ما عدّيت الصنف ده (بيع أو شحن) — `
+        + `**مفيش أي تعديل اتعمل عليه**، أعد عدّه لوحده من تاب الجرد`
+      : `inventorySetQuantities: ${msg}`);
+    err.stale = stale;
+    throw err;
+  }
+  // ③ `userErrors: []` معناها «مفيش اعتراض»، مش «اتنفّذت»
+  const group = result?.inventoryAdjustmentGroup;
+  if (!group?.changes?.length) {
+    throw new Error('inventorySetQuantities: شوبيفاي ما أكدتش تعديل الكمية');
   }
   return group;
 }
@@ -1117,6 +1466,264 @@ export default {
           truncated, scanned, pages,
           cap: MAX_VARIANT_PAGES * VARIANTS_PER_PAGE,
         }, 200, request);
+      }
+
+      // ─── §BULK — الجرد الجماعي ───────────────────────────
+      //
+      // تلات endpoints بيتنادوا بالترتيب ده من التاب الجماعي:
+      //   ① get_bulk_index  — فهرس الباركود مرة واحدة في أول الجلسة (قراءة)
+      //   ② bulk_shelf_check — القطع المغلَّفة للأصناف اللي عليها حجز (قراءة)
+      //   ③ bulk_adjust     — الكتابة الجماعية (POST)
+
+      if (action === 'get_bulk_index') {
+        const { variants, truncated, scanned, pages, skippedNoLevel, dupBarcodes } = await getBulkIndex(env, token);
+        return json({
+          ok: true, variants, count: variants.length,
+          truncated, scanned, pages, skippedNoLevel,
+          cap: MAX_VARIANT_PAGES * VARIANTS_PER_PAGE,
+          dupBarcodes,
+          // مصدر واحد للسقوف — الواجهة بتقراها ومابتكتبش أرقامها عندها (⑪)
+          chunkHint:      BULK_CHUNK,
+          shelfChunkHint: BULK_SHELF_CHUNK,
+          maxBatch:       BULK_MAX_BATCH,
+          shelfMaxBatch:  BULK_SHELF_MAX_BATCH,
+        }, 200, request);
+      }
+
+      // ── ② مراجعة الأوردرات المعلّقة ──
+      // العقد: **نتيجة واحدة لكل عنصر في `items`، بنفس الترتيب**، في كل الفروع.
+      // ⚠️ الواجهة بتطابق بالفهرس وبتتأكد من `variantId` كمان — أي `continue`
+      //    من غير `push` هيزحلق كل اللي بعده.
+      // ⛔ فشل استعلام منتج **مايتحوّلش لـ packed = 0** — بيرجع `ok:false`
+      //    ورسالة، والواجهة بتعرضها كـ «تعذّر الاستعلام» مش كـ «مفيش مغلَّف».
+      if (action === 'bulk_shelf_check') {
+        if (request.method !== 'POST') return json({ error: 'POST required' }, 405, request);
+        const body  = await request.json().catch(() => ({}));
+        const items = Array.isArray(body.items) ? body.items : [];
+
+        if (!items.length) return json({ ok: false, error: 'items مطلوبة' }, 400, request);
+        if (items.length > BULK_SHELF_MAX_BATCH) {
+          return json({
+            ok: false,
+            error: `الدفعة أكبر من الحد (${items.length} من ${BULK_SHELF_MAX_BATCH}) — قسّمها`,
+          }, 400, request);
+        }
+
+        // منتج واحد فيه ٨ مقاسات = استعلام واحد مش تمانية
+        const byProduct = new Map();
+        for (const it of items) {
+          const pid = String(it?.productId || '');
+          if (!pid) continue;
+          if (!byProduct.has(pid)) byProduct.set(pid, null);
+        }
+
+        const breakdowns = new Map();   // productId → { map } | { error }
+        for (const pid of byProduct.keys()) {
+          try {
+            breakdowns.set(pid, { map: await getShelfBreakdown(env, token, pid) });
+          } catch (e) {
+            breakdowns.set(pid, { error: e.message });
+          }
+        }
+
+        const results = items.map(it => {
+          const variantId = String(it?.variantId || '');
+          const productId = String(it?.productId || '');
+          const b = breakdowns.get(productId);
+          if (!variantId || !productId) {
+            return { variantId, productId, ok: false, error: 'variantId أو productId ناقص' };
+          }
+          if (!b || b.error) {
+            return { variantId, productId, ok: false, error: b?.error || 'تعذّر الاستعلام' };
+          }
+          const rec = b.map.get(variantId) || { packed: 0, unpacked: 0, orders: 0 };
+          return {
+            variantId, productId, ok: true,
+            packed:   rec.packed,
+            unpacked: rec.unpacked,
+            orders:   rec.orders,
+          };
+        });
+
+        return json({ ok: true, results }, 200, request);
+      }
+
+      // ── ③ الكتابة الجماعية ──
+      //
+      // العقد: **نتيجة واحدة لكل عنصر في `items`، بنفس الترتيب**، في كل الفروع
+      // (worker-builder Step 5A ⑬). الواجهة بتطابق بالفهرس + تأكيد `variantId`.
+      //
+      // 🔴 قاعدة عدم الضياع (⑭): لكل عنصر في الدفعة **صف واحد بالظبط** في D1 —
+      //    `adjustment` لو فيه فرق، و`ok` لو العدّ مطابق. مفيش مسار بيتخطّى
+      //    عنصر في صمت.
+      //    والتحقق كله بيتم **قبل** أول كتابة على الدفعة كلها: أي عنصر مش
+      //    مظبوط بيرفض النداء بـ 400 و**مفيش أي صنف بيتلمس** — فالإجابة على
+      //    «الأداة حاولت ولا لأ؟» تبقى صريحة: لأ، ولا صنف واحد.
+      //    (عشان كده مفيش `rejected` هنا — مفيش مسار بيوقف بعد ما الدفعة تبدأ.)
+      if (action === 'bulk_adjust') {
+        if (request.method !== 'POST') return json({ error: 'POST required' }, 405, request);
+        const body = await request.json().catch(() => ({}));
+
+        const employee = body.employee || '';
+        const batchId  = String(body.batchId || '').slice(0, 48) || null;
+        const items    = Array.isArray(body.items) ? body.items : [];
+
+        if (!items.length) return json({ ok: false, error: 'items مطلوبة' }, 400, request);
+        if (items.length > BULK_MAX_BATCH) {
+          return json({
+            ok: false,
+            error: `الدفعة أكبر من الحد (${items.length} من ${BULK_MAX_BATCH}) — قسّمها`,
+          }, 400, request);
+        }
+
+        // ⑩① كل تحقق ممكن يتعمل — قبل أول فعل لا رجعة فيه
+        // ⑫ حارس التكرار **بالكيان** (الصنف)، مش بالمدخل. الواجهة بتجمّع
+        //    المسحات في Map مفتاحها `variantId` فالتكرار مستحيل منها — الحارس
+        //    ده ضد نداء مبني بالغلط، وبيرفض الدفعة كلها قبل أي كتابة.
+        const seenVariants = new Set();
+        const prepared = [];
+        for (let i = 0; i < items.length; i++) {
+          const it  = items[i] || {};
+          const pos = i + 1;
+
+          const variantId       = String(it.variantId       || '');
+          const inventoryItemId = String(it.inventoryItemId || '');
+          if (!variantId || !inventoryItemId) {
+            return json({ ok: false, error: `العنصر رقم ${pos}: variantId أو inventoryItemId ناقص`, index: i }, 400, request);
+          }
+          if (seenVariants.has(variantId)) {
+            return json({ ok: false, error: `العنصر رقم ${pos}: الصنف ${it.sku || variantId} مكرر في نفس الدفعة`, index: i }, 400, request);
+          }
+          seenVariants.add(variantId);
+
+          const counted         = parseInt(it.counted,         10);
+          const expected        = parseInt(it.expected,        10);
+          const delta           = parseInt(it.delta,           10);
+          const availableAtScan = parseInt(it.availableAtScan, 10);
+          const committedAtScan = parseInt(it.committedAtScan ?? 0, 10);
+          const packedAtScan    = parseInt(it.packedAtScan    ?? 0, 10);
+
+          if (![counted, expected, delta, availableAtScan].every(Number.isFinite)) {
+            return json({ ok: false, error: `العنصر رقم ${pos}: أرقام العدّ مش صحيحة`, index: i }, 400, request);
+          }
+          if (counted < 0) {
+            return json({ ok: false, error: `العنصر رقم ${pos}: العدّ مايكونش بالسالب`, index: i }, 400, request);
+          }
+          // الفرق لازم يطلع من نفس الرقمين المعروضين على الشاشة — اختلافه
+          // معناه إن الصفحة والنداء مش على نفس اللقطة.
+          if (counted - expected !== delta) {
+            return json({
+              ok: false,
+              error: `العنصر رقم ${pos}: الفرق (${delta}) مش مطابق للعدّ (${counted}) ناقص المتوقع (${expected}) — أعد حساب المقارنة`,
+              index: i,
+            }, 400, request);
+          }
+
+          prepared.push({
+            variantId, inventoryItemId,
+            sku:          it.sku          || null,
+            productTitle: it.productTitle || null,
+            notes:        (it.notes || '').toString().slice(0, 400),
+            counted, expected, delta,
+            availableAtScan,
+            committedAtScan: Number.isFinite(committedAtScan) ? committedAtScan : 0,
+            packedAtScan:    Number.isFinite(packedAtScan)    ? packedAtScan    : 0,
+          });
+        }
+
+        requireLocationId(env);   // بيرمي قبل أي كتابة لو ناقص
+
+        const results = [];
+        const counts  = { success: 0, warning: 0, error: 0 };
+
+        for (const p of prepared) {
+          // ⑤ الأكشنز بتتملي أول بأول — لو رمى استثناء في النص، اللي حصل بيفضل مسجّل
+          const actions  = [];
+          const warnings = [];
+          let status       = 'success';
+          let errorMsg     = null;
+          let stale        = false;
+          let auditDate    = null;
+          let newAvailable = null;
+
+          if (p.delta !== 0) {
+            try {
+              const target = p.availableAtScan + p.delta;
+              await setInventoryAbsolute(env, token, p.inventoryItemId, target, p.availableAtScan);
+              newAvailable = target;
+              actions.push(`inventorySetQuantities: available ${p.availableAtScan} → ${target}`);
+            } catch (e) {
+              status   = 'error';
+              errorMsg = e.message;
+              stale    = !!e.stale;
+            }
+          }
+
+          // ⑩② الفشل **بعد** الفعل الأساسي = warning مش error، ومعاه إجراء الإصلاح
+          if (status !== 'error') {
+            try {
+              const meta = await setAuditMetafields(env, token, p.variantId, employee, p.notes);
+              auditDate = meta.auditDate;
+              actions.push(`metafieldsSet×${meta.written}`);
+            } catch (e) {
+              if (p.delta !== 0) {
+                status = 'warning';
+                warnings.push(
+                  `الكمية اتعدّلت فعلاً على شوبيفاي، لكن تاريخ الجرد ما اتكتبش (${e.message}) — `
+                  + `سجّل الجرد يدويًا على الصنف ده، ومتعيدش التعديل`
+                );
+              } else {
+                // مفيش فعل أساسي تاني في المسار ده — فده فشل كامل مش جزئي
+                status   = 'error';
+                errorMsg = e.message;
+              }
+            }
+          }
+
+          // ⑦ فشل D1 يبان — العملية حصلت بس مفيش سجل
+          let logged = true, logError = null;
+          try {
+            await writeLog(env.DB, {
+              tool:         TOOL_NAME,
+              type:         p.delta !== 0 ? LOG_TYPE_ADJUSTMENT : LOG_TYPE_OK,
+              timestamp:    auditDate || new Date().toISOString(),
+              employee:     employee     || null,
+              sku:          p.sku,
+              productTitle: p.productTitle,
+              delta:        p.delta,
+              valueBefore:  p.expected,
+              valueAfter:   p.counted,
+              notes:        p.notes || null,
+              // ⚠️ عقد مفاتيح `extra` — الواجهة بتقرا `result` بس (عمود النتيجة
+              //    في تاب السجل). الباقي للتشخيص: `mode` بيفرّق الجرد الجماعي
+              //    عن الفردي، و`batchId` بيلمّ جلسة المسح الواحدة في السجل.
+              extra: {
+                result: status, actions, warnings, error: errorMsg,
+                mode: 'bulk', batchId, stale,
+                counted:   p.counted,
+                expected:  p.expected,
+                available: p.availableAtScan,
+                committed: p.committedAtScan,
+                packed:    p.packedAtScan,
+              },
+            });
+          } catch (e) { logged = false; logError = e.message; }
+
+          counts[status]++;
+          results.push({
+            variantId: p.variantId,
+            sku:       p.sku,
+            status, actions, warnings, logged, logError,
+            error: errorMsg, stale,
+            auditDate, newAvailable,
+            delta: p.delta, counted: p.counted, expected: p.expected,
+          });
+        }
+
+        // ⚠️ `ok: true` دايمًا هنا — الدفعة الجزئية مش فشل. نتيجة كل صنف في
+        //    `results`، والواجهة بتعرضها صف بصف. (`ok:false` محجوزة لرفض
+        //    الدفعة كلها قبل أي كتابة — فوق.)
+        return json({ ok: true, batchId, results, counts }, 200, request);
       }
 
       // ─── §AUDIT — Write endpoints ─────────────────────────
