@@ -580,6 +580,7 @@ td.centered{text-align:center;}
 .st-needs_check{background:var(--amber-light);color:var(--amber-dark);border:1px solid var(--amber-border);}
 .st-other_states{background:var(--purple-light);color:var(--purple-dark);border:1px solid var(--purple-border);}
 
+.bulk-prov{color:var(--text-muted);font-style:italic;}
 .bulk-diff{font-weight:800;font-variant-numeric:tabular-nums;direction:ltr;display:inline-block;}
 .bulk-diff.pos{color:var(--green-dark);}
 .bulk-diff.neg{color:var(--red);}
@@ -625,7 +626,17 @@ td.centered{text-align:center;}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.0.0</span><span class="cl-ver-date">18-09-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.1.0</span><span class="cl-ver-date">18-09-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span><b>أرقام شوبيفاي بقت بتتسحب لحظة المقارنة مش لحظة تحميل الباركودات.</b> قبل كده الرصيد المعروض كان من أول الجلسة، فلو اتباعت قطعة أو اتشحنت وإنت بتمسح، الشاشة كانت بتقول رقم والحقيقة رقم تاني. الكتابة كانت محميّة، لكن <b>القرار كان بيتاخد على رقم قديم</b></span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>زرار <b>«⚖️ قارن بشوبيفاي»</b> — بيسحب الأرصدة الحيّة والقطع المغلَّفة <b>في نفس اللحظة ونفس النداء</b>، وللأصناف اللي عدّيتها بس. أسرع كمان: بتسحب ٣٠٠ صنف عدّيتهم مش الكتالوج كله</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>التنفيذ مقفول على أي صنف لسه ما اتقارنش</b> — رقمه بيتعرض بعلامة «؟» ورمادي، عشان مايتلخبطش مع الرقم الحقيقي</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>قبل كده الأرصدة كانت من لحظة والقطع المغلَّفة من لحظة تانية، يعني معادلة «المتوقع على الرف» بتتجمّع من وقتين مختلفين. دلوقتي الاتنين من نفس النداء</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>لو عدّى على المقارنة أكتر من ١٥ دقيقة بيظهر تنبيه، ونافذة التأكيد بتقول الأرقام اتسحبت من كام دقيقة</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>الخطوات بقت مرقّمة ①②③④ وكلمة «فهرس» اتشالت — بقى «حمّل الباركودات»</span></li>
+      </ul>
+
+      <div class="cl-version"><span class="cl-ver-badge">v6.0.0</span><span class="cl-ver-date">18-09-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>تاب «🧾 الجرد الجماعي»</b> — تمسح رفوف كاملة بالسكانر من غير توقّف، والأداة بتعدّ وتقارن بشوبيفاي وتنفّذ التعديلات كلها دفعة واحدة. الأقسام القديمة (الجرد الفردي · الأولويات · السجل) زي ما هي بالظبط</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>كل مسحة بحث محلي مش نداء شبكة — الفهرس بيتحمّل مرة واحدة في أول الجلسة، فالمسح المتواصل مابيستناش الإنترنت</span></li>
@@ -726,8 +737,9 @@ td.centered{text-align:center;}
 
           <h4>🧾 تاب الجرد الجماعي (v6.0.0)</h4>
           <ol>
-            <li><b>تحميل الفهرس</b> — كل المتغيّرات الصالحة للجرد (باركود · SKU · الرصيد على
-                <code>LOCATION_ID</code> · آخر جرد) في نداء واحد. كل مسحة بعد كده بحث محلي مش نداء شبكة.</li>
+            <li><b>① حمّل الباركودات</b> — كل المتغيّرات الصالحة للجرد (باركود · SKU · آخر جرد)
+                في نداء واحد. كل مسحة بعد كده بحث محلي مش نداء شبكة.
+                الأرصدة بتيجي معاها كمان بس <b>كأرقام مبدئية للعرض</b> — القرار مابيتبناش عليها.</li>
             <li><b>جلسة المسح</b> — مسح متواصل لرفوف كاملة. الكود المجهول أو المتكرر على أكتر من صنف
                 بيروح لقايمة حمرا و<b>بيقفل التنفيذ</b> لحد ما تتفضى.</li>
             <li><b>النطاق</b> — تلات أوضاع، والفرق بينهم هو معنى الصنف اللي <b>ما اتمسحش</b>:
@@ -741,10 +753,12 @@ td.centered{text-align:center;}
               والمتغيّرات هي المقاسات (<code>GT1 / Black</code> منتج · <code>GT1 / White</code> منتج
               تاني)، فالتجميع ده بيدّي «باقي مقاسات نفس اللون» بالظبط. نفس تجميع زرار
               «باقي مقاسات هذا المنتج».</li>
-            <li><b>مراجعة الأوردرات المعلّقة</b> — أي صنف عليه حجز بيفضل «محتاج مراجعة» لحد ما نعرف
-                كام قطعة منه <b>اتغلّفت</b> (خرجت من الرف). المتوقع =
-                <code>available + committed − المغلَّف</code>.</li>
-            <li><b>التنفيذ</b> — بالمجموعات مع شريط تقدّم حقيقي وقفل على كل نقط التعديل،
+            <li><b>④ قارن بشوبيفاي</b> — 🔴 <b>هنا بالظبط بتتقرا الأرقام الحقيقية</b>:
+                الأرصدة الحيّة على <code>LOCATION_ID</code> <b>والقطع المغلَّفة</b> في
+                <b>نفس النداء ونفس اللحظة</b> (<code>at</code> بترجع في الرد)، وللأصناف اللي
+                اتعدّت بس. المتوقع = <code>available + committed − المغلَّف</code>.
+                <b>أي صف ما اتقارنش مش بيتنفّذ</b> ورقمه بيتعرض بعلامة «؟».</li>
+            <li><b>⑤ التنفيذ</b> — بالمجموعات مع شريط تقدّم حقيقي وقفل على كل نقط التعديل،
                 والصف اللي اتنفّذ بيتنزع سلاحه فورًا.</li>
           </ol>
 
@@ -768,8 +782,8 @@ td.centered{text-align:center;}
             <tr><td>get_audit_priorities</td><td>قايمة أولويات الجرد + <code>truncated</code></td></tr>
             <tr><td>adjust_inventory <b>(POST)</b></td><td>تصحيح الرصيد + تسجيل تاريخ الجرد</td></tr>
             <tr><td>set_audit_date <b>(POST)</b></td><td>تأكيد إن الجرد مظبوط من غير تعديل</td></tr>
-            <tr><td>get_bulk_index</td><td>فهرس الجرد الجماعي — باركود/SKU/الرصيد على <code>LOCATION_ID</code> + <code>dupBarcodes</code> + <code>truncated</code> + السقوف</td></tr>
-            <tr><td>bulk_shelf_check <b>(POST)</b></td><td>القطع المغلَّفة مقابل اللي على الرف — استعلام لكل <b>منتج</b> مش لكل مقاس</td></tr>
+            <tr><td>get_bulk_index</td><td>باركودات الجرد الجماعي + أرصدة <b>مبدئية</b> + <code>dupBarcodes</code> + <code>truncated</code> + السقوف</td></tr>
+            <tr><td>bulk_compare <b>(POST)</b></td><td>الأرصدة الحيّة + المغلَّف في <b>نداء واحد ولحظة واحدة</b> (<code>at</code>) — استعلام الأوردرات الغالي للأصناف اللي عليها حجز بس</td></tr>
             <tr><td>bulk_adjust <b>(POST)</b></td><td>الكتابة الجماعية بقيمة مطلقة + تحقق من الرصيد الحالي (CAS) + صف D1 لكل عنصر</td></tr>
             <tr><td>get_logs / get_logs_count / get_logs_export</td><td>السجل: صفحة · عدّ · تصدير بـ cap/total/truncated</td></tr>
             <tr><td>diag / get_config</td><td>فحص ذاتي · نسخة الـ Worker</td></tr>
@@ -795,7 +809,7 @@ td.centered{text-align:center;}
             <li><code>§AUTH-JS</code> — <code>renderLoginMode</code> (٤ حالات) · <code>loadEmployeesList</code> · <code>finishLogin</code></li>
             <li><code>§SCAN</code> — <code>handleBarcodeScan</code> · <code>handleScanCountInput</code> · <code>§SCAN::plausibility</code></li>
             <li><code>§TOOL-JS</code> — الأولويات · بطاقة المنتج · لوحة التعديل · العد بالسكانر · كارت الأوردرات غير المشحونة (<b>عرض فقط</b> — مفيش أي فعل عليها من الأداة دي)</li>
-            <li><code>§BULK-JS</code> — <code>loadBulkIndex</code> · <code>processBulkScanCode</code> · <code>computeBulkRows</code> · <code>runBulkShelfCheck</code> · <code>executeBulk</code> · <code>bms*</code> (فلاتر التاب) · <code>exportBulkXLSX</code></li>
+            <li><code>§BULK-JS</code> — <code>loadBulkIndex</code> · <code>processBulkScanCode</code> · <code>computeBulkRows</code> · <code>runBulkCompare</code> · <code>executeBulk</code> · <code>bms*</code> (فلاتر التاب) · <code>exportBulkXLSX</code></li>
             <li><code>§LOG-JS</code> — <code>logParams</code> · <code>fetchLog</code> · <code>renderLogTable</code> · <code>applySort</code> · <code>exportLogXLSX</code></li>
           </ul>
 
@@ -806,9 +820,10 @@ td.centered{text-align:center;}
             <li><code>TOOL_VERSION</code> / <code>MIN_WORKER_VERSION</code> — مصدر واحد لرقم النسخة وحارس نسخة الـ Worker</li>
             <li><code>currentEmployee</code> — في الذاكرة بس، عمره ما يدخل localStorage</li>
             <li><code>LOG_PAGE_SIZE = 100</code> · <code>msState</code> — حالة فلاتر السجل multi-select</li>
-            <li><code>bulkIndex</code> · <code>bulkScans</code> · <code>bulkShelf</code> · <code>bulkDone</code> — حالة الجلسة الجماعية، كلها في الذاكرة بس</li>
-            <li><code>bulkCaps</code> — السقوف <b>بتيجي من الـ Worker</b> (<code>chunkHint</code>/<code>maxBatch</code>...) عشان مايبقاش فيه مصدرين بيتعتّقوا</li>
-            <li><code>BULK_STATES</code> — سبع حالات، كل واحدة بتقول هل الصف قابل للتنفيذ وهل بيتحدّد افتراضيًا</li>
+            <li><code>bulkIndex</code> · <code>bulkScans</code> · <code>bulkLive</code> · <code>bulkDone</code> — حالة الجلسة الجماعية، كلها في الذاكرة بس</li>
+            <li><code>bulkCaps</code> — السقوف <b>بتيجي من الـ Worker</b> (<code>chunkHint</code>/<code>maxBatch</code>/<code>compareChunkHint</code>...) عشان مايبقاش فيه مصدرين بيتعتّقوا</li>
+            <li><code>bulkComparedAt</code> · <code>BULK_COMPARE_STALE_MS</code> — لحظة آخر مقارنة وعتبة التنبيه</li>
+            <li><code>BULK_STATES</code> — تمن حالات، كل واحدة بتقول هل الصف قابل للتنفيذ وهل بيتحدّد افتراضيًا. <code>not_compared</code> و<code>compare_failed</code> الاتنين <b>مش قابلين للتنفيذ</b></li>
           </ul>
 
           <h4>NOTES / QUIRKS</h4>
@@ -824,8 +839,10 @@ td.centered{text-align:center;}
             <li><b>الصنف بدون باركود</b> في الوضع الشامل بياخد حالة مستقلة «🚫 بدون باركود» ومش بيتصفّر — لأنه أصلاً مايتجردش بالسكانر.</li>
             <li><b>«⚠️ مش متسكن» مشروطة بإن المتوقع أكبر من صفر.</b> المقاس اللي شوبيفاي بتقول عنه صفر والرف فاضي = «✅ مظبوط»، وبيتسجّل إنه اتراجع. الوضع الشامل بيتخطّى الأصناف الصفر من الأساس (مش هيرمي المتجر كله في الجدول)، أما وضع «باقي المقاسات» فبيضمّها لأن نطاقه صغير والتسجيل ده هو نص فايدة جرد الرف.</li>
             <li><b>الفهرس المقصوص بيقفل «الجرد الشامل» بس</b> — وضع «باقي المقاسات» نطاقه اللي اتمسح فعلاً فهو مابيدّعيش شمول، بس اللافتة بتنبّه إن ممكن يكون فيه مقاسات مش في الفهرس.</li>
-            <li><b>كل الفهرس في ذاكرة المتصفح</b> — الجلسة بتضيع مع أي refresh. ده مقصود: مفيش عدّ بيتخزّن في <code>localStorage</code>.</li>
-            <li><b>إعادة تحميل الفهرس بتحافظ على المسحات</b> — ده مسار الإصلاح لو رصيد اتغيّر أثناء جلسة طويلة. اللي بيتمسح هو بيانات الأوردرات المعلّقة بس.</li>
+            <li>🔴 <b>الأرقام المبدئية مقابل الأرقام المقارَنة:</b> الفهرس بيتحمّل <b>قبل</b> العدّ، فأرقامه بتقدم أثناء جلسة المسح (بيعة · شحنة). عشان كده صفوف ما اتقارنتش بتتعرض بعلامة «؟» و<b>التنفيذ عليها مقفول</b>. الكتابة نفسها محميّة بالـ CAS، فالخطر مكانش على المخزون — كان إن <b>الشاشة تعرض رقم قديم</b> والموظف ياخد قرار عليه.</li>
+            <li><b>كل الباركودات في ذاكرة المتصفح</b> — الجلسة بتضيع مع أي refresh. ده مقصود: مفيش عدّ بيتخزّن في <code>localStorage</code>.</li>
+            <li><b>إعادة تحميل الباركودات بتحافظ على المسحات</b> — اللي بيتمسح هو نتيجة المقارنة، فالصفوف بترجع «لسه ما اتقارنش» لحد ما تضغط «قارن» تاني.</li>
+            <li><b>بعد ١٥ دقيقة من المقارنة</b> بيظهر تنبيه، ونافذة التأكيد بتقول الأرقام اتسحبت من كام دقيقة. التنفيذ لسه مسموح — الـ CAS بيحمي المخزون.</li>
           </ul>
         </div>
       </details>
@@ -1048,13 +1065,13 @@ td.centered{text-align:center;}
 
     <!-- ─── §BULK::index — فهرس المنتجات ─── -->
     <div class="bulk-toolbar">
-      <button class="bulk-btn primary" id="bulkLoadBtn" onclick="loadBulkIndex()">↺ تحميل فهرس المنتجات</button>
+      <button class="bulk-btn primary" id="bulkLoadBtn" onclick="loadBulkIndex()">① حمّل الباركودات</button>
       <div class="priority-ts-badge" id="bulkIndexTs">
         <span class="priority-ts-part">📅 <span id="bxDate">—</span></span>
         <span class="priority-ts-part">🕐 <span id="bxTime">—</span></span>
         <span class="priority-ts-relative" id="bxRelative"></span>
       </div>
-      <div class="bulk-idx-stat" id="bulkIdxStat">الفهرس لسه ما اتحملش — حمّله قبل ما تبدأ المسح</div>
+      <div class="bulk-idx-stat" id="bulkIdxStat">لازم تحمّل الباركودات الأول عشان الأداة تعرف كل مسحة بتاعة أنهي صنف</div>
       <div class="bulk-card-spacer"></div>
       <button class="bulk-btn" id="bulkResetBtn" onclick="confirmResetBulkSession()" disabled>🗑 جلسة جديدة</button>
     </div>
@@ -1065,8 +1082,8 @@ td.centered{text-align:center;}
     <!-- ─── §BULK::scan — جلسة المسح المتواصل ─── -->
     <div class="bulk-card">
       <div class="bulk-card-hdr">
-        <span class="bulk-card-title">🔫 جلسة المسح</span>
-        <span class="bulk-card-sub" id="bulkScanHint">امسح كل القطع على الرفوف واحدة ورا التانية — من غير توقّف.</span>
+        <span class="bulk-card-title">② 🔫 جلسة المسح</span>
+        <span class="bulk-card-sub" id="bulkScanHint">امسح كل القطع على الرفوف واحدة ورا التانية — من غير توقّف ومن غير إنترنت.</span>
         <div class="bulk-card-spacer"></div>
         <button class="bulk-btn go" id="bulkScanToggle" onclick="toggleBulkScan()" disabled>▶ ابدأ المسح</button>
       </div>
@@ -1074,7 +1091,7 @@ td.centered{text-align:center;}
         <div class="bulk-scan-row">
           <div class="bulk-scan-wrap disabled" id="bulkScanWrap">
             <span>🔫</span>
-            <input type="text" id="bulkScanInput" placeholder="حمّل الفهرس ثم اضغط «ابدأ المسح»"
+            <input type="text" id="bulkScanInput" placeholder="حمّل الباركودات ثم اضغط «ابدأ المسح»"
                    autocomplete="off" spellcheck="false" inputmode="numeric" disabled />
           </div>
         </div>
@@ -1120,7 +1137,7 @@ td.centered{text-align:center;}
     <!-- ─── §BULK::scope — نطاق الجرد ─── -->
     <div class="bulk-card">
       <div class="bulk-card-hdr">
-        <span class="bulk-card-title">🎯 نطاق الجرد</span>
+        <span class="bulk-card-title">③ 🎯 نطاق الجرد</span>
         <span class="bulk-card-sub">الفرق بين الوضعين هو إيه اللي بيحصل للصنف اللي **ما اتمسحش**.</span>
       </div>
       <div class="bulk-card-body">
@@ -1200,10 +1217,10 @@ td.centered{text-align:center;}
 
       <div class="results-row" onclick="toggleBulkTable()">
         <span class="uf-arrow" id="bulkTblArrow">▼</span>
-        <span class="results-title">النتائج</span>
+        <span class="results-title">④ النتائج</span>
         <span class="results-count" id="bulkResultsCount">—</span>
         <span class="results-actions">
-          <button class="bulk-btn amber" id="bulkShelfBtn" onclick="event.stopPropagation();runBulkShelfCheck()" disabled>🔍 مراجعة الأوردرات المعلّقة</button>
+          <button class="bulk-btn primary" id="bulkCompareBtn" onclick="event.stopPropagation();runBulkCompare()" disabled>⚖️ قارن بشوبيفاي</button>
           <button class="log-export-btn" id="bulkExportBtn" onclick="event.stopPropagation();exportBulkXLSX()" disabled>⬇ تصدير المقارنة .xlsx</button>
           <button class="bulk-btn go" id="bulkExecBtn" onclick="event.stopPropagation();confirmBulkExecute()" disabled>✔ نفّذ التعديلات</button>
         </span>
@@ -1223,7 +1240,7 @@ td.centered{text-align:center;}
           <table class="bulk-table">
             <thead><tr id="bulkHeadRow"></tr></thead>
             <tbody id="bulkBody">
-              <tr><td colspan="12"><div class="state-box"><div class="state-icon">🧾</div><p>حمّل الفهرس وابدأ المسح — المقارنة هتظهر هنا أول بأول</p></div></td></tr>
+              <tr><td colspan="12"><div class="state-box"><div class="state-icon">🧾</div><p>حمّل الباركودات وابدأ المسح — وبعد ما تخلص اضغط «⚖️ قارن بشوبيفاي»</p></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -1389,11 +1406,12 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.0.0';
+const TOOL_VERSION = '6.1.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
-// get_bulk_index و bulk_shelf_check و bulk_adjust — كلهم اتضافوا في 6.0.0.
-// (وقبلهم get_config/diag و get_logs_count/get_logs_export من 5.0.0.)
-const MIN_WORKER_VERSION = '6.0.0';
+// `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
+// اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
+// على Worker 6.0.0: `bulk_compare` هيرجّع «Unknown action».
+const MIN_WORKER_VERSION = '6.1.0';
 
 // السر الوحيد اللي بيتخزّن جهة العميل.
 const LS_SECRET = 'stockaudit_worker_secret';
@@ -2669,7 +2687,11 @@ async function exportLogXLSX(){
 // ─── §BULK-JS::state ───
 let bulkIndex      = null;      // { variants, byId, byBarcode, bySku, dupBarcodes, loadedAt, truncated }
 let bulkScans      = new Map(); // variantId → { scanned, manual }
-let bulkShelf      = new Map(); // variantId → { ok, packed, unpacked, orders } | { ok:false, error }
+// 🔴 الأرقام اللي بيتبني عليها القرار — بتتقرا لحظة **المقارنة** مش لحظة
+//    الفهرس. الفهرس بيدّي أرقام **مبدئية** للعرض وإنت بتمسح، والمقارنة بتجيب
+//    الأرصدة الحيّة والمغلَّف من شوبيفاي في نفس النداء ونفس اللحظة.
+let bulkLive       = new Map(); // variantId → { ok, at, available, committed, onHand, packed, unpacked, orders } | { ok:false, error }
+let bulkComparedAt = null;      // آخر لحظة مقارنة — بتظهر جنب الجدول
 let bulkResults    = new Map(); // variantId → نتيجة آخر تنفيذ
 let bulkProblems   = new Map(); // code → { code, count, reason, candidates }
 let bulkSelOverride= new Map(); // variantId → اختيار الموظف الصريح (بيغلب الافتراضي)
@@ -2686,15 +2708,23 @@ let bulkOrphanScans = 0;   // قطع اتمسحت وصنفها اختفى من �
 
 // السقوف بتيجي من الـ Worker (`get_bulk_index`) — الواجهة مابتكتبش أرقامها
 // عندها عشان مايبقاش فيه مصدرين بيتعتّقوا. دي قيم أولية لحد ما الفهرس يوصل.
-let bulkCaps = { chunk: 10, shelfChunk: 8, maxBatch: 50, shelfMaxBatch: 30 };
+let bulkCaps = { chunk: 10, maxBatch: 50, compareChunk: 12, compareMaxBatch: 30 };
 
+// بعد الوقت ده الأرقام المقارَنة بتتحسب «قديمة» وبيظهر تنبيه — التنفيذ لسه
+// مسموح (الـ CAS بيحمي المخزون)، بس الموظف لازم يعرف.
+const BULK_COMPARE_STALE_MS = 15 * 60 * 1000;
+
+// ⚠️ `sel` = الصف ده ممكن يتنفّذ · `auto` = بيتحدّد لوحده.
+//    أي صف **ما اتقارنش** مش قابل للتنفيذ مهما كان شكل الفرق — الرقم اللي
+//    قدامه مبدئي، والتنفيذ على رقم مبدئي هو بالظبط اللي البند ده اتكتب ضده.
 const BULK_STATES = {
   match:        { label: '✅ مظبوط',            sel: true,  auto: true  },
   short:        { label: '🔴 عجز',              sel: true,  auto: true  },
   over:         { label: '🟢 زيادة',            sel: true,  auto: true  },
   missing:      { label: '⚠️ مش متسكن',          sel: true,  auto: false },
   no_barcode:   { label: '🚫 بدون باركود',       sel: false, auto: false },
-  needs_check:  { label: '🔍 محتاج مراجعة',      sel: false, auto: false },
+  not_compared: { label: '⏳ لسه ما اتقارنش',    sel: false, auto: false },
+  compare_failed:{label: '❌ تعذّرت المقارنة',   sel: false, auto: false },
   other_states: { label: '❗ حالات مخزون تانية', sel: false, auto: false },
 };
 
@@ -2804,9 +2834,9 @@ function toggleBulkTable(){
 }
 
 // ─── §BULK-JS::index — تحميل الفهرس ───
-// ⚠️ إعادة التحميل **بتحافظ على المسحات** عن قصد: ده مسار الإصلاح لما رصيد
-//    يتغيّر أثناء جلسة طويلة. اللي بيتمسح هو بيانات الأوردرات المعلّقة
-//    (`bulkShelf`) لأنها بقت قديمة زيّها زي الأرصدة.
+// ⚠️ إعادة التحميل **بتحافظ على المسحات** عن قصد. واللي بيتمسح هو نتيجة
+//    المقارنة (`bulkLive`) — أرقامها بقت من لقطة أقدم من الفهرس الجديد،
+//    فالصفوف بترجع «لسه ما اتقارنش» لحد ما تضغط «قارن» تاني.
 async function loadBulkIndex(){
   if (isUpdatingBulk) return;
   const btn = document.getElementById('bulkLoadBtn');
@@ -2832,12 +2862,12 @@ async function loadBulkIndex(){
       skippedNoLevel: data.skippedNoLevel || 0,
     };
     bulkCaps = {
-      chunk:         data.chunkHint      || bulkCaps.chunk,
-      shelfChunk:    data.shelfChunkHint || bulkCaps.shelfChunk,
-      maxBatch:      data.maxBatch       || bulkCaps.maxBatch,
-      shelfMaxBatch: data.shelfMaxBatch  || bulkCaps.shelfMaxBatch,
+      chunk:           data.chunkHint        || bulkCaps.chunk,
+      maxBatch:        data.maxBatch         || bulkCaps.maxBatch,
+      compareChunk:    data.compareChunkHint || bulkCaps.compareChunk,
+      compareMaxBatch: data.compareMaxBatch  || bulkCaps.compareMaxBatch,
     };
-    bulkShelf.clear();     // الأرصدة اتجدّدت → بيانات التغليف القديمة بقت قديمة
+    bulkLive.clear(); bulkComparedAt = null;   // لقطة جديدة → المقارنة القديمة بطلت
 
     // خيارات البراند للفلتر وللنطاق
     const vendors = [...new Set(variants.map(v => v.vendor || '—'))].sort((a,b) => a.localeCompare(b,'ar'));
@@ -2921,7 +2951,7 @@ function handleBulkScanInput(){
 }
 
 function toggleBulkScan(){
-  if (!bulkIndex){ showToast('حمّل الفهرس الأول', 'warning'); return; }
+  if (!bulkIndex){ showToast('حمّل الباركودات الأول', 'warning'); return; }
   if (isUpdatingBulk){ showToast('في تنفيذ شغّال — استنى لما يخلص', 'warning'); return; }
   bulkScanActive = !bulkScanActive;
   const wrap = document.getElementById('bulkScanWrap');
@@ -2948,7 +2978,7 @@ function setBulkLive(kind, text, count){
 function processBulkScanCode(raw){
   if (isUpdatingBulk) return;          // القفل البصري لوحده مابيمنعش النداء البرمجي
   const code = String(raw || '').trim();
-  if (!bulkIndex){ showToast('حمّل الفهرس الأول', 'warning'); return; }
+  if (!bulkIndex){ showToast('حمّل الباركودات الأول', 'warning'); return; }
 
   const list = bulkIndex.byBarcode.get(code) || [];
   if (list.length === 0){ addBulkProblem(code, 'unknown', []); return; }
@@ -2994,7 +3024,7 @@ function addBulkBySku(){
   const inp = document.getElementById('bulkSkuAdd');
   const sku = inp.value.trim();
   if (!sku) return;
-  if (!bulkIndex){ showToast('حمّل الفهرس الأول', 'warning'); return; }
+  if (!bulkIndex){ showToast('حمّل الباركودات الأول', 'warning'); return; }
   if (isUpdatingBulk){ showToast('في تنفيذ شغّال — استنى لما يخلص', 'warning'); return; }
   const v = bulkIndex.bySku.get(sku.toUpperCase());
   if (!v){ showToast(`مفيش صنف بالـ SKU ده في الفهرس: ${sku}`, 'error', 6000); playBeep('error'); return; }
@@ -3107,44 +3137,50 @@ function computeBulkRows(){
   const inScope  = v => !scopeSel.size || scopeSel.has(v.vendor || '—');
 
   const build = (v, scanned, manual) => {
-    const counted   = scanned + manual;
-    const shelf     = bulkShelf.get(v.variantId) || null;
-    const refined   = !!(shelf && shelf.ok);
-    const packed    = refined ? shelf.packed : 0;
-    const available = v.available ?? 0;
-    const committed = v.committed ?? 0;
+    const counted = scanned + manual;
+
+    // 🔴 مصدر الأرقام: الحيّة من المقارنة لو موجودة، وإلا **المبدئية** من
+    //    الفهرس. الفرق بينهم مش تجميلي — الصف اللي على أرقام مبدئية
+    //    **ممنوع يتنفّذ**، لأن الفهرس اتحمّل قبل العدّ وأرقامه بتقدم.
+    const live      = bulkLive.get(v.variantId) || null;
+    const compared  = !!(live && live.ok);
+    const available = compared ? (live.available ?? 0) : (v.available ?? 0);
+    const committed = compared ? (live.committed ?? 0) : (v.committed ?? 0);
+    const onHand    = compared ?  live.onHand          :  v.onHand;
+    const packed    = compared ? (live.packed ?? 0)    : 0;
     const expected  = available + committed - packed;
     const diff      = counted - expected;
 
     // onHand مش مساوي available+committed معناه إن الصنف عليه حالات مخزون تانية
     // (تالف · محجوز · فحص جودة) — معادلة الرف مش بتغطّيها، فالصنف بيتشال من
     // التنفيذ الجماعي بدل ما يتعدّل برقم ناقص.
-    const otherStates = v.onHand != null && v.onHand !== available + committed;
+    const otherStates = compared && onHand != null && onHand !== available + committed;
     const untouched   = counted === 0 && scanned === 0 && manual === 0 && !bulkScans.has(v.variantId);
 
     let state;
-    if (otherStates)                     state = 'other_states';
-    else if (untouched && !v.barcode)    state = 'no_barcode';
-    else if (committed > 0 && !refined)  state = 'needs_check';
+    if (untouched && !v.barcode)           state = 'no_barcode';
+    else if (live && live.ok === false)    state = 'compare_failed';
+    else if (!compared)                    state = 'not_compared';
+    else if (otherStates)                  state = 'other_states';
     // «مش متسكن» معناها **متوقع منه حاجة والرف فاضي**. المقاس اللي شوبيفاي
     // أصلاً بتقول عنه صفر والرف فاضي = مظبوط، مش ناقص — وده أهم صف في وضع
     // «باقي المقاسات»: بيسجّل إن المقاس اتراجع فعلاً.
-    else if (untouched && expected > 0)  state = 'missing';
-    else if (diff === 0)                 state = 'match';
-    else if (diff < 0)                   state = 'short';
-    else                                 state = 'over';
+    else if (untouched && expected > 0)    state = 'missing';
+    else if (diff === 0)                   state = 'match';
+    else if (diff < 0)                     state = 'short';
+    else                                   state = 'over';
 
     bulkRows.push({
-      variantId: v.variantId, productId: v.productId, inventoryItemId: v.inventoryItemId,
+      variantId: v.variantId, productId: v.productId,
+      // الـ inventoryItemId بيترجع من المقارنة كمان — أحدث من بتاع الفهرس
+      inventoryItemId: (compared && live.inventoryItemId) || v.inventoryItemId,
       sku: v.sku, barcode: v.barcode, productTitle: v.productTitle,
       variantTitle: v.variantTitle, vendor: v.vendor || '—',
       lastAuditDate: v.lastAuditDate,
       scanned, manual, counted, expected, diff, state,
-      available, committed, onHand: v.onHand, packed,
-      // المحاولة الفاشلة بتفضل في القايمة — الزرار بيعيدها. «تعذّر الاستعلام»
-      // مش «مفيش مغلَّف»، والصف بيفضل مقفول لحد ما نعرف الرقم الحقيقي.
-      needsShelf: committed > 0 && !refined,
-      shelfError: shelf && shelf.ok === false ? shelf.error : null,
+      available, committed, onHand, packed,
+      compared, comparedAt: compared ? live.at : null,
+      compareError: live && live.ok === false ? live.error : null,
       result: bulkResults.get(v.variantId) || null,
     });
   };
@@ -3320,7 +3356,7 @@ function renderBulkTable(){
   const body = document.getElementById('bulkBody');
   if (!bulkRows.length){
     body.innerHTML = `<tr><td colspan="${BULK_COLS.length}"><div class="state-box"><div class="state-icon">🧾</div>`
-      + `<p>${bulkIndex ? 'ابدأ المسح — المقارنة هتظهر هنا أول بأول' : 'حمّل الفهرس الأول'}</p></div></td></tr>`;
+      + `<p>${bulkIndex ? 'ابدأ المسح — الأصناف هتظهر هنا أول بأول' : 'حمّل الباركودات الأول'}</p></div></td></tr>`;
     return;
   }
   if (!bulkFiltered.length){
@@ -3332,12 +3368,13 @@ function renderBulkTable(){
     const sel  = isBulkSelected(r);
     const selectable = BULK_STATES[r.state]?.sel && !done && !isUpdatingBulk;
     const diffCls = r.diff > 0 ? 'pos' : r.diff < 0 ? 'neg' : 'zero';
-    const diffTxt = r.state === 'no_barcode' || r.state === 'needs_check' || r.state === 'other_states'
-      ? '—' : (r.diff > 0 ? '+' : '') + r.diff.toLocaleString('en-US');
+    const diffTxt = r.state === 'no_barcode' || r.state === 'compare_failed' || r.state === 'other_states'
+      ? '—' : (r.diff > 0 ? '+' : '') + r.diff.toLocaleString('en-US')
+              + (r.compared ? '' : '؟');
     const res = r.result;
     const resHtml = res
       ? `<span class="log-res-badge res-${esc(res.status)}" title="${esc((res.warnings||[]).join(' · ') || res.error || (res.actions||[]).join(' · '))}">${esc(resultLabel(res.status))}</span>`
-      : (r.shelfError ? `<span class="log-res-badge res-error" title="${esc(r.shelfError)}">تعذّر الاستعلام</span>` : '<span class="res-none">—</span>');
+      : (r.compareError ? `<span class="log-res-badge res-error" title="${esc(r.compareError)}">تعذّرت المقارنة</span>` : '<span class="res-none">—</span>');
     return `<tr class="${done ? 'is-done' : ''}${!BULK_STATES[r.state]?.sel ? ' is-blocked' : ''}">
       <td><input type="checkbox" ${sel ? 'checked' : ''} ${selectable ? '' : 'disabled'}
            onchange="toggleBulkRowIdx(${i})"></td>
@@ -3348,7 +3385,9 @@ function renderBulkTable(){
       <td><input type="number" min="0" class="bulk-manual-cell" value="${r.manual}" ${isUpdatingBulk || done ? 'disabled' : ''}
            onchange="setBulkManualIdx(${i}, this.value)"></td>
       <td class="col-num">${r.counted.toLocaleString('en-US')}</td>
-      <td class="col-num" title="available ${r.available} + committed ${r.committed} − مغلَّف ${r.packed}">${r.expected.toLocaleString('en-US')}</td>
+      <td class="col-num" title="${r.compared ? `available ${r.available} + committed ${r.committed} − مغلَّف ${r.packed}` : 'رقم مبدئي من وقت تحميل الباركودات — اضغط «قارن بشوبيفاي»'}">${
+        r.compared ? r.expected.toLocaleString('en-US')
+                   : `<span class="bulk-prov">${r.expected.toLocaleString('en-US')}؟</span>`}</td>
       <td class="col-num"><span class="bulk-diff ${diffCls}">${esc(diffTxt)}</span></td>
       <td><span class="bulk-state st-${esc(r.state)}">${esc(BULK_STATES[r.state]?.label || r.state)}</span></td>
       <td>${resHtml}</td>
@@ -3382,6 +3421,15 @@ function renderBulkStats(){
 function renderBulkNotices(){
   const box = document.getElementById('bulkNotices');
   const out = [];
+  // حالة المقارنة — أهم سطر في الشاشة: الأرقام دي من إمتى؟
+  const nCmp = bulkRows.filter(r => !r.compared).length;
+  if (bulkRows.length && nCmp)
+    out.push(`⏳ <b>${nCmp.toLocaleString('en-US')}</b> صنف أرقامه <b>مبدئية</b> (من وقت تحميل الباركودات) — `
+      + `اضغط <b>«⚖️ قارن بشوبيفاي»</b> عشان تتسحب الأرقام الحقيقية دلوقتي. `
+      + `<b>التنفيذ مقفول عليهم</b> لحد ما يتقارنوا.`);
+  else if (bulkRows.length && bulkComparedAt && isBulkCompareStale())
+    out.push(`🕐 آخر مقارنة كانت <b>${formatTimeOnly(bulkComparedAt.toISOString()).replace('🕐 ','')}</b> — `
+      + `عدّى عليها وقت. لو المخزن شغّال، اضغط «⚖️ قارن تاني» قبل التنفيذ.`);
   if (bulkOrphanScans)
     out.push(`⚠️ <b>${bulkOrphanScans.toLocaleString('en-US')}</b> قطعة اتمسحت على أصناف مش موجودة في الفهرس الحالي `
       + `(اتشالت من شوبيفاي أو بقت Suspended بعد آخر تحميل) — <b>مش ظاهرة في الجدول ومش هتتنفّذ</b>.`);
@@ -3407,24 +3455,33 @@ function renderBulkNotices(){
 }
 
 function updateBulkButtons(){
-  const execBtn  = document.getElementById('bulkExecBtn');
-  const shelfBtn = document.getElementById('bulkShelfBtn');
-  const expBtn   = document.getElementById('bulkExportBtn');
-  const n        = bulkExecutableRows().length;
-  const nShelf   = bulkRows.filter(r => r.needsShelf).length;
-  const blocked  = bulkProblems.size > 0;
+  const execBtn = document.getElementById('bulkExecBtn');
+  const cmpBtn  = document.getElementById('bulkCompareBtn');
+  const expBtn  = document.getElementById('bulkExportBtn');
+  const n       = bulkExecutableRows().length;
+  const nCmp    = bulkRows.filter(r => !r.compared).length;
+  const blocked = bulkProblems.size > 0;
 
+  // ⚠️ التنفيذ مقفول طول ما فيه صف ما اتقارنش — الرقم اللي قدامه مبدئي.
   execBtn.disabled = isUpdatingBulk || blocked || n === 0;
   execBtn.textContent = blocked
     ? '🔒 شيل الأكواد المجهولة الأول'
-    : `✔ نفّذ التعديلات${n ? ` (${n.toLocaleString('en-US')})` : ''}`;
+    : n === 0 && nCmp > 0
+      ? '⚖️ قارن الأول'
+      : `✔ نفّذ التعديلات${n ? ` (${n.toLocaleString('en-US')})` : ''}`;
 
-  shelfBtn.disabled = isUpdatingBulk || nShelf === 0;
-  shelfBtn.textContent = nShelf
-    ? `🔍 مراجعة الأوردرات المعلّقة (${nShelf.toLocaleString('en-US')})`
-    : '🔍 مراجعة الأوردرات المعلّقة';
+  cmpBtn.disabled = isUpdatingBulk || !bulkRows.length;
+  cmpBtn.textContent = nCmp
+    ? `⚖️ قارن بشوبيفاي (${nCmp.toLocaleString('en-US')})`
+    : '⚖️ قارن تاني';
+  cmpBtn.classList.toggle('primary', nCmp > 0);
+  cmpBtn.classList.toggle('amber',   nCmp === 0 && bulkComparedAt && isBulkCompareStale());
 
   expBtn.disabled = isUpdatingBulk || !bulkRows.length;
+}
+
+function isBulkCompareStale(){
+  return !!bulkComparedAt && (Date.now() - bulkComparedAt.getTime()) > BULK_COMPARE_STALE_MS;
 }
 
 // ─── §BULK-JS::lock — القفل واللقطة أثناء أي دفعة (Standards #43) ───
@@ -3458,44 +3515,61 @@ function setBulkProgress(done, total, label){
     `${label}: ${done.toLocaleString('en-US')} / ${total.toLocaleString('en-US')} (${pct}%)`;
 }
 
-// ─── §BULK-JS::shelfCheck — القطع المغلَّفة ───
-// ⛔ فشل الاستعلام **مايتحوّلش** لـ «مفيش مغلَّف» — الصنف بيفضل «محتاج مراجعة»
-//    ومش بيتنفّذ، والسبب بيظهر في عمود النتيجة.
-async function runBulkShelfCheck(){
+// ─── §BULK-JS::compare — المقارنة: الأرقام بتتقرا **دلوقتي** ───
+//
+// 🔴 ده قلب القسم. الفهرس بيتحمّل قبل العدّ عشان المسح يبقى فوري وذكي، لكن
+//    أرقامه بتقدم أثناء جلسة المسح (بيعة · شحنة). الزرار ده بيسحب من شوبيفاي
+//    **في لحظة الضغط**: الأرصدة الحيّة والقطع المغلَّفة في نفس النداء ونفس
+//    اللحظة، وللأصناف اللي اتعدّت بس.
+// ⛔ فشل الاستعلام **مايتحوّلش لصفر** — الصنف بياخد «تعذّرت المقارنة»
+//    ومابيتنفّذش لحد ما نعرف رقمه الحقيقي.
+async function runBulkCompare(){
   if (isUpdatingBulk) return;
-  const batch = bulkRows.filter(r => r.needsShelf).slice();   // ① لقطة
-  if (!batch.length) return;
+  if (!bulkIndex){ showToast('حمّل الباركودات الأول', 'warning'); return; }
+  const batch = bulkRows.slice();          // ① لقطة
+  if (!batch.length){ showToast('مفيش أصناف تتقارن — امسح الأول', 'warning'); return; }
 
   setBulkUpdateLock(true); showBulkProgress(true);
-  setBulkProgress(0, batch.length, 'مراجعة الأوردرات المعلّقة');
-  let failed = 0, mismatched = 0, netErr = null;
+  setBulkProgress(0, batch.length, 'سحب الأرقام من شوبيفاي');
+  let failed = 0, mismatched = 0, netErr = null, lastAt = null;
   try {
-    for (let i = 0; i < batch.length; i += bulkCaps.shelfChunk){
-      const chunk = batch.slice(i, i + bulkCaps.shelfChunk);
-      const data  = await apiPost('bulk_shelf_check', {
+    for (let i = 0; i < batch.length; i += bulkCaps.compareChunk){
+      const chunk = batch.slice(i, i + bulkCaps.compareChunk);
+      const data  = await apiPost('bulk_compare', {
         items: chunk.map(r => ({ variantId: r.variantId, productId: r.productId })),
       });
+      lastAt = data.at || lastAt;
       const results = data.results || [];
       chunk.forEach((r, idx) => {
         const res = results[idx];
         // العقد: نتيجة لكل عنصر بنفس الترتيب — والتأكيد بالـ variantId كمان،
         // عشان نتيجة ما تتنسبش لصف غلط لو العقد اتكسر يومًا ما.
         if (!res || (res.variantId && res.variantId !== r.variantId)){ mismatched++; return; }
-        if (res.ok) bulkShelf.set(r.variantId, { ok:true, packed:res.packed, unpacked:res.unpacked, orders:res.orders });
-        else { bulkShelf.set(r.variantId, { ok:false, error: res.error || 'تعذّر الاستعلام' }); failed++; }
+        if (res.ok){
+          bulkLive.set(r.variantId, {
+            ok: true, at: res.at || lastAt,
+            inventoryItemId: res.inventoryItemId,
+            available: res.available, committed: res.committed, onHand: res.onHand,
+            packed: res.packed, unpacked: res.unpacked, orders: res.orders,
+          });
+        } else {
+          bulkLive.set(r.variantId, { ok: false, error: res.error || 'تعذّرت المقارنة' });
+          failed++;
+        }
       });
-      setBulkProgress(Math.min(i + chunk.length, batch.length), batch.length, 'مراجعة الأوردرات المعلّقة');
+      setBulkProgress(Math.min(i + chunk.length, batch.length), batch.length, 'سحب الأرقام من شوبيفاي');
     }
+    bulkComparedAt = lastAt ? new Date(lastAt) : new Date();
   } catch (e){
     netErr = e.message;
   } finally {
     setBulkUpdateLock(false); showBulkProgress(false);
     computeBulkRows(); applyBulkFilters();
   }
-  if (netErr)          showToast('خطأ في مراجعة الأوردرات: ' + netErr, 'error', 9000);
+  if (netErr)          showToast('خطأ في المقارنة: ' + netErr, 'error', 9000);
   else if (mismatched) showToast(`⚠️ ${mismatched} صنف رد الـ Worker عليه مش مطابق للترتيب — راجعهم فرديًا`, 'error', 9000);
-  else if (failed)     showToast(`⚠️ ${failed} صنف تعذّر الاستعلام عنه — بيفضل «محتاج مراجعة» ومش هيتنفّذ`, 'warning', 8000);
-  else                 showToast('✓ تمت مراجعة الأوردرات المعلّقة', 'success');
+  else if (failed)     showToast(`⚠️ ${failed} صنف تعذّرت مقارنته — مش هيتنفّذ، السبب في عمود النتيجة`, 'warning', 8000);
+  else                 showToast('✓ الأرقام اتسحبت من شوبيفاي — المقارنة جاهزة', 'success');
 }
 
 // ─── §BULK-JS::execute — التنفيذ الجماعي ───
@@ -3540,6 +3614,10 @@ function confirmBulkExecute(){
   if (nNeg)
     body += `<div class="confirm-note">⚠️ <b>${nNeg.toLocaleString('en-US')}</b> صنف رصيده المتاح هيبقى بالسالب بعد التعديل — `
           + `شوبيفاي ممكن ترفضهم، وهيظهروا «فشل» بسببهم بس.</div>`;
+  const cmpAge = bulkComparedAt ? Math.round((Date.now() - bulkComparedAt.getTime()) / 60000) : null;
+  body += line('الأرقام اتسحبت من شوبيفاي',
+               cmpAge === null ? '—' : cmpAge < 1 ? 'دلوقتي' : `من ${cmpAge.toLocaleString('en-US')} دقيقة`,
+               cmpAge !== null && cmpAge > 15 ? 'amber' : 'green');
   body += `<div class="confirm-note">التعديل بيتبعت كقيمة مطلقة مع تحقق من الرصيد الحالي — `
         + `أي صنف رصيده اتغيّر بعد ما عدّيته هيترفض <b>من غير أي تعديل عليه</b> بدل ما يتعدّل غلط.</div>`;
 
@@ -3657,7 +3735,7 @@ function confirmResetBulkSession(){
     'امسح وابدأ من جديد', 'btn-red', resetBulkSession);
 }
 function resetBulkSession(){
-  bulkScans.clear(); bulkShelf.clear(); bulkResults.clear();
+  bulkScans.clear(); bulkLive.clear(); bulkResults.clear(); bulkComparedAt = null;
   bulkProblems.clear(); bulkSelOverride.clear(); bulkDone.clear();
   bulkSessionScans = 0; bulkBatchId = null;
   setBulkLive('', 'مفيش مسحات لسه.', null);
@@ -3688,10 +3766,12 @@ async function exportBulkXLSX(){
       'committed':      r.committed,
       'مغلَّف':          r.packed,
       'الحالة':         BULK_STATES[r.state]?.label || r.state,
+      'الأرقام اتقارنت': r.compared ? 'أيوه' : 'لأ — مبدئية',
+      'وقت المقارنة':   r.comparedAt ? formatTimeForExport(r.comparedAt) : null,
       'النتيجة':        r.result ? resultLabel(r.result.status) : '—',
       'ملاحظة النتيجة': r.result
                           ? ((r.result.warnings || []).join(' · ') || r.result.error || (r.result.actions || []).join(' · ') || null)
-                          : (r.shelfError || null),
+                          : (r.compareError || null),
       'آخر جرد':        r.lastAuditDate ? formatDateForExport(r.lastAuditDate) : null,
     }));
 
