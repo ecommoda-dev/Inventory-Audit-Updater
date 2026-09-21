@@ -1,0 +1,26 @@
+{
+  "tool": "inventory_audit",
+  "since": null,
+  "types": {
+    "login": {
+      "result": null,
+      "stage": null,
+      "desc": "دخول موظف"
+    },
+    "logout": {
+      "result": null,
+      "stage": null,
+      "desc": "خروج موظف"
+    },
+    "adjustment": {
+      "result": "success",
+      "stage": null,
+      "desc": "تعديل كمية المخزون بعد الجرد"
+    },
+    "ok": {
+      "result": "success",
+      "stage": null,
+      "desc": "الجرد طابق المخزون — مفيش تعديل"
+    }
+  }
+}
