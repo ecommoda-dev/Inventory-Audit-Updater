@@ -6,7 +6,7 @@
 
 **بتعمل إيه:** الموظفين بيراجعوا أرصدة المخزون بالباركود/SKU، يصلّحوا الفرق (`adjust_inventory`)، أو يأكّدوا إن الجرد مظبوط (`set_audit_date`) — مع قايمة أولويات جرد وتفاصيل الأوردرات الغير مجهّزة لكل صنف، و**جرد جماعي** (`§BULK`) لرفوف كاملة بالسكانر في جلسة واحدة.
 **مين بيستخدمها:** المخزن
-**الإصدار:** Worker `v6.1.0` · الواجهة `v6.1.0`
+**الإصدار:** Worker `v6.1.1` · الواجهة `v6.1.0`
 
 ## الروابط
 
@@ -50,6 +50,16 @@ type  : ok · adjustment · login · logout
 
 > القيم دي مسجّلة بالفعل في جدول D1 في `ecommoda-constants` §7.
 > ⛔ **ممنوع أي `writeLog` بقيمة `type` مش في السطر ده** قبل ما تتسجّل هناك.
+
+### 🟢 الحارس الديناميكي لقيم اللوج (الطبقة ٥ — من v6.1.1)
+
+`writeLog` بتتحقق من الزوج `(tool, type)` مقابل `LOG_REGISTRY` (§LOG-REG في
+`index.js`، مبني من `log-values.json`) وقت التشغيل — **مش بديل** عن
+`check-log-values.mjs` (تحقق قبل النشر)، ده تأمين إضافي للقيم اللي بتتحسب
+وقت التشغيل. قيمة غير مسجّلة **بتتكتب عادي** + `extra._unregistered = true`
++ صف UPSERT في `log_value_alerts` المشترك (`ecommoda-constants` §2) — مفيش
+رفض كتابة أبدًا. الأداة دي حاليًا صفوفها الأربعة كلها ثابتة ومسجّلة، فالحارس
+مؤمّن ضد أي قيمة ديناميكية تتضاف مستقبلًا.
 
 ### نتيجة العملية — `extra.result`
 
@@ -316,12 +326,12 @@ git show 7f0cce9:index.html
 
 | المهارة | الإصدار وقت آخر تعديل |
 |---|---|
-| ecommoda-worker-builder | v3.3.0 |
+| ecommoda-worker-builder | v3.8.0 |
 | ecommoda-html-builder | v7.0.0 |
-| ecommoda-constants | v2.1.0 |
+| ecommoda-constants | v3.1.0 |
 | shopify-graphql-helper | v1.0.0 |
 
-آخر مطابقة: 18-09-2026 · `index.js` v6.1.0 · `index.html` v6.1.0
+آخر مطابقة: 24-09-2026 · `index.js` v6.1.1 · `index.html` v6.1.0
 🔴 معلّقة: — لا شيء
 
 ## مسائل مفتوحة
@@ -400,6 +410,6 @@ node <skill>/scripts/js-undef-check.js index.html # Step 9B — الربط
 
 ---
 
-آخر تحديث: 18-09-2026
+آخر تحديث: 24-09-2026
 
 </div>
