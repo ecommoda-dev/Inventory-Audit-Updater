@@ -504,6 +504,13 @@ td.centered{text-align:center;}
 
 .bulk-live{padding:10px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface-2);font-size:13px;font-weight:700;color:var(--text-secondary);min-height:42px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .bulk-live.ok{border-color:var(--green-border);background:var(--green-light);color:var(--green-dark);}
+.bulk-live.scan{display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:8px;align-items:stretch;}
+.bulk-live-cell{display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 12px;border-radius:var(--radius-sm);background:var(--surface);border:1.5px solid var(--green-border);min-width:0;}
+.bulk-live-cell small{font-size:10.5px;font-weight:700;color:var(--text-secondary);}
+.bulk-live-cell b{font-size:16px;font-weight:800;color:var(--green-dark);overflow-wrap:anywhere;}
+.bulk-live-cell.num b{font-size:22px;font-variant-numeric:tabular-nums;text-align:center;}
+.bulk-live-cell.size b{text-align:center;}
+.bulk-live-tag{grid-column:1/-1;font-size:11px;font-weight:700;color:var(--text-secondary);}
 .bulk-live.bad{border-color:var(--red-border);background:var(--red-light);color:var(--red);}
 .bulk-live-count{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:28px;padding:0 9px;border-radius:var(--radius-sm);background:var(--surface);border:1.5px solid currentColor;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;}
 
@@ -732,7 +739,12 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.7.1</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.8.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي: قسم ③ النتائج (الجدول والمقارنة والتنفيذ) مش بيظهر غير بعد ما توقّف المسح.</b> أثناء المسح الشاشة بتفضل على العدّ بس.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>المربع الأخضر لآخر مسحة بقى 3 أجزاء:</b> الـ SKU · المقاس · إجمالي اللي اتعدّ من نفس الباركود. اسم المنتج اتشال.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.7.1</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span><b>زرار «نفّذ التعديلات» ما كانش بيفتح نافذة التأكيد</b> (خطأ في v6.7.0). اتصلّح.</span></li>
       </ul>
@@ -1276,7 +1288,7 @@ col.hl{background:var(--accent-light);}
     </div>
 
     <!-- ─── §BULK::results — القسم الموحّد: فلاتر + جدول ─── -->
-    <div class="unified-section">
+    <div class="unified-section" id="bulkResultsSection" style="display:none;">
 
       <div class="tbl-bar" data-tbar="bulk">
         <div class="tbl-bar-right">
@@ -1416,7 +1428,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.7.1';
+const TOOL_VERSION = '6.8.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -3202,6 +3214,7 @@ function toggleBulkScan(){
   // القسم بيتفتح عند أول «ابدأ المسح» ويفضل مفتوح (العدّادات والإضافة اليدوية جواه)
   if (bulkScanActive) document.getElementById('bulkScanCard').classList.remove('closed');
   if (bulkScanActive) setTimeout(() => bulkScanInputEl.focus(), 40);
+  updateBulkResultsVisibility();
 }
 
 function setBulkLive(kind, text, count){
@@ -3209,6 +3222,26 @@ function setBulkLive(kind, text, count){
   el.className = 'bulk-live' + (kind ? ' ' + kind : '');
   el.innerHTML = esc(text) + (count != null
     ? ` <span class="bulk-live-count">${Number(count).toLocaleString('en-US')}</span>` : '');
+}
+
+// آخر مسحة: 3 أجزاء — SKU · المقاس · إجمالي اللي اتعدّ من نفس الباركود
+function setBulkLiveScan(v, count, manual){
+  const el = document.getElementById('bulkLive');
+  const size = String(v.variantTitle || '').split('/').pop().trim() || '—';
+  el.className = 'bulk-live ok scan';
+  el.innerHTML =
+      `<div class="bulk-live-cell"><small>SKU</small><b>${esc(v.sku)}</b></div>`
+    + `<div class="bulk-live-cell size"><small>المقاس</small><b>${esc(size)}</b></div>`
+    + `<div class="bulk-live-cell num"><small>إجمالي المعدود</small><b>${Number(count).toLocaleString('en-US')}</b></div>`
+    + (manual ? `<div class="bulk-live-tag">(إضافة يدوية)</div>` : '');
+}
+
+// قسم النتائج مخفي طول ما المسح شغّال — بيظهر بعد الإيقاف لو في عدّ أو نتايج
+function updateBulkResultsVisibility(){
+  const el = document.getElementById('bulkResultsSection');
+  if (!el) return;
+  const has = bulkScans.size > 0 || bulkResults.size > 0 || bulkLive.size > 0;
+  el.style.display = (!bulkScanActive && has) ? '' : 'none';
 }
 
 function processBulkScanCode(raw){
@@ -3234,7 +3267,7 @@ function processBulkScanCode(raw){
   bulkScans.set(v.variantId, rec);
   bulkSessionScans++;
   playBeep('success'); vibrateDevice(40);
-  setBulkLive('ok', `${v.sku} — ${v.productTitle}${v.variantTitle ? ' · ' + v.variantTitle : ''}`, rec.scanned + rec.manual);
+  setBulkLiveScan(v, rec.scanned + rec.manual, false);
   updateBulkScanStats();
   scheduleBulkRecompute();
 }
@@ -3254,6 +3287,7 @@ function updateBulkScanStats(){
   document.getElementById('bulkStatSkus').textContent     = bulkScans.size.toLocaleString('en-US');
   document.getElementById('bulkStatPieces').textContent   = pieces.toLocaleString('en-US');
   document.getElementById('bulkStatProblems').textContent = bulkProblems.size.toLocaleString('en-US');
+  updateBulkResultsVisibility();
 }
 
 // إضافة صنف يدويًا — للقطع اللي باركودها تالف أو منتج بلا باركود
@@ -3270,7 +3304,7 @@ function addBulkBySku(){
   bulkScans.set(v.variantId, rec);
   inp.value = '';
   playBeep('success');
-  setBulkLive('ok', `(يدوي) ${v.sku} — ${v.productTitle}`, rec.scanned + rec.manual);
+  setBulkLiveScan(v, rec.scanned + rec.manual, true);
   updateBulkScanStats(); computeBulkRows(); applyBulkFilters();
 }
 
