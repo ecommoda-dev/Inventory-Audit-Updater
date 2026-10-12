@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<!-- skills: html-builder v7.0.0 · worker-builder v3.3.0 · constants v2.1.0 — 18-09-2026 -->
+<!-- skills: html-builder v8.3.1 · worker-builder v3.8.0 · constants v3.1.0 — 12-10-2026 -->
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Inventory Audit</title>
@@ -16,7 +16,7 @@
   /* Borders */
   --border:#e5e7eb;--border-strong:#d1d5db;
   /* Text */
-  --text-primary:#111827;--text-secondary:#6b7280;--text-muted:#6b7280;--text-mid:#374151;
+  --text-primary:#111827;--text-secondary:#4b5563;--text-muted:#4b5563;--text-mid:#374151;
   /* Blue (accent) */
   --accent:#2563eb;--accent-light:#eff6ff;--accent-dark:#1d4ed8;
   /* Green */
@@ -42,6 +42,8 @@
   /* Typography — خط واحد فقط؛ خط الكود القديم أُلغي (19-08-2026) */
   --font-body:'Noto Sans Arabic',-apple-system,sans-serif;
   --font-mono:'Noto Sans Arabic',-apple-system,sans-serif;
+  /* الجدول (معتمد 08-10-2026): عناوين 12px/700 بلون text-mid — خلايا 12.5px/600 */
+  --th-size:12px;--th-weight:700;--th-color:var(--text-mid);--td-size:12.5px;--td-weight:600;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary);min-height:100vh;padding:20px 24px;font-size:14px;line-height:1.5;}
@@ -88,6 +90,13 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary)
 .pin-key.utility:hover:not(:disabled){background:var(--red);color:var(--on-accent);}
 .pin-key:disabled{opacity:.55;cursor:not-allowed;}
 .login-alert{display:none;min-height:38px;border-radius:10px;border:1px solid var(--red-border);background:var(--red-light);color:var(--red);padding:9px 12px;font-size:12px;font-weight:800;text-align:center;line-height:1.6;}
+/* ── Idle logout (§IDLE-JS) — banner + login notice (Standards #52) ── */
+.idle-warn{display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9000;width:min(92vw,440px);background:var(--amber-light);border:1px solid var(--amber-border);color:var(--amber-dark);border-radius:12px;padding:12px 14px;box-shadow:0 6px 24px rgba(0,0,0,.18);text-align:center;line-height:1.7;font-weight:800;font-size:13px;}
+.idle-warn.visible{display:block;}
+.idle-warn .idle-ask{font-weight:900;font-size:14px;}
+.idle-warn button{margin-top:8px;min-height:44px;padding:0 22px;border:none;border-radius:10px;background:var(--accent);color:var(--on-accent);font-family:var(--font-body);font-size:14px;font-weight:900;cursor:pointer;}
+.login-notice{display:none;border-radius:10px;border:1px solid var(--amber-border);background:var(--amber-light);color:var(--amber-dark);padding:9px 12px;font-size:12px;font-weight:800;text-align:center;line-height:1.6;}
+.login-notice.visible{display:block;}
 .login-alert.visible{display:block;}
 .login-primary{display:none;align-items:center;justify-content:center;gap:7px;width:100%;min-height:58px;margin-top:1px;border:none;border-radius:10px;background:var(--accent);color:var(--on-accent);font-family:var(--font-body);font-size:15px;font-weight:900;cursor:pointer;transition:background .15s,opacity .15s,transform .06s;}
 .login-primary.visible{display:inline-flex;}
@@ -172,8 +181,9 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary)
 .btn-next-priority{background:var(--green-light);color:var(--green);border-color:var(--green);}
 .post-audit-icon{font-size:20px;flex-shrink:0;}
 /* Priority Queue */
-.priority-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
-.priority-toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);flex-wrap:wrap;}
+/* ⚠️ مفيش overflow:hidden — القايمة العائمة على body بس القاعدة سارية على أي أب */
+.priority-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
+.priority-toolbar{border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);flex-wrap:wrap;}
 .priority-refresh-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border:1px solid var(--green-border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:700;color:var(--green);background:var(--green-light);cursor:pointer;}
 .priority-refresh-btn:hover{background:var(--green);color:var(--on-accent);}
 .priority-refresh-btn:disabled{opacity:.5;cursor:not-allowed;}
@@ -196,10 +206,6 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary)
 .p-chip-p4{background:var(--accent-light);color:var(--accent);border-color:var(--accent-border);}
 .p-chip-p5{background:var(--bg);color:var(--text-secondary);border-color:var(--border);}
 .p-chip-p6{background:var(--green-light);color:var(--green);border-color:var(--green-border);}
-.priority-table-wrap{overflow-y:auto;max-height:620px;}
-.priority-table{width:100%;border-collapse:collapse;}
-.priority-table th{padding:10px 14px;text-align:right;font-size:12px;font-weight:700;background:var(--border);border-bottom:2px solid var(--border-strong);white-space:nowrap;position:sticky;top:0;z-index:1;}
-.priority-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
 .priority-row{cursor:pointer;transition:background .1s;}
 .priority-row:hover{background:var(--accent-light);}
 .priority-row:hover .priority-sku{text-decoration:underline;}
@@ -228,8 +234,8 @@ td.centered{text-align:center;}
 .search-icon{padding:0 10px;color:var(--text-muted);font-size:15px;}
 #skuSearch{flex:1;border:none;outline:none;padding:10px 4px;font-family:var(--font-body);font-size:13px;color:var(--text-primary);background:transparent;direction:rtl;}
 #skuSearch::placeholder{color:var(--text-muted);}
-.clear-btn{padding:0 10px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px;display:none;align-items:center;}
-.clear-btn.visible{display:flex;}
+.search-x{padding:0 10px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px;display:none;align-items:center;}
+.search-x.visible{display:flex;}
 .dropdown-wrap{position:relative;}
 .dropdown-list{position:absolute;top:calc(100% + 5px);right:0;left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.1);max-height:280px;overflow-y:auto;z-index:100;display:none;}
 .dropdown-list.open{display:block;}
@@ -374,17 +380,6 @@ td.centered{text-align:center;}
 .state-box p{font-size:12px;}
 .loading-spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.log-filters-header{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;background:var(--surface-2);cursor:pointer;user-select:none;}
-.log-filters-title{font-size:12px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px;}
-.log-filters-toggle{font-size:13px;color:var(--text-muted);transition:transform .25s;}
-.log-filters-toggle.open{transform:rotate(180deg);}
-.log-filters-body{padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
-.log-filters-body.collapsed{display:none;}
-.log-frow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
-.log-fg{display:flex;flex-direction:column;gap:3px;}
-.log-flabel{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
-.log-fsel,.log-finput{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;height:34px;}
-.log-fsel.w-emp{width:160px;}.log-fsel.w-type{width:155px;}.log-fsel.w-count{width:130px;}.log-finput.w-search{width:220px;}
 
 /* ══════════════════════════════════════════════════════════════
    §LOG-CSS — القسم الموحّد (data-table-standard.md)
@@ -392,40 +387,11 @@ td.centered{text-align:center;}
 /* ⚠️ ممنوع overflow:hidden هنا — بيقص قوايم الفلاتر المنسدلة */
 .unified-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
 .section-divider{height:1px;background:var(--border);margin:0;}
-.uf-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;}
-.uf-arrow{font-size:12px;color:var(--text-secondary);transition:transform .18s;}
-.uf-arrow.closed{transform:rotate(-90deg);}
-.uf-funnel{width:34px;height:22.5px;display:grid;place-items:center;color:var(--text-secondary);transition:color .15s;}
-.uf-funnel.active{color:var(--accent);}
-.uf-spacer{flex:1;}
-.uf-body{padding:0 16px 14px;display:flex;flex-direction:column;gap:10px;}
-.uf-body.closed{display:none;}
-.uf-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;}
-.uf-fg{display:flex;flex-direction:column;gap:5px;}
-.uf-flabel{font-size:11px;font-weight:800;color:var(--text-secondary);}
-.log-clear-btn{padding:7px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--red-border);background:var(--red-light);color:var(--red);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;}
-.log-clear-btn:hover{background:var(--red);color:var(--on-accent);}
 
 /* ─── مربع بحث نصي — بيتلوّن بمجرد وجود نص (Standards #13) ─── */
-.uf-search{position:relative;}
-.uf-search>span{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;color:var(--text-muted);}
-.uf-input{width:100%;height:38px;padding:0 12px 0 34px;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-primary);outline:none;transition:border-color .15s,background .15s;}
-.uf-input:focus{border-color:var(--accent);}
-.uf-input.has-value{background:var(--accent-light);border-color:var(--accent);}
 
 /* ─── multi-select (multi-select-filter.md) ─── */
-.ms-wrap{position:relative;}
-.ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:170px;height:38px;padding:0 12px;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text-primary);cursor:pointer;}
-.ms-btn.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
-.ms-list{position:absolute;top:calc(100% + 4px);right:0;min-width:230px;max-height:300px;overflow-y:auto;background:var(--surface);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:200;padding:5px;display:none;}
-.ms-list.open{display:block;}
 /* "مسح الاختيار" فوق القائمة — مش في فوتر تحت (Standards #21) */
-.ms-ftr-top{display:flex;justify-content:flex-start;padding:4px 6px 7px;border-bottom:1px solid var(--border);margin-bottom:5px;}
-.ms-ftr-top button{background:none;border:none;color:var(--red);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;padding:2px 4px;}
-.ms-item{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:6px;font-size:13px;font-weight:600;color:var(--text-primary);cursor:pointer;}
-.ms-item:hover{background:var(--surface-hover);}
-.ms-item input{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;}
-.ms-empty{padding:10px;font-size:12px;color:var(--text-muted);text-align:center;}
 
 /* ─── chips — سطر لكل فلتر واسم الفلتر مرة واحدة (Standards #12/#23) ─── */
 .ms-chips-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
@@ -434,10 +400,6 @@ td.centered{text-align:center;}
 .ms-chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;line-height:1;padding:0;}
 
 /* ─── صف النتائج (Standards #24) ─── */
-.results-row{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;}
-.results-title{font-size:13px;font-weight:800;color:var(--text-primary);}
-.results-count{min-width:54px;padding:5px 12px;border-radius:var(--radius-sm);background:var(--accent-light);border:1.5px solid var(--accent-border);color:var(--accent);font-size:17px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;}
-.results-actions{margin-right:auto;display:flex;gap:8px;}
 .log-refresh-btn,.log-export-btn{padding:7px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface);font-family:var(--font-body);font-size:12px;font-weight:700;color:var(--text-primary);cursor:pointer;}
 .log-refresh-btn:hover{background:var(--accent-light);border-color:var(--accent-border);color:var(--accent);}
 .log-export-btn{border-color:var(--green-border);background:var(--green-light);color:var(--green-dark);}
@@ -448,14 +410,6 @@ td.centered{text-align:center;}
 .export-warn{margin:0 16px 12px;padding:10px 14px;border-radius:9px;background:var(--amber-light);border:1px solid var(--amber);color:var(--amber-dark);font-size:13px;font-weight:600;line-height:1.7;}
 
 /* ─── الجدول (Standards #26 — السجل جدول مش بطاقات) ─── */
-.log-table-wrap{overflow-x:auto;}
-.log-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-.log-table th{padding:10px 12px;text-align:right;font-size:12px;font-weight:800;color:var(--text-mid);background:var(--surface-2);border-bottom:2px solid var(--border-strong);white-space:nowrap;}
-.log-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text-primary);}
-.log-table tbody tr:hover{background:var(--surface-hover);}
-.sortable-th{cursor:pointer;user-select:none;}
-.sortable-th:hover{color:var(--accent);}
-.sort-ind{font-size:11px;color:var(--accent);margin-right:3px;}
 .log-sku-badge{display:inline-block;padding:2px 8px;border-radius:5px;background:var(--accent-light);border:1px solid var(--accent-border);color:var(--accent);font-size:12px;font-weight:700;}
 .log-type-badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:12px;font-weight:700;white-space:nowrap;}
 .log-type-ok{background:var(--green-light);color:var(--green-dark);border:1px solid var(--green-border);}
@@ -551,14 +505,6 @@ td.centered{text-align:center;}
 
 
 /* ─── الجدول ─── */
-.bulk-table-wrap{overflow-x:auto;overflow-y:auto;max-height:640px;}
-.bulk-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-.bulk-table th{padding:10px 10px;text-align:right;font-size:12px;font-weight:800;color:var(--text-mid);background:var(--surface-2);border-bottom:2px solid var(--border-strong);white-space:nowrap;position:sticky;top:0;z-index:2;}
-.bulk-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text-primary);}
-.bulk-table tbody tr:hover{background:var(--surface-hover);}
-.bulk-table tbody tr.is-done{background:var(--green-light);}
-.bulk-table tbody tr.is-blocked{background:var(--amber-light);}
-.bulk-table input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;}
 .bulk-manual-cell{width:74px;height:30px;padding:0 8px;border:1.5px solid var(--border-strong);border-radius:6px;background:var(--surface);font-family:var(--font-body);font-size:12.5px;font-weight:700;color:var(--text-primary);text-align:center;outline:none;}
 .bulk-manual-cell:focus{border-color:var(--accent);}
 .bulk-manual-cell:disabled{opacity:.5;cursor:not-allowed;}
@@ -588,6 +534,112 @@ td.centered{text-align:center;}
 .bulk-note{padding:10px 14px;border-radius:var(--radius-sm);background:var(--accent-light);border:1px solid var(--accent-border);color:var(--accent-dark);font-size:12.5px;font-weight:600;line-height:1.8;}
 .bulk-note.warn{background:var(--amber-light);border-color:var(--amber-border);color:var(--amber-dark);}
 .bulk-note.danger{background:var(--red-light);border-color:var(--red-border);color:var(--red-dark);}
+
+/* حقول بحث/مدخلات مستخدمة برّه الجدول (إضافة صنف يدويًا · تاب الأولويات) */
+.uf-fg{display:flex;flex-direction:column;gap:5px;}
+.uf-flabel{font-size:11px;font-weight:800;color:var(--text-secondary);}
+.uf-search{position:relative;}
+.uf-search>span{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;color:var(--text-muted);}
+.uf-input{width:100%;height:38px;padding:0 12px 0 34px;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-primary);outline:none;transition:border-color .15s,background .15s;}
+.uf-input:focus{border-color:var(--accent);}
+.uf-input.has-value{background:var(--accent-light);border-color:var(--accent);}
+
+/* ══════════════════════════════════════════════════════════════
+   §TBL-CSS — محرّك الجدول الموحّد: فلاتر رأس العمود + sticky + عرض الأعمدة
+   (data-table-standard.md) — ⚠️ ممنوع overflow:hidden على .unified-section
+   ══════════════════════════════════════════════════════════════ */
+.unified-section{margin-bottom:16px;}
+/* «مسح الاختيار» و«مسح كل الفلاتر» = نفس الكلاس بالظبط (§ 2.3) */
+.clear-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;height:34px;border:1px solid var(--red-border);color:var(--red);background:var(--red-light);}
+.clear-btn:hover{background:var(--red);color:var(--on-accent);border-color:var(--red);}
+.clear-btn.inactive{border-color:var(--border);color:var(--text-muted);background:var(--surface-2);cursor:not-allowed;opacity:.6;}
+.clear-btn.inactive:hover{background:var(--surface-2);color:var(--text-muted);border-color:var(--border);}
+.pop .clear-btn{height:30px;padding:4px 10px;font-size:12px;}
+
+/* صف النتائج (قابل للطي) */
+.tbl-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:var(--surface-2);border-radius:var(--radius) var(--radius) 0 0;cursor:pointer;user-select:none;flex-wrap:wrap;}
+.tbl-bar:hover{background:var(--surface-hover);}
+.tbl-bar-right,.tbl-bar-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tbl-toggle{font-size:13px;color:var(--text-muted);transition:transform .25s;}
+.tbl-toggle.open{transform:rotate(180deg);}
+.results-wrap{display:flex;align-items:center;gap:8px;}
+.results-label{font-size:14px;font-weight:800;color:var(--text-primary);white-space:nowrap;}
+.results-count{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:34px;padding:0 10px;font-family:var(--font-mono);font-size:17px;font-weight:800;color:var(--purple);background:var(--purple-light);border:1.5px solid var(--purple-border);border-radius:var(--radius-sm);font-variant-numeric:tabular-nums;}
+.chips-zone{display:flex;flex-direction:column;gap:6px;}
+.chips-zone.pad{padding:10px 16px;border-top:1px solid var(--border);}
+.chips-zone:empty{display:none;}
+
+/* الطي بـ grid بدل max-height ثابت (Standards #46) + سكرول داخلي بعناوين ثابتة */
+.tbl-body-wrap{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:1fr;transition:grid-template-rows .3s ease;}
+.tbl-body-wrap>*{min-height:0;}
+.tbl-body-wrap.collapsed{grid-template-rows:0fr;overflow:hidden;}
+.tbl-body-wrap.collapsed>*{overflow:hidden;}
+.tbl-scroll{max-height:68vh;overflow:auto;}
+
+/* الجدول */
+.data-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:var(--td-size);}
+.data-table.auto{table-layout:auto;}
+.data-table thead th{position:sticky;top:0;z-index:20;background:var(--surface-2);color:var(--th-color);font-weight:var(--th-weight);font-size:var(--th-size);padding:10px 6px;text-align:center;white-space:normal;box-shadow:inset 0 -2px 0 var(--border-strong);}
+.data-table tbody td{text-align:center;padding:9px 6px;border-bottom:1px solid var(--border);white-space:normal;overflow-wrap:anywhere;vertical-align:middle;font-size:var(--td-size);font-weight:var(--td-weight);color:var(--text-primary);}
+.data-table thead th,.data-table tbody td{border-inline-start:1px solid var(--border);}
+.data-table thead th:first-child,.data-table tbody td:first-child{border-inline-start:none;}
+.data-table tbody tr:hover{background:var(--surface-hover);}
+.data-table tbody tr.is-done{background:var(--green-light);}
+.data-table tbody tr.is-blocked{background:var(--amber-light);}
+.data-table input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;}
+.data-table.measuring th,.data-table.measuring td{white-space:nowrap;}
+.data-table.measuring .th-in{flex-wrap:nowrap;max-width:none;}
+.th-in{display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:5px;max-width:100%;}
+.th-label{cursor:pointer;user-select:none;padding:2px 4px;border-radius:5px;transition:background .12s,color .12s;}
+.th-label:hover,th.sorted .th-label{background:var(--accent-light);color:var(--accent-dark);}
+.sort-icon{display:inline-block;font-size:10px;color:var(--accent);font-weight:900;}
+.sort-icon.active{margin-inline-start:4px;}
+.th-flt{min-width:22px;height:22px;padding:0 3px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--text-muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:800;}
+.th-flt svg{width:14px;height:14px;}
+.th-flt:hover{background:var(--accent-light);color:var(--accent);}
+th.flt-on .th-flt{background:var(--accent-light);border-color:var(--accent-border);color:var(--accent);}
+
+/* القائمة العائمة — position:fixed على body (z 200: تحت الهيدر 300 والمودالات 600) */
+.pop{position:fixed;z-index:200;width:268px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.16);max-height:72vh;display:flex;flex-direction:column;}
+.pop.wide{width:340px;}
+.pop-hd{padding:9px 12px;font-weight:800;font-size:12.5px;border-bottom:1px solid var(--border);background:var(--surface-2);border-radius:var(--radius-sm) var(--radius-sm) 0 0;}
+.pop-body{padding:10px 12px;display:flex;flex-direction:column;gap:9px;}
+.pop-srch{padding:8px 10px 0;}
+.pop-ftr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--border);}
+.pop-lnk{border:none;background:none;font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;color:var(--accent);}
+.pop-lnk:hover{text-decoration:underline;}
+.pop-list{overflow:auto;padding:4px;}
+.pop-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:600;user-select:none;}
+.pop-item:hover{background:var(--surface-hover);}
+.pop-item .cb{width:16px;height:16px;border:1.5px solid var(--border-strong);border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:var(--on-accent);flex-shrink:0;}
+.pop-item.on .cb{background:var(--accent);border-color:var(--accent);}
+.pop-item.on .cb::after{content:'✓';}
+.pop-cnt{margin-inline-start:auto;font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--text-mid);background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:0 7px;}
+.pop-empty{padding:14px;text-align:center;color:var(--text-mid);font-weight:700;font-size:12.5px;}
+.pop-inp{width:100%;height:36px;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);padding:0 11px;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-primary);background:var(--surface);outline:none;transition:border-color .15s,background .15s;}
+.pop-inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+.pop-inp.has-value{border-color:var(--accent);background:var(--accent-light);}
+.pop-inp[type=date]{min-width:0;padding:0 8px;font-size:12.5px;}
+.pop-sw{position:relative;}
+.pop-sw .pop-inp{padding-left:34px;}
+.pop-sicon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text-muted);pointer-events:none;}
+.pop-rng{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pop-rng>div{min-width:0;}
+.pop-body label{font-size:11.5px;font-weight:700;color:var(--text-mid);display:block;margin-bottom:3px;}
+.pop-presets{display:flex;flex-direction:column;gap:2px;}
+.pop-presets>.clear-btn{margin:0 0 6px;align-self:flex-start;}
+.pop-presets button:not(.clear-btn){text-align:right;padding:7px 9px;border:none;background:none;border-radius:6px;font-family:var(--font-body);font-size:12.5px;font-weight:600;cursor:pointer;color:var(--text-primary);}
+.pop-presets button:not(.clear-btn):hover{background:var(--surface-hover);}
+.pop-presets button.on:not(.clear-btn){background:var(--accent-light);color:var(--accent-dark);font-weight:800;}
+.tbl-tip{position:fixed;z-index:210;max-width:300px;background:var(--neutral-dark);color:var(--on-accent);font-size:12px;font-weight:600;line-height:1.7;padding:6px 10px;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.2);pointer-events:none;word-break:break-word;}
+
+/* عرض الأعمدة بالسحب (§ 9ب) */
+.col-rz{position:absolute;top:0;bottom:0;inset-inline-end:0;width:10px;cursor:col-resize;touch-action:none;z-index:3;}
+.col-rz::after{content:'';position:absolute;top:24%;bottom:24%;inset-inline-end:3px;width:2px;border-radius:2px;background:var(--border-strong);transition:background .12s,top .12s,bottom .12s;}
+.col-rz:hover::after,.col-rz.active::after{background:var(--accent);top:8%;bottom:8%;}
+body.col-resizing,body.col-resizing *{cursor:col-resize!important;user-select:none!important;}
+col.hl{background:var(--accent-light);}
+.w-badge{position:fixed;z-index:220;bottom:14px;left:50%;transform:translateX(-50%);background:var(--neutral-dark);color:var(--on-accent);font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:20px;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.25);}
 </style>
 
 <!-- §SHELL -->
@@ -618,7 +670,28 @@ td.centered{text-align:center;}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.2.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.4.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>جدول أولويات الجرد بنفس معيار باقي الجداول:</b> فلاتر الأولوية وآخر جرد والبحث بقت في رأس العمود (اختيار متعدد) بدل القوايم فوق الجدول، مع صف نتائج و«مسح كل الفلاتر» وchips.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>ترتيب من اسم أي عمود (تصاعدي ← تنازلي ← بلا ترتيب = أولوية ثم الأقدم جردًا)، وتحكّم لايف في عرض الأعمدة، وعناوين ثابتة أثناء السكرول.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>SKU في الجدول بقى بيتهرّب قبل العرض، وفتح الصنف من الصف مابقاش بيحط بيانات الصنف كاملة في الـ HTML.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.3.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الفلاتر بقت في رأس كل عمود</b> (أيقونة قمع جنب اسم العمود ← قايمة عائمة) في سجل العمليات والجرد الجماعي — مفيش قسم فلاتر فوق الجدول. «مسح كل الفلاتر» في صف النتائج والـ chips تحته.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>تحكّم لايف في عرض الأعمدة:</b> اسحب الخط الرأسي على حافة أي عنوان، ودبل كليك = ضبط تلقائي على أطول محتوى. العرض بيتحفظ على الجهاز.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>عناوين الجدول <b>ثابتة</b> أثناء السكرول (سكرول داخلي للجدول).</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>الترتيب من اسم العمود فقط (تصاعدي ← تنازلي ← بلا ترتيب). سجل العمليات بيبدأ بلا ترتيب = الأحدث أولًا من السيرفر.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>طي الجدول بقى بـ <code>grid-template-rows</code> بدل الإخفاء الكامل.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.2.1</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>خروج تلقائي لعدم النشاط بعد 60 دقيقة</b> مع بانر تحذير قبلها بدقيقة وزرار «أنا موجود». مش بيشتغل أثناء تنفيذ دفعة جماعية.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>تسجيل الخروج اليدوي بقى فوري بلا نافذة تأكيد</b> (بيتمنع بس لو فيه دفعة جماعية شغّالة).</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>نصوص جاية من شوبيفاي (اسم المنتج · SKU · الملاحظات · رسائل الخطأ) بقت بتعدّي على <code>esc()</code> قبل ما تتحط في نوافذ التأكيد وقايمة البحث.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>لون النص الثانوي بقى <code>#4b5563</code> (أوضح من الرمادي القديم).</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.2.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي: خطوة «نطاق الجرد» اتشالت.</b> النطاق بقى ثابت: اللي اتمسح + باقي مقاسات نفس المنتج. وضعَي «اللي اتمسح بس» و«الجرد الشامل» اتشالوا. الخطوات بقت ①②③④</span></li>
       </ul>
@@ -798,20 +871,22 @@ td.centered{text-align:center;}
           <ul>
             <li><code>§CONFIG</code> — <code>WORKER_URL</code> · <code>TOOL_VERSION</code> · <code>MIN_WORKER_VERSION</code> · <code>esc()</code> · <code>apiRequest</code> بمهلة · دوال التوقيت (Intl)</li>
             <li><code>§SHELL-JS</code> — الإعدادات · التوست (٤ أنواع) · <code>renderVersionUI</code> · <code>checkWorkerVersion</code> · <code>runDiag</code></li>
-            <li><code>§AUTH-JS</code> — <code>renderLoginMode</code> (٤ حالات) · <code>loadEmployeesList</code> · <code>finishLogin</code></li>
+            <li><code>§AUTH-JS</code> — <code>renderLoginMode</code> (٤ حالات) · <code>loadEmployeesList</code> · <code>finishLogin</code> · <code>doLogout</code>/<code>performLogout</code> · <code>§IDLE-JS</code> (خروج تلقائي بعد 60 د)</li>
             <li><code>§SCAN</code> — <code>handleBarcodeScan</code> · <code>handleScanCountInput</code> · <code>§SCAN::plausibility</code></li>
             <li><code>§TOOL-JS</code> — الأولويات · بطاقة المنتج · لوحة التعديل · العد بالسكانر · كارت الأوردرات غير المشحونة (<b>عرض فقط</b> — مفيش أي فعل عليها من الأداة دي)</li>
             <li><code>§BULK-JS</code> — <code>loadBulkIndex</code> · <code>processBulkScanCode</code> · <code>computeBulkRows</code> · <code>runBulkCompare</code> · <code>executeBulk</code> · <code>bms*</code> (فلاتر التاب) · <code>exportBulkXLSX</code></li>
-            <li><code>§LOG-JS</code> — <code>logParams</code> · <code>fetchLog</code> · <code>renderLogTable</code> · <code>applySort</code> · <code>exportLogXLSX</code></li>
+            <li><code>§PRIORITY-JS</code> — إعداد جدول الأولويات (<code>PRIO_T</code>) · <code>applyPriorityFilters</code> · <code>sortPriorityRows</code></li>
+            <li><code>§TBL-JS</code> — محرّك الجدول الموحّد: <code>tblReg</code> · <code>tblOpenPop</code> · <code>tblRefresh</code> · <code>tblEnsureW</code> (فلاتر رأس العمود + عرض الأعمدة)</li>
+            <li><code>§LOG-JS</code> — <code>logParams</code> · <code>fetchLog</code> · <code>renderLogTable</code> · <code>LOG_T</code> · <code>exportLogXLSX</code></li>
           </ul>
 
           <h4>KEY VARIABLES</h4>
           <ul>
-            <li><code>LS_SECRET = 'stockaudit_worker_secret'</code> — السر الوحيد في localStorage</li>
+            <li><code>LS_SECRET = 'stockaudit_worker_secret'</code> — السر الوحيد في localStorage. الاستثناء: تفضيل عرض الأعمدة <code>stockaudit_col_widths_log_v1</code> / <code>stockaudit_col_widths_bulk_v1</code> / <code>stockaudit_col_widths_priority_v1</code> (تفضيل واجهة مش هوية — ارفع <code>_v1</code> لو الأعمدة اتغيّرت)</li>
             <li><code>WORKER_URL</code> — constant مش حقل إعدادات (Standards #28)</li>
             <li><code>TOOL_VERSION</code> / <code>MIN_WORKER_VERSION</code> — مصدر واحد لرقم النسخة وحارس نسخة الـ Worker</li>
             <li><code>currentEmployee</code> — في الذاكرة بس، عمره ما يدخل localStorage</li>
-            <li><code>LOG_PAGE_SIZE = 100</code> · <code>msState</code> — حالة فلاتر السجل multi-select</li>
+            <li><code>LOG_PAGE_SIZE = 100</code> · <code>LOG_T</code> / <code>BULK_T</code> / <code>PRIO_T</code> — إعداد وحالة فلاتر كل جدول (قيم · بحث · تاريخ) لمحرّك <code>§TBL-JS</code></li>
             <li><code>bulkIndex</code> · <code>bulkScans</code> · <code>bulkLive</code> · <code>bulkDone</code> — حالة الجلسة الجماعية، كلها في الذاكرة بس</li>
             <li><code>bulkCaps</code> — السقوف <b>بتيجي من الـ Worker</b> (<code>chunkHint</code>/<code>maxBatch</code>/<code>compareChunkHint</code>...) عشان مايبقاش فيه مصدرين بيتعتّقوا</li>
             <li><code>bulkComparedAt</code> · <code>BULK_COMPARE_STALE_MS</code> — لحظة آخر مقارنة وعتبة التنبيه</li>
@@ -820,6 +895,9 @@ td.centered{text-align:center;}
 
           <h4>NOTES / QUIRKS</h4>
           <ul>
+            <li><b>الفلاتر في رأس العمود:</b> محرّك <code>§TBL-JS</code> واحد للجدولين. القايمة عائمة على <code>body</code> (<code>position:fixed</code>) وبتفضل مفتوحة بعد الاختيار (حارس <code>document.contains</code>). السجل بيبعت الفلاتر والترتيب للسيرفر، والجماعي بيفلتر في المتصفح.</li>
+            <li><b>عرض الأعمدة:</b> بيتقاس أول مرة على صفوف حقيقية وبيتجمّد، وآخر عمود بيمتص الفراغ عشان الجدول يملا الكارت. التاب المخفي مابيتقاسش لحد ما يظهر.</li>
+            <li><b>الخروج:</b> اليدوي فوري بلا تأكيد، والتلقائي بعد <code>IDLE_TIMEOUT_MIN</code> (60 دقيقة) بدون نشاط (مقارنة وقت فعلي كل 30 ث، تحذير قبلها بدقيقة). الحماية على العميل بس، ومش شغّالة أثناء تنفيذ دفعة جماعية.</li>
             <li><b>الجرد والوقت:</b> التوقيت محسوب بـ <code>Intl</code> على <code>Africa/Cairo</code> — مفيش إزاحة ثابتة، فنهاية التوقيت الصيفي مش محتاجة أي تدخل.</li>
             <li><b>فلتر التاريخ</b> بيقارن <code>timestamp</code> المخزّن (UTC) والعرض بالقاهرة — فرق الساعتين/التلاتة ممكن يحط عملية بعد ٩ مساءً في يوم UTC اللي بعده.</li>
             <li><b>فلاتر السجل كلها server-side</b> — العدّ والصفحات والتصدير من نفس <code>logParams()</code>، فالرقم المعروض هو رقم القاعدة مش رقم الصفحة.</li>
@@ -887,7 +965,7 @@ td.centered{text-align:center;}
     </div>
     <div id="skuMode">
       <div class="dropdown-wrap" id="dropdownWrap">
-        <div class="search-input-wrap"><span class="search-icon">🔍</span><input type="text" id="skuSearch" placeholder="ابحث بكتابة (SKU) أو اسم المنتج ..." autocomplete="off" spellcheck="false" /><button class="clear-btn" id="clearBtn" onclick="clearSearch()">✕</button></div>
+        <div class="search-input-wrap"><span class="search-icon">🔍</span><input type="text" id="skuSearch" placeholder="ابحث بكتابة (SKU) أو اسم المنتج ..." autocomplete="off" spellcheck="false" /><button class="search-x" id="clearBtn" onclick="clearSearch()">✕</button></div>
         <div class="dropdown-list" id="dropdownList"></div>
       </div>
     </div>
@@ -1008,46 +1086,27 @@ td.centered{text-align:center;}
       </div>
       <label class="priority-active-toggle"><input type="checkbox" id="priorityActiveOnly" checked onchange="applyPriorityFilters()" /> ACTIVE فقط</label>
     </div>
-    <div style="border-bottom:1px solid var(--border);">
-      <div class="log-filters-header" onclick="togglePriorityFilters()">
-        <div class="log-filters-title"><span>🔽</span><span>الفلاتر</span></div>
-        <span class="log-filters-toggle open" id="pfFiltersToggle">▲</span>
+    <!-- ─── §PRIORITY::results — الفلاتر في رأس العمود (data-table-standard.md) ─── -->
+    <div class="tbl-bar" data-tbar="prio" style="border-radius:0;">
+      <div class="tbl-bar-right">
+        <span class="tbl-toggle open" id="prioTog">▲</span>
+        <div class="results-wrap"><span class="results-label">النتائج:</span><span class="results-count" id="priorityResultsCount">—</span></div>
       </div>
-      <div class="log-filters-body" id="pfFiltersBody">
-        <div class="log-frow">
-          <div class="log-fg">
-            <span class="log-flabel">الأولوية</span>
-            <select class="log-fsel" style="width:210px;" id="pfPriority" onchange="applyPriorityFilters()">
-              <option value="">كل الأولويات</option>
-              <option value="0">🚨 خطأ محتمل</option>
-              <option value="1">🔴 محجوز بالكامل</option>
-              <option value="2">🟠 محجوز أقل من 3 قطع</option>
-              <option value="3">🟡 من 1-3 قطع</option>
-              <option value="4">🔵 من 4-6 قطع</option>
-              <option value="5">⚪ من 7-10 قطع</option>
-              <option value="6">✅ أكبر من 10 قطع</option>
-            </select>
-          </div>
-          <div class="log-fg">
-            <span class="log-flabel">آخر جرد</span>
-            <select class="log-fsel" style="width:160px;" id="pfAuditStatus" onchange="applyPriorityFilters()">
-              <option value="">الكل</option>
-              <option value="never">لم يُجرد قط</option>
-              <option value="audited">جُرد من قبل</option>
-            </select>
-          </div>
-          <div class="log-fg" style="flex:1;">
-            <span class="log-flabel">بحث SKU / اسم المنتج</span>
-            <input type="text" class="log-finput" style="width:100%;" id="pfSearch" placeholder="ابحث..." oninput="onPfSearchInput()" />
-          </div>
-          <div class="log-fg" style="align-self:flex-end;">
-            <button class="log-clear-btn" onclick="clearPriorityFilters()">✕ مسح</button>
-          </div>
-        </div>
+      <div class="tbl-bar-left">
+        <button class="clear-btn inactive" type="button" data-clearall="prio">✕ مسح كل الفلاتر</button>
       </div>
     </div>
+    <div class="chips-zone pad" id="prioChipsZone"></div>
     <div class="priority-stats-bar" id="priorityStatsBar" style="display:none;"><div id="priorityStatsContent" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;"></div></div>
-    <div id="priorityTableWrap"><div class="state-box"><div class="state-icon">🎯</div><p>اضغط "تحديث القائمة" لتحميل أولويات الجرد</p></div></div>
+    <div class="tbl-body-wrap" id="prioTableZone"><div>
+      <div class="tbl-scroll">
+        <table class="data-table auto measuring" id="prioTbl">
+          <colgroup id="prioCg"></colgroup>
+          <thead><tr id="prioHeadRow"></tr></thead>
+          <tbody id="priorityBody"><tr><td colspan="5"><div class="state-box"><div class="state-icon">🎯</div><p>اضغط "تحديث القائمة" لتحميل أولويات الجرد</p></div></td></tr></tbody>
+        </table>
+      </div>
+    </div></div>
   </div>
 </div>
 
@@ -1129,48 +1188,20 @@ td.centered{text-align:center;}
     <!-- ─── §BULK::results — القسم الموحّد: فلاتر + جدول ─── -->
     <div class="unified-section">
 
-      <div class="uf-head" onclick="toggleBulkFilters()">
-        <span class="uf-arrow" id="bulkFltArrow">▼</span>
-        <span class="uf-funnel" id="bulkFunnel" title="الفلاتر">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-            <path d="M3 5h18l-7 8v5l-4 2v-7z"/>
-          </svg>
-        </span>
-        <span class="uf-spacer"></span>
-        <button class="log-clear-btn" onclick="event.stopPropagation();clearBulkFilters()">✕ مسح كل الفلاتر</button>
-      </div>
-
-      <div class="uf-body" id="bulkFltBody">
-        <div class="uf-row">
-          <div class="uf-fg" style="flex:1;min-width:230px;">
-            <span class="uf-flabel">بحث SKU / اسم المنتج</span>
-            <div class="uf-search"><span>🔍</span><input type="text" class="uf-input" id="bulkSearch" /></div>
-          </div>
-          <div class="uf-fg"><span class="uf-flabel">الحالة</span>
-            <div class="ms-wrap" id="bmsWrap-state"><button class="ms-btn" id="bmsBtn-state" onclick="bmsToggle('state',event)"><span id="bmsLbl-state">كل الحالات</span><span>▾</span></button><div class="ms-list" id="bmsList-state"></div></div>
-          </div>
-          <div class="uf-fg"><span class="uf-flabel">البراند</span>
-            <div class="ms-wrap" id="bmsWrap-vendor"><button class="ms-btn" id="bmsBtn-vendor" onclick="bmsToggle('vendor',event)"><span id="bmsLbl-vendor">كل البراندات</span><span>▾</span></button><div class="ms-list" id="bmsList-vendor"></div></div>
-          </div>
-          <div class="uf-fg"><span class="uf-flabel">التحديد</span>
-            <div class="ms-wrap" id="bmsWrap-sel"><button class="ms-btn" id="bmsBtn-sel" onclick="bmsToggle('sel',event)"><span id="bmsLbl-sel">الكل</span><span>▾</span></button><div class="ms-list" id="bmsList-sel"></div></div>
-          </div>
+      <div class="tbl-bar" data-tbar="bulk">
+        <div class="tbl-bar-right">
+          <span class="tbl-toggle open" id="bulkTog">▲</span>
+          <div class="results-wrap"><span class="results-label">③ النتائج:</span><span class="results-count" id="bulkResultsCount">—</span></div>
         </div>
-        <div id="bulkChipsZone"></div>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <div class="results-row" onclick="toggleBulkTable()">
-        <span class="uf-arrow" id="bulkTblArrow">▼</span>
-        <span class="results-title">③ النتائج</span>
-        <span class="results-count" id="bulkResultsCount">—</span>
-        <span class="results-actions">
+        <div class="tbl-bar-left">
           <button class="bulk-btn primary" id="bulkCompareBtn" onclick="event.stopPropagation();runBulkCompare()" disabled>⚖️ قارن بشوبيفاي</button>
           <button class="log-export-btn" id="bulkExportBtn" onclick="event.stopPropagation();exportBulkXLSX()" disabled>⬇ تصدير المقارنة .xlsx</button>
           <button class="bulk-btn go" id="bulkExecBtn" onclick="event.stopPropagation();confirmBulkExecute()" disabled>✔ نفّذ التعديلات</button>
-        </span>
+          <button class="clear-btn inactive" type="button" data-clearall="bulk">✕ مسح كل الفلاتر</button>
+        </div>
       </div>
+
+      <div class="chips-zone pad" id="bulkChipsZone"></div>
 
       <div id="bulkNotices" style="display:none;padding:12px 16px 0;"></div>
 
@@ -1181,16 +1212,17 @@ td.centered{text-align:center;}
         <div class="bulk-progress-txt" id="bulkProgressTxt">—</div>
       </div>
 
-      <div id="bulkTableZone">
-        <div class="bulk-table-wrap">
-          <table class="bulk-table">
+      <div class="tbl-body-wrap" id="bulkTableZone"><div>
+        <div class="tbl-scroll">
+          <table class="data-table auto measuring" id="bulkTbl">
+            <colgroup id="bulkCg"></colgroup>
             <thead><tr id="bulkHeadRow"></tr></thead>
             <tbody id="bulkBody">
-              <tr><td colspan="12"><div class="state-box"><div class="state-icon">🧾</div><p>حمّل الباركودات وابدأ المسح — وبعد ما تخلص اضغط «⚖️ قارن بشوبيفاي»</p></div></td></tr>
+              <tr><td colspan="11"><div class="state-box"><div class="state-icon">🧾</div><p>حمّل الباركودات وابدأ المسح — وبعد ما تخلص اضغط «⚖️ قارن بشوبيفاي»</p></div></td></tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </div></div>
 
     </div>
   </div>
@@ -1200,96 +1232,30 @@ td.centered{text-align:center;}
 <div id="logTabContent" style="display:none;">
   <div class="unified-section">
 
-    <!-- ─── §LOG::filters ─── -->
-    <div class="uf-head" onclick="toggleLogFilters()">
-      <span class="uf-arrow" id="ufArrow">▼</span>
-      <span class="uf-funnel" id="ufFunnel" title="الفلاتر">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <path d="M3 5h18l-7 8v5l-4 2v-7z"/>
-        </svg>
-      </span>
-      <span class="uf-spacer"></span>
-      <button class="log-clear-btn" onclick="event.stopPropagation();clearLogFilters()">✕ مسح كل الفلاتر</button>
-    </div>
-
-    <div class="uf-body" id="ufBody">
-      <div class="uf-row">
-        <div class="uf-fg" style="flex:1;min-width:230px;">
-          <span class="uf-flabel">بحث SKU / اسم المنتج</span>
-          <div class="uf-search"><span>🔍</span><input type="text" class="uf-input" id="logSearch" /></div>
-        </div>
-        <!-- Standards #19: الفترة السريعة أولاً، بعدها من ثم إلى -->
-        <div class="uf-fg">
-          <span class="uf-flabel">فترة سريعة</span>
-          <div class="ms-wrap" id="presetWrap">
-            <button class="ms-btn" id="logPresetBtn" onclick="togglePresetMenu(event)"><span id="logPresetLabel">⚡ اختار فترة</span><span>▾</span></button>
-            <div class="ms-list" id="logPresetMenu">
-              <div class="ms-ftr-top"><button onclick="clearDateFilter()">✕ مسح الاختيار</button></div>
-              <div class="ms-item" onclick="applyPreset('today')">اليوم</div>
-              <div class="ms-item" onclick="applyPreset('yesterday')">أمس</div>
-              <div class="ms-item" onclick="applyPreset('last7')">آخر 7 أيام</div>
-              <div class="ms-item" onclick="applyPreset('last30')">آخر 30 يوم</div>
-              <div class="ms-item" onclick="applyPreset('thisMonth')">الشهر الحالي</div>
-              <div class="ms-item" onclick="applyPreset('thisYear')">العام الحالي</div>
-            </div>
-          </div>
-        </div>
-        <div class="uf-fg">
-          <span class="uf-flabel">من تاريخ</span>
-          <input type="date" class="uf-input" style="padding:0 10px;" id="logFilterDateFrom"
-                 onclick="this.showPicker&amp;&amp;this.showPicker();" onchange="onLogFilterChange()" />
-        </div>
-        <div class="uf-fg">
-          <span class="uf-flabel">إلى تاريخ</span>
-          <input type="date" class="uf-input" style="padding:0 10px;" id="logFilterDateTo"
-                 onclick="this.showPicker&amp;&amp;this.showPicker();" onchange="onLogFilterChange()" />
-        </div>
+    <!-- ─── §LOG::results — الفلاتر في رأس العمود (data-table-standard.md) ─── -->
+    <div class="tbl-bar" data-tbar="log">
+      <div class="tbl-bar-right">
+        <span class="tbl-toggle open" id="logTog">▲</span>
+        <div class="results-wrap"><span class="results-label">النتائج:</span><span class="results-count" id="logResultsCount">—</span></div>
       </div>
-
-      <!-- Standards #21: كل الفلاتر multi-select بدون استثناء -->
-      <div class="uf-row">
-        <div class="uf-fg"><span class="uf-flabel">الموظف</span>
-          <div class="ms-wrap" id="msWrap-emp"><button class="ms-btn" id="msBtn-emp" onclick="msToggle('emp',event)"><span id="msLbl-emp">كل الموظفين</span><span>▾</span></button><div class="ms-list" id="msList-emp"></div></div>
-        </div>
-        <div class="uf-fg"><span class="uf-flabel">نوع العملية</span>
-          <div class="ms-wrap" id="msWrap-type"><button class="ms-btn" id="msBtn-type" onclick="msToggle('type',event)"><span id="msLbl-type">كل العمليات</span><span>▾</span></button><div class="ms-list" id="msList-type"></div></div>
-        </div>
-        <div class="uf-fg"><span class="uf-flabel">اتجاه التعديل</span>
-          <div class="ms-wrap" id="msWrap-dir"><button class="ms-btn" id="msBtn-dir" onclick="msToggle('dir',event)"><span id="msLbl-dir">الكل</span><span>▾</span></button><div class="ms-list" id="msList-dir"></div></div>
-        </div>
-        <div class="uf-fg"><span class="uf-flabel">عدد مرات الجرد</span>
-          <div class="ms-wrap" id="msWrap-cnt"><button class="ms-btn" id="msBtn-cnt" onclick="msToggle('cnt',event)"><span id="msLbl-cnt">الكل</span><span>▾</span></button><div class="ms-list" id="msList-cnt"></div></div>
-        </div>
-        <div class="uf-fg" style="flex:1;min-width:200px;">
-          <span class="uf-flabel">بحث في الملاحظات</span>
-          <div class="uf-search"><span>🔍</span><input type="text" class="uf-input" id="logSearchNotes" /></div>
-        </div>
-      </div>
-
-      <!-- Standards #12/#23: سطر chips لكل فلتر، واسم الفلتر مرة واحدة في أوله -->
-      <div id="chipsZone"></div>
-    </div>
-
-    <div class="section-divider"></div>
-
-    <!-- ─── §LOG::results ─── -->
-    <div class="results-row" onclick="toggleLogTable()">
-      <span class="uf-arrow" id="tblArrow">▼</span>
-      <span class="results-title">النتائج</span>
-      <span class="results-count" id="logResultsCount">—</span>
-      <span class="results-actions">
+      <div class="tbl-bar-left">
         <button class="log-refresh-btn" onclick="event.stopPropagation();fetchLog()">↺ تحديث</button>
         <button class="log-export-btn" id="logExportBtn" onclick="event.stopPropagation();exportLogXLSX()">⬇ تصدير المعروض .xlsx</button>
-      </span>
+        <button class="clear-btn inactive" type="button" data-clearall="log">✕ مسح كل الفلاتر</button>
+      </div>
     </div>
+
+    <!-- Standards #12/#23: سطر chips لكل فلتر، واسم الفلتر مرة واحدة في أوله -->
+    <div class="chips-zone pad" id="chipsZone"></div>
 
     <div id="logExportWarn" class="export-warn" style="display:none;"></div>
 
-    <div id="logTableZone">
-      <div class="log-table-wrap">
-        <table class="log-table">
+    <div class="tbl-body-wrap" id="logTableZone"><div>
+      <div class="tbl-scroll">
+        <table class="data-table auto measuring" id="logTbl">
+          <colgroup id="logCg"></colgroup>
           <thead><tr id="logHeadRow"></tr></thead>
-          <tbody id="logBody"><tr><td colspan="10"><div class="log-empty">جاري التحميل...</div></td></tr></tbody>
+          <tbody id="logBody"><tr><td colspan="12"><div class="log-empty">جاري التحميل...</div></td></tr></tbody>
         </table>
       </div>
       <div class="pagination-row" id="paginationRow" style="display:none;">
@@ -1297,13 +1263,20 @@ td.centered{text-align:center;}
         <span class="page-info" id="pageInfo"></span>
         <button class="page-btn" id="btnNextPage" onclick="goPage(1)">التالي ←</button>
       </div>
-    </div>
+    </div></div>
 
   </div>
 </div>
 </div>
 
 <!-- §LOGIN -->
+<!-- Idle warning banner — §IDLE-JS (z-index 9000). النص بيتملا من JS. -->
+<div class="idle-warn" id="idleWarn" role="alert">
+  <div id="idleWarnText"></div>
+  <div class="idle-ask" id="idleWarnAsk"></div>
+  <button type="button" onclick="idleStay()">أنا موجود</button>
+</div>
+
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
     <button class="login-settings-btn missing" id="loginSettingsBtn" onclick="openSettings()">⚙️ الإعدادات</button>
@@ -1321,6 +1294,7 @@ td.centered{text-align:center;}
       </div>
       <!-- ⚠️ Standards #8: بره .pin-zone — جوّاها بيبقى مخفي في الخطوة الأولى
            فأي فشل في تحميل الموظفين (CORS/سر/شبكة) مايظهرش للمستخدم خالص -->
+      <div class="login-notice" id="loginNotice"></div>
       <div class="login-alert" id="loginAlert"></div>
       <div class="pin-zone" id="pinZone">
         <div class="pin-label" id="pinLabel">أدخل الـ PIN</div>
@@ -1352,7 +1326,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.2.0';
+const TOOL_VERSION = '6.4.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -1597,6 +1571,7 @@ function switchMainTab(tab){
   if (tab === 'log' && !logLoaded) { logLoaded = true; initLogFilters(); fetchLog(); }
   if (tab === 'priority' && priorityData === null) loadPriorityData();
   if (tab === 'bulk' && !bulkIndex && !isUpdatingBulk) openBulkStartPrompt();
+  setTimeout(() => Object.values(TBL).forEach(tblEnsureW), 0);   // التاب المخفي عرضه صفر — القياس بعد ما يظهر
 }
 
 // §AUTH-JS
@@ -1615,7 +1590,7 @@ async function loadEmployeesList(){
   try{
     const data=await apiGet('get_employees');const emps=data.employees||[];
     allEmployees=emps;
-    if(msState&&msState.emp){msState.emp.options=emps.map(e=>({v:e.username,t:e.display_name||e.username}));}
+    LOG_OPTS.emp=emps.map(e=>({v:e.username,t:e.display_name||e.username}));
     emps.forEach(e=>{const o=document.createElement('option');o.value=e.username;o.textContent=e.display_name;sel.appendChild(o);});
     sel.disabled=false;status.className=emps.length?'login-status info':'login-status warn';
     // Standards #34: بعد تحميل ناجح وفيه موظفين — الرسالة فاضية، الإرشاد في الـ placeholder
@@ -1714,21 +1689,71 @@ async function finishLogin(username,displayName){
   document.getElementById('loginOverlay').classList.add('hidden');
   document.getElementById('activeUserBtn').textContent='👤 '+displayName;
   document.getElementById('activeUserBtn').classList.add('active-user');
+  hideLoginNotice();
+  idleStart();                       // §IDLE-JS — يبدأ عدّاد عدم النشاط
   showToast('أهلاً '+displayName+' 👋','success');playBeep('success');
 }
-async function doLogout(){
-  if(!confirm('تسجيل الخروج؟'))return;
+// Standards #52 — الخروج اليدوي فوري بلا تأكيد. حارس الدفعة (مش تأكيد): الخروج ممنوع أثناء تنفيذ جماعي.
+function doLogout(){
+  if(isIdleBlocked()){showToast('فيه دفعة بتتنفّذ دلوقتي — استنى لحد ما تخلص','warning');return;}
+  performLogout('manual');
+}
+// reason: 'manual' | 'idle' — مسار واحد للاتنين
+function performLogout(reason){
+  idleStop();
   if(currentEmployee)apiGet('log_logout',{username:currentEmployee.username}).catch(()=>{});
   currentEmployee=null;loginMode='employee';pinDigits=[];pendingNewPin='';isLoginBusy=false;clearTimeout(autoLoginTimer);
   document.getElementById('loginSelect').value='';document.getElementById('loginSelect').disabled=false;
   document.getElementById('pinSlots').classList.remove('shake');
   document.getElementById('activeUserBtn').textContent='👤 —';document.getElementById('activeUserBtn').classList.remove('active-user');
   renderPinSlots();renderLoginMode('employee');clearLoginAlert();
+  // ── CUSTOMIZE: تصفير حالة الأداة ──
   currentSku=null;currentVariant=null;currentShelfQty=null;
   cancelScanCount();
   document.getElementById('results').classList.remove('visible');
   document.getElementById('loginOverlay').classList.remove('hidden');
+  if(reason==='idle')showLoginNotice('تم تسجيل خروج تلقائي لعدم النشاط');
 }
+function showLoginNotice(msg){const el=document.getElementById('loginNotice');if(!el)return;el.textContent=msg;el.classList.add('visible');}
+function hideLoginNotice(){document.getElementById('loginNotice')?.classList.remove('visible');}
+
+// ─── §IDLE-JS — الخروج التلقائي لعدم النشاط (Standards #52 · references/idle-logout.md) ───
+const IDLE_TIMEOUT_MIN = 60;      // ثابت موحّد — ممنوع تغييره لأداة بعينها
+const IDLE_WARN_SEC    = 60;      // التحذير قبل الخروج بدقيقة
+const IDLE_CHECK_MS    = 30000;   // مقارنة وقت فعلي كل 30 ث (مش setTimeout واحد طويل)
+const IDLE_THROTTLE_MS = 10000;   // أقصى تكرار لتسجيل النشاط (السكانر بيبعت ضغطات متتالية)
+let idleLastActivity = Date.now(), idleTicker = null, idleFastTicker = null;
+// دفعة الجرد الجماعي شغّالة = مش خمول
+function isIdleBlocked(){return typeof isUpdatingBulk !== 'undefined' && !!isUpdatingBulk;}
+function idleMark(){
+  const now = Date.now();
+  if (now - idleLastActivity < IDLE_THROTTLE_MS) return;
+  idleLastActivity = now; idleHideWarn();
+}
+// أحداث حقيقية بس — mousemove ممنوع، والـ polling/network مابيعدّش نشاط
+['keydown','pointerdown','wheel','touchstart','scroll'].forEach(ev =>
+  document.addEventListener(ev, idleMark, { capture:true, passive:true }));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) idleTick(); });
+window.addEventListener('focus', idleTick);
+function idleStart(){idleLastActivity = Date.now(); clearInterval(idleTicker); idleTicker = setInterval(idleTick, IDLE_CHECK_MS);}
+function idleStop(){clearInterval(idleTicker); idleTicker = null; idleHideWarn();}
+function idleStay(){idleLastActivity = Date.now(); idleHideWarn();}
+function idleTick(){
+  if (!currentEmployee) return;
+  const limit = IDLE_TIMEOUT_MIN * 60000;
+  if (isIdleBlocked()){ idleLastActivity = Date.now(); idleHideWarn(); return; }
+  const idleMs = Date.now() - idleLastActivity;
+  if (idleMs >= limit){ performLogout('idle'); return; }
+  const remainMs = limit - idleMs;
+  if (remainMs <= IDLE_WARN_SEC * 1000) idleShowWarn(Math.ceil(remainMs / 1000)); else idleHideWarn();
+}
+function idleShowWarn(sec){
+  document.getElementById('idleWarnText').textContent = `سيتم تسجيل الخروج لعدم النشاط بعد ${sec} ثانية`;
+  document.getElementById('idleWarnAsk').textContent  = `هل أنت موجود يا ${currentEmployee ? currentEmployee.displayName : ''}؟`;
+  document.getElementById('idleWarn').classList.add('visible');
+  if (!idleFastTicker) idleFastTicker = setInterval(idleTick, 1000);
+}
+function idleHideWarn(){document.getElementById('idleWarn')?.classList.remove('visible'); clearInterval(idleFastTicker); idleFastTicker = null;}
 
 // ══════════════════════════════════════════════════════
 // §SCAN
@@ -1802,7 +1827,7 @@ function handleScanCountInput(){
 // ══════════════════════════════════════════════════════
 let currentSku=null,currentVariant=null,currentShelfQty=null,_searchDebounce=null,currentImgUrl=null;
 let priorityData=null,priorityFiltered=[],priorityMode={active:false,currentProductId:null};
-let lastPriorityRefreshTime=null,pfFiltersOpen=true,_pfSearchDebounce=null;
+let lastPriorityRefreshTime=null,priorityShown=[],prioSort={key:null,dir:null};   // priorityShown = اللي معروض فعلًا (بعد ترتيب المستخدم) · priorityFiltered = الترتيب الافتراضي (للتالي)
 let scanCountState={active:false,scannerCount:0,targetBarcode:null};
 
 // New Arabic priority names
@@ -1840,22 +1865,10 @@ function updatePriorityTimestamp(){
 }
 setInterval(()=>{if(lastPriorityRefreshTime)updatePriorityTimestamp();},60000);
 
-function togglePriorityFilters(){
-  pfFiltersOpen=!pfFiltersOpen;
-  document.getElementById('pfFiltersBody').classList.toggle('collapsed',!pfFiltersOpen);
-  document.getElementById('pfFiltersToggle').classList.toggle('open',pfFiltersOpen);
-}
-function onPfSearchInput(){clearTimeout(_pfSearchDebounce);_pfSearchDebounce=setTimeout(applyPriorityFilters,300);}
-function clearPriorityFilters(){
-  document.getElementById('pfPriority').value='';
-  document.getElementById('pfAuditStatus').value='';
-  document.getElementById('pfSearch').value='';
-  applyPriorityFilters();
-}
-
 async function loadPriorityData(){
-  const wrap=document.getElementById('priorityTableWrap'),statsBar=document.getElementById('priorityStatsBar'),refreshBtn=document.getElementById('priorityRefreshBtn');
-  wrap.innerHTML='<div class="state-box"><div class="loading-spinner"></div><p style="margin-top:8px;font-size:12px;">\u062c\u0627\u0631\u064a \u062a\u062d\u0645\u064a\u0644 \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0645\u0646 \u0627\u0644\u0645\u062a\u062c\u0631...</p></div>';
+  const body=document.getElementById('priorityBody'),statsBar=document.getElementById('priorityStatsBar'),refreshBtn=document.getElementById('priorityRefreshBtn');
+  priorityShown=[];
+  body.innerHTML='<tr><td colspan="5"><div class="state-box"><div class="loading-spinner"></div><p style="margin-top:8px;font-size:12px;">\u062c\u0627\u0631\u064a \u062a\u062d\u0645\u064a\u0644 \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0645\u0646 \u0627\u0644\u0645\u062a\u062c\u0631...</p></div></td></tr>';
   statsBar.style.display='none';if(refreshBtn)refreshBtn.disabled=true;
   try{
     const data=await apiGet('get_audit_priorities');
@@ -1865,24 +1878,21 @@ async function loadPriorityData(){
     applyPriorityFilters();
     showToast('\u062a\u0645 \u062a\u062d\u0645\u064a\u0644 '+priorityData.length.toLocaleString('en-US')+' variant \u2713','success');
   }
-  catch(e){wrap.innerHTML='<div class="state-box"><div class="state-icon">\u26a0\ufe0f</div><p>'+e.message+'</p></div>';showToast('\u062e\u0637\u0623: '+e.message,'error');}
+  catch(e){body.innerHTML='<tr><td colspan="5"><div class="state-box"><div class="state-icon">\u26a0\ufe0f</div><p>'+esc(e.message)+'</p></div></td></tr>';document.getElementById('priorityResultsCount').textContent='\u2014';showToast('\u062e\u0637\u0623: '+e.message,'error');}
   finally{if(refreshBtn)refreshBtn.disabled=false;}
 }
 
 function applyPriorityFilters(){
   if(!priorityData)return;
   const threshold=parseInt(document.getElementById('priorityThreshold').value)||30;
-  const pfPriority=document.getElementById('pfPriority')?.value??'';
-  const pfAuditStatus=document.getElementById('pfAuditStatus')?.value??'';
-  const pfSearch=(document.getElementById('pfSearch')?.value||'').trim().toLowerCase();
+  const pm=PRIO_T.ms.priority,am=PRIO_T.ms.audit,q=PRIO_T.q.search.trim().toLowerCase();
 
   let filtered=priorityData.filter(v=>needsAudit(v.lastAuditDate,threshold));
+  if(pm.size)filtered=filtered.filter(v=>pm.has(String(getPriority(v.available,v.committed))));
+  if(am.size)filtered=filtered.filter(v=>(v.lastAuditDate?am.has('audited'):am.has('never')));
+  if(q)filtered=filtered.filter(v=>(v.sku||'').toLowerCase().includes(q)||(v.productTitle||'').toLowerCase().includes(q));
 
-  if(pfPriority!=='')filtered=filtered.filter(v=>getPriority(v.available,v.committed)===parseInt(pfPriority));
-  if(pfAuditStatus==='never')filtered=filtered.filter(v=>!v.lastAuditDate);
-  else if(pfAuditStatus==='audited')filtered=filtered.filter(v=>!!v.lastAuditDate);
-  if(pfSearch)filtered=filtered.filter(v=>(v.sku||'').toLowerCase().includes(pfSearch)||(v.productTitle||'').toLowerCase().includes(pfSearch));
-
+  // الترتيب الافتراضي (أولوية ثم الأقدم جردًا) = «بلا ترتيب» + اللي بيعتمد عليه «التالي» بعد الجرد
   filtered.sort((a,b)=>{
     const pa=getPriority(a.available,a.committed),pb=getPriority(b.available,b.committed);
     if(pa!==pb)return pa-pb;
@@ -1891,7 +1901,29 @@ function applyPriorityFilters(){
     if(da===Infinity)return -1;if(db===Infinity)return 1;
     return db-da;
   });
-  priorityFiltered=filtered;renderPriorityTable(filtered);renderPriorityStats(filtered);
+  priorityFiltered=filtered;
+  priorityShown=sortPriorityRows(filtered);
+  document.getElementById('priorityResultsCount').textContent=filtered.length.toLocaleString('en-US');
+  tblRefresh(PRIO_T);
+  renderPriorityTable(priorityShown);renderPriorityStats(filtered);
+  tblEnsureW(PRIO_T);
+}
+// ترتيب المستخدم من اسم العمود — على نسخة، مش على priorityFiltered
+const PRIO_SORTV={
+  priority:v=>getPriority(v.available,v.committed),sku:v=>String(v.sku||''),
+  available:v=>v.available??-Infinity,committed:v=>v.committed??-Infinity,
+  lastAudit:v=>{const d=getDaysSince(v.lastAuditDate);return d===Infinity?1e9:d;}
+};
+function sortPriorityRows(rows){
+  if(!prioSort.key)return rows;
+  const g=PRIO_SORTV[prioSort.key],d=prioSort.dir==='asc'?1:-1;
+  return [...rows].sort((a,b)=>{const x=g(a),y=g(b);return(typeof x==='string'?x.localeCompare(y):x-y)*d;});
+}
+function togglePrioSort(key){
+  if(prioSort.key!==key){prioSort={key,dir:'asc'};}
+  else if(prioSort.dir==='asc'){prioSort.dir='desc';}
+  else{prioSort={key:null,dir:null};}
+  applyPriorityFilters();
 }
 
 function renderPriorityStats(filtered){
@@ -1903,9 +1935,9 @@ function renderPriorityStats(filtered){
 }
 
 function renderPriorityTable(variants){
-  const wrap=document.getElementById('priorityTableWrap');
-  if(!variants.length){wrap.innerHTML='<div class="state-box"><div class="state-icon">\u{1F389}</div><p>\u062a\u0645 \u062c\u0631\u062f \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u2014 \u0623\u0648 \u0644\u0627 \u062a\u0648\u062c\u062f \u0646\u062a\u0627\u0626\u062c.</p></div>';return;}
-  const rows=variants.map(v=>{
+  const body=document.getElementById('priorityBody');
+  if(!variants.length){body.innerHTML='<tr><td colspan="5"><div class="state-box"><div class="state-icon">\u{1F389}</div><p>\u062a\u0645 \u062c\u0631\u062f \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u2014 \u0623\u0648 \u0644\u0627 \u062a\u0648\u062c\u062f \u0646\u062a\u0627\u0626\u062c.</p></div></td></tr>';return;}
+  body.innerHTML=variants.map((v,i)=>{
     const p=getPriority(v.available,v.committed),cfg=PRIORITY_CFG[p],days=getDaysSince(v.lastAuditDate);
     let auditText,auditCls;
     if(days===Infinity){auditText='\u0644\u0645 \u064a\u064f\u062c\u0631\u062f \u0642\u0637';auditCls='audit-age-never';}
@@ -1914,20 +1946,16 @@ function renderPriorityTable(variants){
     else{auditText='\u0645\u0646\u0630 '+days+' \u064a\u0648\u0645';auditCls='audit-age-recent';}
     const avail=v.available!=null?v.available.toLocaleString('en-US'):'\u2014',comm=v.committed!=null?v.committed.toLocaleString('en-US'):'\u2014';
     const neg=(v.available!=null&&v.available<0)?' val-negative':'';
-    const vJson=JSON.stringify(v).replace(/"/g,'&quot;');
-    return '<tr class="priority-row" onclick="loadVariantFromPriority('+vJson+')">'
-      +'<td><span class="priority-badge priority-badge-'+cfg.cls+'">'+cfg.label+'</span></td>'
-      +'<td><span class="priority-sku">'+v.sku+'</span></td>'
+    // الفهرس مش JSON في الـ attribute — الصف بيرجع للعنصر من priorityShown
+    return '<tr class="priority-row" onclick="loadVariantFromPriorityIdx('+i+')">'
+      +'<td><span class="priority-badge priority-badge-'+cfg.cls+'">'+esc(cfg.label)+'</span></td>'
+      +'<td><span class="priority-sku">'+esc(v.sku)+'</span></td>'
       +'<td class="centered'+neg+'">'+avail+'</td>'
       +'<td class="centered">'+comm+'</td>'
       +'<td><span class="'+auditCls+'">'+auditText+'</span></td></tr>';
   }).join('');
-  wrap.innerHTML='<div class="priority-table-wrap"><table class="priority-table"><thead><tr>'
-    +'<th>\u0627\u0644\u0623\u0648\u0644\u0648\u064a\u0629</th><th>SKU</th>'
-    +'<th style="text-align:center;">Available</th><th style="text-align:center;">Committed</th>'
-    +'<th>\u0622\u062e\u0631 \u062c\u0631\u062f</th>'
-    +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
+function loadVariantFromPriorityIdx(i){const v=priorityShown[i];if(v)loadVariantFromPriority(v);}
 
 async function loadVariantFromPriority(item){
   priorityMode={active:true,currentProductId:item.productId};switchMainTab('audit');
@@ -1969,8 +1997,8 @@ skuSearch.addEventListener('input',()=>{const val=skuSearch.value.trim();clearBt
 skuSearch.addEventListener('focus',()=>{if(skuSearch.value.trim())loadSkus(skuSearch.value.trim());});
 document.addEventListener('click',e=>{if(!document.getElementById('dropdownWrap').contains(e.target))dropdownList.classList.remove('open');});
 function clearSearch(){skuSearch.value='';clearBtn.classList.remove('visible');dropdownList.innerHTML='';dropdownList.classList.remove('open');skuSearch.focus();}
-async function loadSkus(search){dropdownList.innerHTML='<div class="dropdown-loading"><div class="loading-spinner"></div></div>';dropdownList.classList.add('open');try{const data=await apiGet('list_skus',{search});renderDropdown(data.variants||[]);}catch(e){dropdownList.innerHTML='<div class="dropdown-empty">⚠️ '+e.message+'</div>';}}
-function renderDropdown(variants){if(!variants.length){dropdownList.innerHTML='<div class="dropdown-empty">لا توجد نتائج</div>';return;}dropdownList.innerHTML=variants.map(v=>'<div class="dropdown-item" onclick=\'selectVariant('+JSON.stringify(v).replace(/'/g,"&#39;")+')\' ><span class="item-sku">'+(v.sku||'—')+'</span><span class="item-name">'+(v.product?.title||'')+' '+(v.selectedOptions?.map(o=>o.value).join(' / ')||'')+'</span></div>').join('');dropdownList.classList.add('open');}
+async function loadSkus(search){dropdownList.innerHTML='<div class="dropdown-loading"><div class="loading-spinner"></div></div>';dropdownList.classList.add('open');try{const data=await apiGet('list_skus',{search});renderDropdown(data.variants||[]);}catch(e){dropdownList.innerHTML='<div class="dropdown-empty">⚠️ '+esc(e.message)+'</div>';}}
+function renderDropdown(variants){if(!variants.length){dropdownList.innerHTML='<div class="dropdown-empty">لا توجد نتائج</div>';return;}dropdownList.innerHTML=variants.map(v=>'<div class="dropdown-item" onclick=\'selectVariant('+JSON.stringify(v).replace(/'/g,"&#39;")+')\' ><span class="item-sku">'+esc(v.sku||'—')+'</span><span class="item-name">'+esc((v.product?.title||'')+' '+(v.selectedOptions?.map(o=>o.value).join(' / ')||''))+'</span></div>').join('');dropdownList.classList.add('open');}
 function selectVariant(variant){currentSku=variant.sku;currentVariant=variant;skuSearch.value=variant.sku;clearBtn.classList.add('visible');dropdownList.classList.remove('open');renderProductCard(variant);loadOrders(variant);}
 function switchTab(tab){document.getElementById('tabSku').classList.toggle('active',tab==='sku');document.getElementById('tabBarcode').classList.toggle('active',tab==='barcode');document.getElementById('skuMode').style.display=tab==='sku'?'block':'none';document.getElementById('barcodeMode').classList.toggle('active',tab==='barcode');if(tab==='barcode')barcodeInput.focus();}
 async function lookupByBarcode(barcode){showToast('جاري البحث...','neutral');try{const data=await apiGet('lookup_barcode',{barcode});if(!data.variant){showToast('لا يوجد منتج بهذا الباركود','warning');return;}showToast('تم العثور على المنتج','success');selectVariant(data.variant);/* v4.0.1: لا تبديل تلقائي للتاب — يفضل على وضع مسح الباركود لاستمرار المسح */skuSearch.value=data.variant.sku;clearBtn.classList.add('visible');barcodeInput.focus();}catch(e){showToast(e.message,'error');}}
@@ -1986,7 +2014,7 @@ function renderProductCard(variant){
   const iid=(variant.inventoryItem?.id||'').split('/').pop();if(iid)document.getElementById('historyLink').href='https://admin.shopify.com/store/6c7e1a-53/products/inventory/'+iid+'/inventory_history?location_id=98849620290';
   const imgWrap=document.getElementById('productImgWrap'),imgUrl=variant.product?.featuredImage?.url;
   currentImgUrl=imgUrl||null;
-  imgWrap.innerHTML=imgUrl?'<img src="'+imgUrl+'" alt="" />':'📦';
+  imgWrap.innerHTML=imgUrl?'<img src="'+esc(imgUrl)+'" alt="" />':'📦';
   imgWrap.style.cursor=imgUrl?'pointer':'default';
   const opts=variant.selectedOptions||[],sizeN=['shoe size','size','مقاس'],colorN=['color','colour','لون'];
   const sizeOpt=opts.find(o=>o.value!=='Default Title'&&sizeN.some(n=>o.name.toLowerCase().includes(n)));
@@ -1996,7 +2024,7 @@ function renderProductCard(variant){
   const colorEl=document.getElementById('productColorVal');
   if(colorOpt){colorEl.textContent=colorOpt.value;colorEl.style.display='inline-flex';}else{colorEl.style.display='none';}
   const status=variant.product?.status||'',labels={ACTIVE:'Active ✓',DRAFT:'Draft',ARCHIVED:'Archived'};
-  document.getElementById('productStatus').innerHTML='<span class="status-badge '+(status==='ACTIVE'?'status-ACTIVE':'status-OTHER')+'">'+(labels[status]||status)+'</span>';
+  document.getElementById('productStatus').innerHTML='<span class="status-badge '+(status==='ACTIVE'?'status-ACTIVE':'status-OTHER')+'">'+esc(labels[status]||status)+'</span>';
   const topbar=document.getElementById('productTopbar');topbar.classList.remove('status-active','status-other');topbar.classList.add(status==='ACTIVE'?'status-active':'status-other');
   document.getElementById('refreshBtn').style.display='flex';
   const levels=variant.inventoryItem?.inventoryLevels?.nodes?.[0]?.quantities||[];const getQty=n=>{const q=levels.find(l=>l.name===n)?.quantity;return q!=null?q:null;};
@@ -2111,7 +2139,7 @@ function openConfirm(headerHTML,bodyHTML,okLabel,okClass,onConfirm){
   const newOk=okBtn.cloneNode(true),newCancel=cancelBtn.cloneNode(true);okBtn.parentNode.replaceChild(newOk,okBtn);cancelBtn.parentNode.replaceChild(newCancel,cancelBtn);
   newOk.textContent=okLabel;newOk.className='btn-confirm-ok '+okClass;newOk.addEventListener('click',()=>{document.getElementById('confirmOverlay').classList.remove('open');onConfirm();});newCancel.addEventListener('click',()=>document.getElementById('confirmOverlay').classList.remove('open'));document.getElementById('confirmOverlay').classList.add('open');
 }
-function confirmAuditOk(){if(!currentVariant){showToast('لم يتم اختيار منتج','warning');return;}const shelf=currentShelfQty!=null?currentShelfQty.toLocaleString('en-US'):'—',empName=currentEmployee?.displayName||'—';const body='<div class="confirm-detail-row"><span class="confirm-detail-label">المنتج</span><span class="confirm-detail-val">'+currentVariant.product?.title+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">SKU</span><span class="confirm-detail-val accent">'+currentVariant.sku+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الموظف</span><span class="confirm-detail-val accent">'+empName+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">عدد القطع على الرف</span><span class="confirm-detail-val green">'+shelf+'</span></div><div class="confirm-note">سيتم تسجيل تاريخ ووقت الجرد واسم الموظف.</div>';openConfirm('✅ تأكيد: الجرد مظبوط',body,'تأكيد','green-btn',doAuditOk);}
+function confirmAuditOk(){if(!currentVariant){showToast('لم يتم اختيار منتج','warning');return;}const shelf=currentShelfQty!=null?currentShelfQty.toLocaleString('en-US'):'—',empName=esc(currentEmployee?.displayName||'—');const body='<div class="confirm-detail-row"><span class="confirm-detail-label">المنتج</span><span class="confirm-detail-val">'+esc(currentVariant.product?.title||'')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">SKU</span><span class="confirm-detail-val accent">'+esc(currentVariant.sku)+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الموظف</span><span class="confirm-detail-val accent">'+empName+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">عدد القطع على الرف</span><span class="confirm-detail-val green">'+shelf+'</span></div><div class="confirm-note">سيتم تسجيل تاريخ ووقت الجرد واسم الموظف.</div>';openConfirm('✅ تأكيد: الجرد مظبوط',body,'تأكيد','green-btn',doAuditOk);}
 // ─── §TOOL-JS::writeResult — أربع حالات مش اتنين (Standards Step 3C) ───
 // ⛔ `res.success ? 'تم' : 'فشل'` بيحوّل «تم جزئيًا» لنجاح أخضر. الحالة جاية من
 //    السيرفر كما هي، والواجهة آخر خط دفاع — بتعرض الشك بدل ما تخفيه.
@@ -2199,7 +2227,7 @@ async function doApplyAdjust(){
     showToast('خطأ: ' + e.message, 'error', 9000);
   } finally { btnAudit.disabled = false; btn.disabled = false; btn.textContent = '✔ تعديل الكمية'; }
 }
-function confirmAdjust(){const delta=parseInt(document.getElementById('deltaInput').value)||0,notes=document.getElementById('adjustNotes').value.trim();if(delta===0){showToast('التعديل يجب أن يكون غير صفر','warning');return;}if(!currentVariant){showToast('لم يتم اختيار منتج','warning');return;}const current=currentShelfQty!=null?currentShelfQty:0,newVal=current+delta,deltaStr=(delta>0?'+':'')+delta.toLocaleString('en-US'),deltaClass=delta>0?'green':'red';const body='<div class="confirm-detail-row"><span class="confirm-detail-label">SKU</span><span class="confirm-detail-val accent">'+currentVariant.sku+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الموظف</span><span class="confirm-detail-val accent">'+(currentEmployee?.displayName||'—')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">عدد القطع على الرف</span><span class="confirm-detail-val">'+current.toLocaleString('en-US')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">التعديل</span><span class="confirm-detail-val '+deltaClass+'">'+deltaStr+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الكمية الجديدة</span><span class="confirm-detail-val '+(delta>0?'green':'red')+'">'+newVal.toLocaleString('en-US')+'</span></div>'+(notes?'<div class="confirm-detail-row"><span class="confirm-detail-label">ملاحظات</span><span class="confirm-detail-val" style="font-size:12px;">'+notes+'</span></div>':'')+'<div class="confirm-note">سيتم تطبيق التعديل على Available في Shopify.</div>';openConfirm('🔧 تأكيد تعديل الكمية',body,'تطبيق التعديل','btn-red',doApplyAdjust);}
+function confirmAdjust(){const delta=parseInt(document.getElementById('deltaInput').value)||0,notes=document.getElementById('adjustNotes').value.trim();if(delta===0){showToast('التعديل يجب أن يكون غير صفر','warning');return;}if(!currentVariant){showToast('لم يتم اختيار منتج','warning');return;}const current=currentShelfQty!=null?currentShelfQty:0,newVal=current+delta,deltaStr=(delta>0?'+':'')+delta.toLocaleString('en-US'),deltaClass=delta>0?'green':'red';const body='<div class="confirm-detail-row"><span class="confirm-detail-label">SKU</span><span class="confirm-detail-val accent">'+esc(currentVariant.sku)+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الموظف</span><span class="confirm-detail-val accent">'+esc(currentEmployee?.displayName||'—')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">عدد القطع على الرف</span><span class="confirm-detail-val">'+current.toLocaleString('en-US')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">التعديل</span><span class="confirm-detail-val '+deltaClass+'">'+deltaStr+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الكمية الجديدة</span><span class="confirm-detail-val '+(delta>0?'green':'red')+'">'+newVal.toLocaleString('en-US')+'</span></div>'+(notes?'<div class="confirm-detail-row"><span class="confirm-detail-label">ملاحظات</span><span class="confirm-detail-val" style="font-size:12px;">'+esc(notes)+'</span></div>':'')+'<div class="confirm-note">سيتم تطبيق التعديل على Available في Shopify.</div>';openConfirm('🔧 تأكيد تعديل الكمية',body,'تطبيق التعديل','btn-red',doApplyAdjust);}
 
 
 let ordersCollapsed=false;
@@ -2226,236 +2254,468 @@ function renderOrders(orders){
 //    والتصدير بينزّل غير المفلتر. كله من غير أي رسالة.
 const LOG_PAGE_SIZE = 100;
 let logLoaded = false, logCurrentPage = 1, logTotalCount = 0;
-let logSearchTimer = null, logFiltersOpen = true, logTableOpen = true;
-let logSortBy = 'date', logSortDir = 'desc';
+let logSortBy = null, logSortDir = null;   // null = ترتيب السيرفر الافتراضي (الأحدث أولًا)
 let logRows = [];
 
-// ─── §LOG-JS::multiSelect ───
-const msState = {
-  emp:  { selected: new Set(), options: [], label: 'كل الموظفين',  title: 'الموظف' },
-  type: { selected: new Set(), options: [
-            { v:'ok', t:'مظبوط' }, { v:'adjustment', t:'تعديل كمية' } ],
-          label: 'كل العمليات', title: 'نوع العملية' },
-  dir:  { selected: new Set(), options: [
-            { v:'pos', t:'زيادة ↑' }, { v:'neg', t:'نقصان ↓' }, { v:'zero', t:'بدون تغيير' } ],
-          label: 'الكل', title: 'اتجاه التعديل' },
-  cnt:  { selected: new Set(), options: [
-            ...Array.from({length:10}, (_,i) => ({ v:String(i+1), t:`${i+1} مرة` })),
-            { v:'10+', t:'أكثر من 10' } ],
-          label: 'الكل', title: 'عدد مرات الجرد' },
-};
+// ══════════════════════════════════════════════════════
+// §TBL-JS — محرّك الجدول الموحّد (data-table-standard.md · القسم 2–9ب)
+// ══════════════════════════════════════════════════════
+// فلاتر في رأس العمود + ترتيب من اسم العمود + chips + تحكم لايف في عرض الأعمدة.
+// جدولين بيستخدموه (سجل العمليات · الجرد الجماعي) — كل جدول بيسجّل config:
+//   { id, tblId, cgId, headId, chipsId, zoneId, togId, lsKey, cols[], FL{}, ms{}, q{}, date|null,
+//     items(k), sort(), toggleSort(k), onChange(), hasRows(), debounce }
+// ⛔ ممنوع الفلتر يبقى قسم فوق الجدول، وممنوع <select> قيمة واحدة (بند ٢١).
+const TBL = {};
+const TBL_FUNNEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z"/></svg>';
+const T_MIN_W = 64, T_MAX_W = 700, T_INIT_CAP = 260;
+let tPop = null, tPopT = null, tPopKey = null, tPopAnchor = null, tPopQ = '', tPopItems = [];
+let tTip = null, tDrag = null, tBadge = null;
 
-function msRenderList(key){
-  const st = msState[key], el = document.getElementById('msList-' + key);
-  const items = st.options.length
-    ? st.options.map(o => `<label class="ms-item">
-        <input type="checkbox" ${st.selected.has(o.v) ? 'checked' : ''}
-               onchange="event.stopPropagation();msToggleItem('${key}','${esc(o.v)}')">
-        <span>${esc(o.t)}</span></label>`).join('')
-    : '<div class="ms-empty">لا توجد خيارات</div>';
-  el.innerHTML = `<div class="ms-ftr-top"><button onclick="msClear('${key}')">✕ مسح الاختيار</button></div>${items}`;
+function tblReg(T){
+  T.W = {}; T.frozen = false; T.rm = []; TBL[T.id] = T;
+  tblBuildHead(T);
 }
-function msToggle(key, ev){
-  ev.stopPropagation();
-  const el = document.getElementById('msList-' + key), wasOpen = el.classList.contains('open');
-  document.querySelectorAll('.ms-list').forEach(l => l.classList.remove('open'));
-  if (!wasOpen) { msRenderList(key); el.classList.add('open'); }
+function tblKind(T, k){
+  if (T.ms[k]) return 'ms';
+  if (k in T.q) return 'q';
+  if (k === 'date' && T.date) return 'date';
+  return '';
 }
-function msToggleItem(key, val){
-  const st = msState[key];
-  if (st.selected.has(val)) st.selected.delete(val); else st.selected.add(val);
-  msRenderList(key); msSyncBtn(key); renderChips(); onLogFilterChange();
+function tblItems(T, k){ return T.items(k) || []; }
+function tblText(T, k, v){ const o = tblItems(T, k).find(x => x.v === v); return o ? o.t : v; }
+function tblActive(T, k){
+  const kd = tblKind(T, k);
+  if (kd === 'ms')   return T.ms[k].size;
+  if (kd === 'q')    return T.q[k].trim() ? 1 : 0;
+  if (kd === 'date') return (T.date.from || T.date.to) ? 1 : 0;
+  return 0;
 }
-function msClear(key){
-  msState[key].selected.clear();
-  msRenderList(key); msSyncBtn(key); renderChips(); onLogFilterChange();
+// ⚠️ !!value مش !== null — فحص "فاضي ولا فيه قيمة" على خاصية ممكن ماتكونش موجودة (data-table-standard.md § 3)
+function tblAny(T){
+  return Object.keys(T.ms).some(k => T.ms[k].size > 0)
+      || Object.keys(T.q).some(k => !!T.q[k].trim())
+      || (!!T.date && (!!T.date.from || !!T.date.to));
 }
-function msSyncBtn(key){
-  const st = msState[key], n = st.selected.size;
-  document.getElementById('msLbl-' + key).textContent = n ? `${n} مختار` : st.label;
-  document.getElementById('msBtn-' + key).classList.toggle('active', n > 0);
+function tblResetDate(T){ if (T.date) T.date.preset = T.date.from = T.date.to = ''; }
+function tblFmtD(v){ if (!v) return '—'; const p = String(v).split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : v; }
+
+// ─── الرأس: <col> + <th> بقمع + مقبض سحب ───
+function tblBuildHead(T){
+  document.getElementById(T.cgId).innerHTML = T.cols.map(c => `<col data-c="${c.k}">`).join('');
+  document.getElementById(T.headId).innerHTML = T.cols.map(c => {
+    const lab = !c.l ? '' : (c.sort === false
+      ? `<span>${esc(c.l)}</span>`
+      : `<span class="th-label" data-sort="${c.k}" data-tb="${T.id}">${esc(c.l)}<span class="sort-icon"></span></span>`);
+    const flt = c.flt
+      ? `<button class="th-flt" type="button" data-flt="${c.flt}" data-tb="${T.id}" aria-label="فلتر ${esc(c.l || T.FL[c.flt] || '')}">${TBL_FUNNEL}<b class="th-cnt"></b></button>` : '';
+    return `<th data-col="${c.k}"${c.flt ? ` data-fk="${c.flt}"` : ''}><div class="th-in">${c.pre || ''}${lab}${flt}</div>`
+         + `<span class="col-rz" data-rz="${c.k}" data-tb="${T.id}"></span></th>`;
+  }).join('');
+  tblRefresh(T);
 }
-// 🔴 الحارس اللي من غيره القائمة بتتقفل بعد **أول** اختيار:
-//    msRenderList بتعيد بناء innerHTML فالعنصر المضغوط بيتشال من الـ DOM قبل ما
-//    الحدث يوصل هنا، و contains(detached) بترجّع false. الهدف اللي مش في الصفحة
-//    أصلاً إحنا مش عارفين كان فين وقت الضغط — فمانعملش حاجة.
-document.addEventListener('click', (e) => {
-  if (!document.contains(e.target)) return;
-  Object.keys(msState).forEach(k => {
-    const wrap = document.getElementById('msWrap-' + k);
-    const list = document.getElementById('msList-' + k);
-    if (wrap && list && !wrap.contains(e.target)) list.classList.remove('open');
+
+// ─── حالات الأيقونات + الـ chips + زرار المسح ───
+function tblChips(T){
+  const z = document.getElementById(T.chipsId); if (!z) return;
+  T.rm = [];
+  const chip = (t, rm) => { T.rm.push(rm); return `<span class="ms-chip">${esc(t)}<button type="button" data-rm="${T.rm.length - 1}" data-tb="${T.id}">✕</button></span>`; };
+  // اسم الفلتر مرة واحدة في أول السطر — مش مكرر جوّه كل chip
+  const row = (label, chips) => `<div class="ms-chips-row"><span class="chips-label">${esc(label)}:</span>${chips.join('')}</div>`;
+  const rows = [];
+  Object.keys(T.ms).forEach(k => { if (T.ms[k].size) rows.push(row(T.FL[k], [...T.ms[k]].map(v => chip(tblText(T, k, v), { t:'ms', k, v })))); });
+  Object.keys(T.q).forEach(k => { if (T.q[k].trim()) rows.push(row(T.FL[k], [chip(T.q[k].trim(), { t:'q', k })])); });
+  if (T.date && (T.date.from || T.date.to))
+    rows.push(row(T.FL.date, [chip(T.date.preset ? T.presets[T.date.preset] : `من 📅 ${tblFmtD(T.date.from)} إلى 📅 ${tblFmtD(T.date.to)}`, { t:'date' })]));
+  z.innerHTML = rows.join('');
+}
+function tblRefresh(T){
+  tblChips(T);
+  const on = tblAny(T);
+  document.querySelectorAll(`[data-clearall="${T.id}"]`).forEach(b => b.classList.toggle('inactive', !on));
+  document.querySelectorAll(`#${T.headId} th[data-fk]`).forEach(th => {
+    const n = tblActive(T, th.dataset.fk);
+    th.classList.toggle('flt-on', n > 0);
+    const c = th.querySelector('.th-cnt'); if (c) c.textContent = n > 1 ? n : (n ? '●' : '');
   });
-  const pw = document.getElementById('presetWrap');
-  if (pw && !pw.contains(e.target)) document.getElementById('logPresetMenu').classList.remove('open');
+  const s = T.sort();
+  document.querySelectorAll(`#${T.headId} th[data-col]`).forEach(th => {
+    const act = !!s.key && s.key === th.dataset.col;
+    th.classList.toggle('sorted', act);
+    const si = th.querySelector('.sort-icon');
+    if (si){ si.textContent = act ? (s.dir === 'asc' ? '▲' : '▼') : ''; si.classList.toggle('active', act); }  // الأيقونة بس عند التفعيل
+  });
+}
+function tblChanged(T, debounced){
+  tblHideTip(); tblRefresh(T);
+  if (debounced && T.debounce){ clearTimeout(T._deb); T._deb = setTimeout(() => T.onChange(), T.debounce); }
+  else T.onChange();
+}
+function tblClearAll(T){
+  Object.keys(T.ms).forEach(k => T.ms[k].clear());
+  Object.keys(T.q).forEach(k => { T.q[k] = ''; });
+  tblResetDate(T);
+  tblClosePop(); tblChanged(T);
+}
+
+// ─── القائمة العائمة (position:fixed على body — ممنوع جوّه الجدول) ───
+function tblClosePop(){ if (tPop) tPop.remove(); tPop = tPopT = tPopKey = tPopAnchor = null; tPopQ = ''; }
+function tblOpenPop(T, k, anchor){
+  tblHideTip();
+  if (tPopKey === k && tPopT === T && tPopAnchor === anchor){ tblClosePop(); return; }   // نفس الأيقونة تاني = اقفل
+  tblClosePop(); tPopT = T; tPopKey = k; tPopAnchor = anchor;
+  tPop = document.createElement('div'); tPop.className = 'pop'; document.body.appendChild(tPop);
+  tblBuildPop(); tblPlace();
+  const f = tPop.querySelector('[data-autofocus]'); if (f) f.focus();
+}
+function tblPlace(){
+  if (!tPop || !tPopAnchor) return;
+  if (!document.contains(tPopAnchor)){ tblClosePop(); return; }
+  const r = tPopAnchor.getBoundingClientRect(), w = tPop.offsetWidth, h = tPop.offsetHeight;
+  const left = Math.max(8, Math.min(r.right - w, innerWidth - w - 8));
+  let top = r.bottom + 6; if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 6);
+  tPop.style.left = left + 'px'; tPop.style.top = top + 'px';
+}
+function tblListHtml(){
+  const T = tPopT, k = tPopKey, q = tPopQ.trim().toLowerCase(), sel = T.ms[k];
+  tPopItems = tblItems(T, k).filter(i => !q || String(i.t).toLowerCase().includes(q));
+  return tPopItems.map((i, n) =>
+    `<div class="pop-item ${sel.has(i.v) ? 'on' : ''}" data-ms="${n}"><span class="cb"></span><span>${esc(i.t)}</span>`
+    + (i.c != null ? `<span class="pop-cnt">${esc(i.c)}</span>` : '') + `</div>`).join('')
+    || '<div class="pop-empty">لا نتائج</div>';
+}
+function tblPresetsHtml(){
+  const T = tPopT;
+  return `<div class="pop-presets"><button type="button" class="clear-btn" data-act="dclear">✕ مسح الاختيار</button>`
+    + Object.keys(T.presets).map(p => `<button type="button" class="${T.date.preset === p ? 'on' : ''}" data-preset="${p}">${esc(T.presets[p])}</button>`).join('') + '</div>';
+}
+function tblBuildPop(){
+  const T = tPopT, k = tPopKey, kd = tblKind(T, k); let h = '';
+  if (kd === 'ms'){
+    h = `<div class="pop-hd">${esc(T.FL[k])}</div>`
+      + `<div class="pop-ftr"><button type="button" class="clear-btn" data-act="clear">✕ مسح الاختيار</button><button type="button" class="pop-lnk" data-act="all">تحديد الكل</button></div>`
+      + (tblItems(T, k).length > 8 ? '<div class="pop-srch"><input class="pop-inp" data-msq placeholder="بحث..." data-autofocus></div>' : '')
+      + `<div class="pop-list">${tblListHtml()}</div>`;
+  } else if (kd === 'q'){
+    h = `<div class="pop-hd">${esc(T.FL[k])}</div><div class="pop-body"><div class="pop-sw">`
+      + `<input class="pop-inp ${T.q[k].trim() ? 'has-value' : ''}" data-q="${k}" value="${esc(T.q[k])}" data-autofocus><span class="pop-sicon">🔍</span></div>`
+      + `<button type="button" class="clear-btn" data-act="qclear">✕ مسح الاختيار</button></div>`;
+  } else if (kd === 'date'){
+    h = `<div class="pop-hd">${esc(T.FL.date)}</div><div class="pop-body">${tblPresetsHtml()}<div class="pop-rng">`
+      + `<div><label>من تاريخ</label><input type="date" class="pop-inp" data-d="from" value="${esc(T.date.from)}" onclick="this.showPicker&&this.showPicker()"></div>`
+      + `<div><label>إلى تاريخ</label><input type="date" class="pop-inp" data-d="to" value="${esc(T.date.to)}" onclick="this.showPicker&&this.showPicker()"></div></div></div>`;
+  }
+  tPop.innerHTML = h; tPop.classList.toggle('wide', kd === 'date');
+}
+function tblPopAction(t){
+  const T = tPopT, k = tPopKey;
+  const it = t.closest('.pop-item');
+  if (it){
+    const o = tPopItems[+it.dataset.ms]; if (!o) return;
+    const s = T.ms[k]; if (s.has(o.v)) s.delete(o.v); else s.add(o.v);
+    const l = tPop.querySelector('.pop-list'); if (l) l.innerHTML = tblListHtml();
+    tblChanged(T); return;
+  }
+  const pr = t.closest('[data-preset]');
+  if (pr){ T.applyPreset(pr.dataset.preset); tblBuildPop(); tblChanged(T); return; }
+  const a = t.closest('[data-act]'); if (!a) return;
+  const act = a.dataset.act;
+  if (act === 'clear'){ T.ms[k].clear(); tblBuildPop(); tblChanged(T); }
+  else if (act === 'all'){
+    const q = tPopQ.trim().toLowerCase();
+    tblItems(T, k).filter(i => !q || String(i.t).toLowerCase().includes(q)).forEach(i => T.ms[k].add(i.v));
+    const l = tPop.querySelector('.pop-list'); if (l) l.innerHTML = tblListHtml();
+    tblChanged(T);
+  }
+  else if (act === 'qclear'){ T.q[k] = ''; tblBuildPop(); tblChanged(T); }
+  else if (act === 'dclear'){ tblResetDate(T); tblBuildPop(); tblChanged(T); }
+}
+
+// ─── الأحداث: listener واحد على document + حارس Standards #32 ───
+document.addEventListener('click', (e) => {
+  const t = e.target;
+  // 🔴 الهدف اللي اتشال من الـ DOM بإعادة رسم القائمة: مفيش قرار قفل (من غيره القائمة بتتقفل بعد أول اختيار)
+  if (!document.contains(t)) return;
+  const trg = t.closest('[data-flt]');
+  if (trg){ e.stopPropagation(); tblOpenPop(TBL[trg.dataset.tb], trg.dataset.flt, trg); return; }
+  if (tPop && tPop.contains(t)){ tblPopAction(t); return; }
+  if (tPop) tblClosePop();
+  const rm = t.closest('[data-rm]');
+  if (rm){
+    const T = TBL[rm.dataset.tb], r = T && T.rm[+rm.dataset.rm]; if (!r) return;
+    if (r.t === 'ms') T.ms[r.k].delete(r.v); else if (r.t === 'q') T.q[r.k] = ''; else if (r.t === 'date') tblResetDate(T);
+    tblChanged(T); return;
+  }
+  const ca = t.closest('[data-clearall]');
+  if (ca){ e.stopPropagation(); const T = TBL[ca.dataset.clearall]; if (T && tblAny(T)) tblClearAll(T); return; }
+  const so = t.closest('[data-sort]');
+  if (so){ TBL[so.dataset.tb].toggleSort(so.dataset.sort); return; }
+  const bar = t.closest('[data-tbar]');
+  if (bar){
+    const T = TBL[bar.dataset.tbar];
+    document.getElementById(T.zoneId).classList.toggle('collapsed');
+    document.getElementById(T.togId).classList.toggle('open');
+  }
+});
+document.addEventListener('input', (e) => {
+  const t = e.target, T = tPopT; if (!T) return;
+  if (t.dataset.q !== undefined){ T.q[t.dataset.q] = t.value; t.classList.toggle('has-value', !!t.value.trim()); tblChanged(T, true); }
+  else if (t.dataset.d){
+    T.date[t.dataset.d] = t.value; T.date.preset = '';
+    tblChanged(T);
+    if (tPop) tPop.querySelectorAll('[data-preset]').forEach(b => b.classList.remove('on'));
+  }
+  else if (t.dataset.msq !== undefined){ tPopQ = t.value; const l = tPop.querySelector('.pop-list'); if (l) l.innerHTML = tblListHtml(); }
+});
+document.addEventListener('scroll', () => { tblPlace(); tblHideTip(); }, true);
+window.addEventListener('resize', () => {
+  tblPlace();
+  Object.values(TBL).forEach(T => { if (T.frozen) tblApplyW(T); else tblEnsureW(T); });
+});
+// Enter داخل أي حقل في قائمة الفلتر = اقفل القائمة والفلتر يفضل (مربع بحث القائمة الداخلي data-msq استثناء)
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape'){ tblClosePop(); return; }
+  if (e.key === 'Enter' && tPop && tPop.contains(e.target) && e.target.matches('input[data-q],input[data-d]')){
+    e.preventDefault(); e.target.blur(); tblClosePop();
+  }
 });
 
-function renderChips(){
-  const zone = document.getElementById('chipsZone');
-  let html = '';
-  for (const key of Object.keys(msState)){
-    const st = msState[key];
-    if (!st.selected.size) continue;
-    // اسم الفلتر **مرة واحدة** في أول السطر — مش مكرر جوّه كل chip
-    const chips = [...st.selected].map(v => {
-      const o = st.options.find(x => x.v === v);
-      return `<span class="ms-chip">${esc(o ? o.t : v)}<button onclick="msToggleItem('${key}','${esc(v)}')">✕</button></span>`;
-    }).join('');
-    html += `<div class="ms-chips-row"><span class="chips-label">${esc(st.title)}:</span>${chips}</div>`;
+// ─── Tooltip بقيم الفلتر المفعّل (مفيش اختيار = مفيش tooltip، ومفيش title native) ───
+function tblTipText(T, k){
+  if (!tblActive(T, k)) return '';
+  const kd = tblKind(T, k);
+  if (kd === 'ms') return [...T.ms[k]].map(v => tblText(T, k, v)).join('، ');
+  if (kd === 'q')  return T.q[k].trim();
+  if (kd === 'date'){
+    const r = `من 📅 ${tblFmtD(T.date.from)} إلى 📅 ${tblFmtD(T.date.to)}`;
+    return T.date.preset ? `${T.presets[T.date.preset]}: ${r}` : r;
   }
-  zone.innerHTML = html;
-  const anyActive = anyFilterActive();
-  document.getElementById('ufFunnel').classList.toggle('active', anyActive);
+  return '';
 }
-// ⚠️ !!value مش !== null — القيمة الفاضية '' لازم تتحسب «مفيش فلتر»
-function anyFilterActive(){
-  if (Object.keys(msState).some(k => msState[k].selected.size > 0)) return true;
-  if (!!document.getElementById('logSearch').value.trim())      return true;
-  if (!!document.getElementById('logSearchNotes').value.trim()) return true;
-  if (!!document.getElementById('logFilterDateFrom').value)     return true;
-  if (!!document.getElementById('logFilterDateTo').value)       return true;
-  return false;
+function tblHideTip(){ if (tTip) tTip.remove(); tTip = null; }
+function tblShowTip(btn){
+  tblHideTip();
+  const T = TBL[btn.dataset.tb], txt = T ? tblTipText(T, btn.dataset.flt) : '';
+  if (!txt || tPopAnchor === btn) return;
+  tTip = document.createElement('div'); tTip.className = 'tbl-tip'; tTip.textContent = txt; document.body.appendChild(tTip);
+  const r = btn.getBoundingClientRect(), w = tTip.offsetWidth, h = tTip.offsetHeight;
+  tTip.style.left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 8)) + 'px';
+  let top = r.bottom + 6; if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 6);
+  tTip.style.top = top + 'px';
 }
+document.addEventListener('mouseover', (e) => { const b = e.target.closest && e.target.closest('.th-flt'); if (b) tblShowTip(b); else if (tTip) tblHideTip(); });
+document.addEventListener('mouseout', (e) => { if (!e.relatedTarget) tblHideTip(); });
 
-// ─── §LOG-JS::filters ───
+// ─── التحكم اللايف في عرض الأعمدة (§ 9ب) — تفضيل واجهة في localStorage مش هوية ───
+const tblEl = (T) => document.getElementById(T.tblId);
+const tblScroll = (T) => tblEl(T).closest('.tbl-scroll');
+function tblSaveW(T){ try { localStorage.setItem(T.lsKey, JSON.stringify(T.W)); } catch {} }
+function tblLoadW(T){
+  try {
+    const s = JSON.parse(localStorage.getItem(T.lsKey) || 'null');
+    return s && T.cols.every(c => s[c.k] >= T_MIN_W) ? s : null;
+  } catch { return null; }
+}
+const tblLastK = (T) => T.cols[T.cols.length - 1].k;
+function tblSlack(T){            // الفراغ لو مجموع الأعمدة أصغر من عرض الكارت
+  let sum = 0; T.cols.forEach(c => { sum += T.W[c.k] || 0; });
+  const sc = tblScroll(T);
+  return Math.max(0, (sc ? sc.clientWidth : 0) - sum);
+}
+function tblApplyW(T){
+  const sc = tblScroll(T); if (!sc || !sc.clientWidth) return;
+  // آخر عمود بيمتص الفراغ → الجدول دايمًا بيملا عرض الكارت. W[] بيحتفظ باختيار المستخدم.
+  const slack = tblSlack(T), last = tblLastK(T); let sum = 0;
+  document.querySelectorAll(`#${T.cgId} col`).forEach(col => {
+    const k = col.dataset.c, w = T.W[k] + (k === last ? slack : 0);
+    col.style.width = w + 'px'; sum += w;
+  });
+  tblEl(T).style.width = sum + 'px';
+}
+function tblFreeze(T){ tblEl(T).classList.remove('auto', 'measuring'); T.frozen = true; tblApplyW(T); }
+// يتنادى بعد كل رسم للصفوف وعند فتح التاب — التاب المخفي عرضه صفر فمينفعش يتقاس
+function tblEnsureW(T){
+  if (T.frozen){ tblApplyW(T); return; }
+  const sc = tblScroll(T); if (!sc || !sc.clientWidth) return;
+  const saved = tblLoadW(T);
+  if (saved){ Object.assign(T.W, saved); tblFreeze(T); return; }
+  if (!T.hasRows()) return;       // القياس على صفوف حقيقية مش على رسالة «جاري التحميل»
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => {
+    if (T.frozen || !tblScroll(T).clientWidth) return;
+    const t = tblEl(T);
+    t.classList.add('auto', 'measuring'); t.style.width = '';
+    document.querySelectorAll(`#${T.cgId} col`).forEach(c => { c.style.width = ''; });
+    let sum = 0;
+    t.querySelectorAll('thead th').forEach(th => {
+      const w = Math.min(T_INIT_CAP, Math.max(T_MIN_W, Math.round(th.getBoundingClientRect().width)));
+      T.W[th.dataset.col] = w; sum += w;
+    });
+    const avail = tblScroll(T).clientWidth;
+    if (sum < avail){ const f = avail / sum; T.cols.forEach(c => { T.W[c.k] = Math.floor(T.W[c.k] * f); }); }
+    tblFreeze(T);
+  });
+}
+function tblShowBadge(w){
+  if (!tBadge){ tBadge = document.createElement('div'); tBadge.className = 'w-badge'; document.body.appendChild(tBadge); }
+  tBadge.textContent = w + ' px';
+}
+function tblHideBadge(){ if (tBadge) tBadge.remove(); tBadge = null; }
+document.addEventListener('pointerdown', (e) => {
+  const h = e.target.closest && e.target.closest('[data-rz]'); if (!h) return;
+  if (e.button !== undefined && e.button !== 0) return;
+  const T = TBL[h.dataset.tb]; if (!T || !T.frozen) return;
+  e.preventDefault(); e.stopPropagation(); tblClosePop(); tblHideTip();
+  const k = h.dataset.rz;
+  if (k === tblLastK(T)) T.W[k] += tblSlack(T);        // آخر عمود: ابدأ من العرض المعروض فعلًا
+  tDrag = { T, k, x: e.clientX, w: T.W[k], sign: getComputedStyle(tblEl(T)).direction === 'rtl' ? -1 : 1, h };
+  try { h.setPointerCapture(e.pointerId); } catch {}
+  h.classList.add('active'); document.body.classList.add('col-resizing');
+  const col = document.querySelector(`#${T.cgId} col[data-c="${k}"]`); if (col) col.classList.add('hl');
+  tblShowBadge(T.W[k]);
+});
+document.addEventListener('pointermove', (e) => {
+  if (!tDrag) return;
+  // RTL: السحب لليسار = توسيع (الإشارة من direction الفعلي مش مكتوبة ثابت)
+  tDrag.T.W[tDrag.k] = Math.max(T_MIN_W, Math.min(T_MAX_W, Math.round(tDrag.w + tDrag.sign * (e.clientX - tDrag.x))));
+  tblApplyW(tDrag.T); tblShowBadge(tDrag.T.W[tDrag.k]);
+});
+function tblEndDrag(){
+  if (!tDrag) return;
+  tDrag.h.classList.remove('active'); document.body.classList.remove('col-resizing');
+  document.querySelectorAll(`#${tDrag.T.cgId} col.hl`).forEach(c => c.classList.remove('hl'));
+  const T = tDrag.T; tDrag = null; tblHideBadge(); tblSaveW(T);
+}
+document.addEventListener('pointerup', tblEndDrag);
+document.addEventListener('pointercancel', tblEndDrag);
+// دبل كليك على المقبض = ضبط تلقائي على أطول محتوى
+function tblFitCol(T, k){
+  const t = tblEl(T), i = T.cols.findIndex(c => c.k === k); if (i < 0 || !T.frozen) return;
+  t.classList.add('measuring');
+  let w = t.querySelectorAll('thead th')[i].querySelector('.th-in').getBoundingClientRect().width + 16;
+  t.querySelectorAll('tbody tr').forEach(tr => {
+    if (tr.children.length < T.cols.length) return;      // صف رسالة (colspan)
+    const rg = document.createRange(); rg.selectNodeContents(tr.children[i]);
+    w = Math.max(w, rg.getBoundingClientRect().width + 16);
+  });
+  t.classList.remove('measuring');
+  T.W[k] = Math.max(T_MIN_W, Math.min(T_MAX_W, Math.ceil(w))); tblApplyW(T); tblSaveW(T);
+}
+document.addEventListener('dblclick', (e) => {
+  const h = e.target.closest && e.target.closest('[data-rz]'); if (h && TBL[h.dataset.tb]) tblFitCol(TBL[h.dataset.tb], h.dataset.rz);
+});
+
+// ─── §PRIORITY-JS — إعداد جدول الأولويات على المحرّك (فلترة client-side) ───
+const PRIO_T = {
+  id:'prio', tblId:'prioTbl', cgId:'prioCg', headId:'prioHeadRow', chipsId:'prioChipsZone', zoneId:'prioTableZone', togId:'prioTog',
+  lsKey:'stockaudit_col_widths_priority_v1',     // ⚠️ ارفع _v1 → _v2 لو الأعمدة اتغيّرت
+  cols:[
+    { k:'priority',  l:'الأولوية', flt:'priority' },
+    { k:'sku',       l:'SKU',      flt:'search' },
+    { k:'available', l:'Available' },
+    { k:'committed', l:'Committed' },
+    { k:'lastAudit', l:'آخر جرد',  flt:'audit' },
+  ],
+  FL:{ priority:'الأولوية', audit:'آخر جرد', search:'بحث SKU / اسم المنتج' },
+  ms:{ priority:new Set(), audit:new Set() },
+  q:{ search:'' },
+  date:null,
+  debounce:300,
+  items:(k)=>k==='priority'
+    ? Object.keys(PRIORITY_CFG).map(p=>({ v:String(p), t:PRIORITY_CFG[p].label }))
+    : [{ v:'never', t:'لم يُجرد قط' },{ v:'audited', t:'جُرد من قبل' }],
+  sort:()=>prioSort,
+  toggleSort:(k)=>togglePrioSort(k),
+  onChange:()=>applyPriorityFilters(),
+  hasRows:()=>priorityShown.length>0,
+};
+tblReg(PRIO_T);
+
+// ─── §LOG-JS::filters — الحالة جوّه LOG_T (أسفل) والقوائم في رأس العمود ───
 // مصدر **واحد** لباراميترات الفلاتر — بتستخدمه التلات نداءات، فمفيش endpoint
 // بيفلتر بشكل مختلف عن اللي جنبه.
 function logParams(){
-  const p = {};
-  const emp = [...msState.emp.selected], typ = [...msState.type.selected];
-  const dir = [...msState.dir.selected], cnt = [...msState.cnt.selected];
-  const search = document.getElementById('logSearch').value.trim();
-  const notes  = document.getElementById('logSearchNotes').value.trim();
-  const from   = document.getElementById('logFilterDateFrom').value;
-  const to     = document.getElementById('logFilterDateTo').value;
-  if (emp.length)  p.employees   = emp.join(',');
-  if (typ.length)  p.types       = typ.join(',');
-  if (dir.length)  p.deltaDirs   = dir.join(',');
-  if (cnt.length)  p.auditCounts = cnt.join(',');
-  if (search)      p.search      = search;
-  if (notes)       p.searchNotes = notes;
-  if (from)        p.dateFrom    = from;
-  if (to)          p.dateTo      = to;
+  const p = {}, m = LOG_T.ms, q = LOG_T.q, d = LOG_T.date;
+  if (m.emp.size)  p.employees   = [...m.emp].join(',');
+  if (m.type.size) p.types       = [...m.type].join(',');
+  if (m.dir.size)  p.deltaDirs   = [...m.dir].join(',');
+  if (m.cnt.size)  p.auditCounts = [...m.cnt].join(',');
+  if (q.search.trim()) p.search      = q.search.trim();
+  if (q.notes.trim())  p.searchNotes = q.notes.trim();
+  if (d.from) p.dateFrom = d.from;
+  if (d.to)   p.dateTo   = d.to;
   return p;
-}
-
-function toggleLogFilters(){
-  logFiltersOpen = !logFiltersOpen;
-  document.getElementById('ufBody').classList.toggle('closed', !logFiltersOpen);
-  document.getElementById('ufArrow').classList.toggle('closed', !logFiltersOpen);
-}
-function toggleLogTable(){
-  logTableOpen = !logTableOpen;
-  document.getElementById('logTableZone').style.display = logTableOpen ? '' : 'none';
-  document.getElementById('tblArrow').classList.toggle('closed', !logTableOpen);
 }
 function clearExportWarn(){
   const w = document.getElementById('logExportWarn');
   if (w) { w.style.display = 'none'; w.innerHTML = ''; }
 }
-function onLogFilterChange(){ logCurrentPage = 1; clearExportWarn(); renderChips(); fetchLog(); }
+function onLogFilterChange(){ logCurrentPage = 1; clearExportWarn(); fetchLog(); }
 
-function clearLogFilters(){
-  Object.keys(msState).forEach(k => { msState[k].selected.clear(); msSyncBtn(k); });
-  document.getElementById('logSearch').value = '';
-  document.getElementById('logSearchNotes').value = '';
-  syncSearchHighlight();
-  clearDateFilter(true);
-  renderChips(); onLogFilterChange();
-}
-
-// ─── §LOG-JS::dateRange — مفيش فترة افتراضية في الجداول التشغيلية ───
-function togglePresetMenu(ev){
-  ev.stopPropagation();
-  const m = document.getElementById('logPresetMenu');
-  const wasOpen = m.classList.contains('open');
-  document.querySelectorAll('.ms-list').forEach(l => l.classList.remove('open'));
-  if (!wasOpen) m.classList.add('open');
-}
-function setPresetLabel(txt, active){
-  document.getElementById('logPresetLabel').textContent = txt;
-  document.getElementById('logPresetBtn').classList.toggle('active', active);
-}
-function clearDateFilter(silent){
-  document.getElementById('logFilterDateFrom').value = '';
-  document.getElementById('logFilterDateTo').value = '';
-  setPresetLabel('⚡ اختار فترة', false);
-  document.getElementById('logPresetMenu').classList.remove('open');
-  if (!silent) onLogFilterChange();
-}
-function applyPreset(preset){
+const LOG_OPTS = {
+  emp:  [],
+  type: [{ v:'ok', t:'مظبوط' }, { v:'adjustment', t:'تعديل كمية' }],
+  dir:  [{ v:'pos', t:'زيادة ↑' }, { v:'neg', t:'نقصان ↓' }, { v:'zero', t:'بدون تغيير' }],
+  cnt:  [...Array.from({length:10}, (_, i) => ({ v:String(i + 1), t:`${i + 1} مرة` })), { v:'10+', t:'أكثر من 10' }],
+};
+// مفيش فترة افتراضية في الجداول التشغيلية — الحالة المحايدة = بلا فلتر تاريخ، وأي فترة (حتى «اليوم») فلتر مفعّل
+const LOG_PRESETS = { today:'اليوم', yesterday:'أمس', last7:'آخر 7 أيام', last30:'آخر 30 يوم', thisMonth:'الشهر الحالي', thisYear:'العام الحالي' };
+function logPresetRange(preset){
   const now = new Date(), cd = cairoDateStr(now);
   const [Y, M] = cd.split('-').map(Number);
-  const shift = (days) => {
-    const d = new Date(now.getTime() - days * 86400000);
-    return cairoDateStr(d);
-  };
+  const shift = (days) => cairoDateStr(new Date(now.getTime() - days * 86400000));
   let from = cd, to = cd;
   if (preset === 'yesterday') { from = to = shift(1); }
   else if (preset === 'last7')  { from = shift(6); }
   else if (preset === 'last30') { from = shift(29); }
   else if (preset === 'thisMonth') { from = `${Y}-${String(M).padStart(2,'0')}-01`; }
   else if (preset === 'thisYear')  { from = `${Y}-01-01`; }
-  document.getElementById('logFilterDateFrom').value = from;
-  document.getElementById('logFilterDateTo').value = to;
-  const labels = { today:'اليوم', yesterday:'أمس', last7:'آخر 7 أيام',
-                   last30:'آخر 30 يوم', thisMonth:'الشهر الحالي', thisYear:'العام الحالي' };
-  setPresetLabel('⚡ ' + labels[preset], true);
-  document.getElementById('logPresetMenu').classList.remove('open');
-  onLogFilterChange();
-}
-
-function syncSearchHighlight(){
-  ['logSearch','logSearchNotes'].forEach(id => {
-    const el = document.getElementById(id);
-    el.classList.toggle('has-value', !!el.value.trim());
-  });
+  return { from, to };
 }
 
 function initLogFilters(){
-  msState.emp.options = (allEmployees || []).map(e => ({ v: e.username, t: (e.display_name || e.username) }));
-  Object.keys(msState).forEach(k => msSyncBtn(k));
-  ['logSearch','logSearchNotes'].forEach(id => {
-    document.getElementById(id).addEventListener('input', () => {
-      syncSearchHighlight();
-      clearTimeout(logSearchTimer);
-      logSearchTimer = setTimeout(() => { logCurrentPage = 1; clearExportWarn(); fetchLog(); }, 400);
-    });
-  });
-  renderLogHead(); renderChips();
+  LOG_OPTS.emp = (allEmployees || []).map(e => ({ v: e.username, t: (e.display_name || e.username) }));
+  tblRefresh(LOG_T);
 }
 
 // ─── §LOG-JS::table ───
 const LOG_COLS = [
-  { key:'date',         t:'التاريخ' },
-  { key:'time',         t:'الوقت' },
-  { key:'employee',     t:'الموظف' },
-  { key:'sku',          t:'SKU' },
-  { key:'productTitle', t:'المنتج' },
-  { key:'type',         t:'نوع العملية' },
-  { key:'valueBefore',  t:'قبل' },
-  { key:'valueAfter',   t:'بعد' },
-  { key:'delta',        t:'التغيير' },
-  { key:null,           t:'عدد مرات الجرد' },
-  { key:null,           t:'النتيجة' },
-  { key:null,           t:'الملاحظات' },
+  { k:'date',         l:'التاريخ',         flt:'date' },
+  { k:'time',         l:'الوقت' },
+  { k:'employee',     l:'الموظف',          flt:'emp' },
+  { k:'sku',          l:'SKU',             flt:'search' },
+  { k:'productTitle', l:'المنتج' },
+  { k:'type',         l:'نوع العملية',     flt:'type' },
+  { k:'valueBefore',  l:'قبل' },
+  { k:'valueAfter',   l:'بعد' },
+  { k:'delta',        l:'التغيير',         flt:'dir' },
+  { k:'cnt',          l:'عدد مرات الجرد',  flt:'cnt',   sort:false },
+  { k:'result',       l:'النتيجة',         sort:false },
+  { k:'notes',        l:'الملاحظات',       flt:'notes', sort:false },
 ];
-function renderLogHead(){
-  document.getElementById('logHeadRow').innerHTML = LOG_COLS.map(c => {
-    if (!c.key) return `<th>${esc(c.t)}</th>`;
-    // الأيقونة تظهر **بس** عند التفعيل — مفيش ⇅ ثابتة على كل عمود
-    const ind = logSortBy === c.key ? `<span class="sort-ind">${logSortDir === 'asc' ? '▲' : '▼'}</span>` : '';
-    return `<th class="sortable-th" onclick="applySort('${c.key}')">${esc(c.t)}${ind}</th>`;
-  }).join('');
-}
-// ٣ حالات: تصاعدي → تنازلي → بلا ترتيب. server-side — الترتيب على القاعدة كلها
-// مش على الصفحة المعروضة.
-function applySort(key){
-  if (logSortBy !== key)        { logSortBy = key; logSortDir = 'asc'; }
-  else if (logSortDir === 'asc'){ logSortDir = 'desc'; }
-  else                          { logSortBy = 'date'; logSortDir = 'desc'; }
-  renderLogHead(); fetchLog();
-}
+const LOG_T = {
+  id:'log', tblId:'logTbl', cgId:'logCg', headId:'logHeadRow', chipsId:'chipsZone', zoneId:'logTableZone', togId:'logTog',
+  lsKey:'stockaudit_col_widths_log_v1',          // ⚠️ ارفع _v1 → _v2 لو الأعمدة اتغيّرت
+  cols: LOG_COLS,
+  FL: { emp:'الموظف', type:'نوع العملية', dir:'اتجاه التعديل', cnt:'عدد مرات الجرد',
+        search:'بحث SKU / اسم المنتج', notes:'بحث في الملاحظات', date:'التاريخ' },
+  ms: { emp:new Set(), type:new Set(), dir:new Set(), cnt:new Set() },
+  q:  { search:'', notes:'' },
+  date: { preset:'', from:'', to:'' },
+  presets: LOG_PRESETS,
+  debounce: 400,
+  items: (k) => LOG_OPTS[k],
+  applyPreset: (p) => { const r = logPresetRange(p); LOG_T.date.preset = p; LOG_T.date.from = r.from; LOG_T.date.to = r.to; },
+  // ٣ حالات: تصاعدي → تنازلي → بلا ترتيب. server-side — الترتيب على القاعدة كلها مش على الصفحة
+  sort: () => ({ key: logSortBy, dir: logSortDir }),
+  toggleSort: (key) => {
+    if (logSortBy !== key)         { logSortBy = key; logSortDir = 'asc'; }
+    else if (logSortDir === 'asc') { logSortDir = 'desc'; }
+    else                           { logSortBy = null; logSortDir = null; }
+    tblRefresh(LOG_T); logCurrentPage = 1; fetchLog();      // أي تغيير في الترتيب بيرجّع لصفحة ١
+  },
+  onChange: () => onLogFilterChange(),
+  hasRows: () => logRows.length > 0,
+};
+tblReg(LOG_T);
 
 async function fetchLog(){
   const body = document.getElementById('logBody');
@@ -2464,7 +2724,7 @@ async function fetchLog(){
   const base   = logParams();
   try {
     const [pageData, countData] = await Promise.all([
-      apiGet('get_logs',       { ...base, limit: LOG_PAGE_SIZE, offset, sortBy: logSortBy, sortDir: logSortDir }),
+      apiGet('get_logs',       { ...base, limit: LOG_PAGE_SIZE, offset, ...(logSortBy ? { sortBy: logSortBy, sortDir: logSortDir } : {}) }),
       apiGet('get_logs_count', base),
     ]);
     logTotalCount = countData.total || 0;
@@ -2472,6 +2732,7 @@ async function fetchLog(){
     document.getElementById('logResultsCount').textContent = logTotalCount.toLocaleString('en-US');
     renderLogTable(logRows);
     renderPagination();
+    tblEnsureW(LOG_T);
   } catch (e) {
     body.innerHTML = `<tr><td colspan="${LOG_COLS.length}"><div class="log-empty">⚠️ ${esc(e.message)}</div></td></tr>`;
     document.getElementById('logResultsCount').textContent = '—';
@@ -2646,8 +2907,7 @@ let bulkRows = [], bulkFiltered = [];
 let bulkScanActive = false;
 let isUpdatingBulk = false;     // القفل أثناء أي دفعة (Standards #43)
 let bulkSessionScans = 0, bulkBatchId = null;
-let bulkFltOpen = true, bulkTableOpen = true;
-let _bulkRecomputeTimer = null, _bulkSearchTimer = null;
+let _bulkRecomputeTimer = null;
 let bulkSortState = { key: null, dir: null };
 let bulkOrphanScans = 0;   // قطع اتمسحت وصنفها اختفى من الفهرس بعد تحديثه
 
@@ -2673,107 +2933,42 @@ const BULK_STATES = {
   other_states: { label: '❗ حالات مخزون تانية', sel: false, auto: false },
 };
 
-// ─── §BULK-JS::multiSelect — نفس نمط فلاتر السجل، حالة مستقلة ───
-const bmsState = {
-  state:  { selected: new Set(), options: [], label: 'كل الحالات',   title: 'الحالة' },
-  vendor: { selected: new Set(), options: [], label: 'كل البراندات', title: 'البراند' },
-  sel:    { selected: new Set(), options: [
-              { v:'on', t:'المحدّد' }, { v:'off', t:'غير المحدّد' }, { v:'done', t:'اتنفّذ خلاص' } ],
-            label: 'الكل', title: 'التحديد' },
+// ─── §BULK-JS::filters — نفس المحرّك (§TBL-JS)، حالة مستقلة، فلترة client-side ───
+const BULK_OPTS = {
+  state:  [],
+  vendor: [],
+  sel:    [{ v:'on', t:'المحدّد' }, { v:'off', t:'غير المحدّد' }, { v:'done', t:'اتنفّذ خلاص' }],
 };
-
-function bmsRenderList(key){
-  const st = bmsState[key], el = document.getElementById('bmsList-' + key);
-  if (!el) return;
-  const items = st.options.length
-    ? st.options.map((o, i) => `<label class="ms-item">
-        <input type="checkbox" ${st.selected.has(o.v) ? 'checked' : ''}
-               onchange="event.stopPropagation();bmsToggleIdx('${key}',${i})">
-        <span>${esc(o.t)}</span></label>`).join('')
-    : '<div class="ms-empty">لا توجد خيارات</div>';
-  el.innerHTML = `<div class="ms-ftr-top"><button onclick="bmsClear('${key}')">✕ مسح الاختيار</button></div>${items}`;
-}
-function bmsToggle(key, ev){
-  ev.stopPropagation();
-  const el = document.getElementById('bmsList-' + key), wasOpen = el.classList.contains('open');
-  document.querySelectorAll('.ms-list').forEach(l => l.classList.remove('open'));
-  if (!wasOpen) { bmsRenderList(key); el.classList.add('open'); }
-}
-// ⚠️ التمرير **بالفهرس** مش بالقيمة: اسم براند فيه علامة اقتباس بيتفك من
-//    الـ attribute وقت ما المتصفح يقراه، فالنص اللي بيوصل للدالة بيبقى مكسور —
-//    والـ onclick نفسه ممكن ما يشتغلش خالص من غير أي رسالة.
-function bmsToggleIdx(key, idx){
-  const o = bmsState[key].options[idx];
-  if (o) bmsToggleItem(key, o.v);
-}
-function bmsToggleItem(key, val){
-  const st = bmsState[key];
-  if (st.selected.has(val)) st.selected.delete(val); else st.selected.add(val);
-  bmsRenderList(key); bmsSyncBtn(key); renderBulkChips();
-  applyBulkFilters();
-}
-function bmsClear(key){
-  bmsState[key].selected.clear();
-  bmsRenderList(key); bmsSyncBtn(key); renderBulkChips();
-  applyBulkFilters();
-}
-function bmsSyncBtn(key){
-  const st = bmsState[key], n = st.selected.size;
-  const lbl = document.getElementById('bmsLbl-' + key), btn = document.getElementById('bmsBtn-' + key);
-  if (!lbl || !btn) return;
-  lbl.textContent = n ? `${n} مختار` : st.label;
-  btn.classList.toggle('active', n > 0);
-}
-// 🔴 نفس حارس فلاتر السجل: العنصر المضغوط بيتشال من الـ DOM قبل ما الحدث
-//    يوصل هنا، و contains(detached) بترجّع false فالقائمة كانت بتتقفل بعد
-//    **أول** اختيار.
-document.addEventListener('click', (e) => {
-  if (!document.contains(e.target)) return;
-  Object.keys(bmsState).forEach(k => {
-    const wrap = document.getElementById('bmsWrap-' + k);
-    const list = document.getElementById('bmsList-' + k);
-    if (wrap && list && !wrap.contains(e.target)) list.classList.remove('open');
-  });
-});
-
-function renderBulkChips(){
-  const zone = document.getElementById('bulkChipsZone');
-  if (!zone) return;
-  let html = '';
-  for (const key of ['state','vendor','sel']){
-    const st = bmsState[key];
-    if (!st.selected.size) continue;
-    const chips = [...st.selected].map(v => {
-      const i = st.options.findIndex(x => x.v === v);
-      const o = i >= 0 ? st.options[i] : null;
-      return `<span class="ms-chip">${esc(o ? o.t : v)}<button onclick="bmsToggleIdx('${key}',${i})">✕</button></span>`;
-    }).join('');
-    html += `<div class="ms-chips-row"><span class="chips-label">${esc(st.title)}:</span>${chips}</div>`;
-  }
-  zone.innerHTML = html;
-  document.getElementById('bulkFunnel').classList.toggle('active', anyBulkFilterActive());
-}
-// ⚠️ !!value مش !== null
-function anyBulkFilterActive(){
-  if (['state','vendor','sel'].some(k => bmsState[k].selected.size > 0)) return true;
-  return !!document.getElementById('bulkSearch').value.trim();
-}
-function clearBulkFilters(){
-  ['state','vendor','sel'].forEach(k => { bmsState[k].selected.clear(); bmsSyncBtn(k); bmsRenderList(k); });
-  document.getElementById('bulkSearch').value = '';
-  document.getElementById('bulkSearch').classList.remove('has-value');
-  renderBulkChips(); applyBulkFilters();
-}
-function toggleBulkFilters(){
-  bulkFltOpen = !bulkFltOpen;
-  document.getElementById('bulkFltBody').classList.toggle('closed', !bulkFltOpen);
-  document.getElementById('bulkFltArrow').classList.toggle('closed', !bulkFltOpen);
-}
-function toggleBulkTable(){
-  bulkTableOpen = !bulkTableOpen;
-  document.getElementById('bulkTableZone').style.display = bulkTableOpen ? '' : 'none';
-  document.getElementById('bulkTblArrow').classList.toggle('closed', !bulkTableOpen);
-}
+const BULK_COLS = [
+  { k:'_sel',         l:'', sort:false, flt:'sel',
+    pre:'<input type="checkbox" id="bulkSelAll" onchange="bulkSelectAll(this.checked)" title="تحديد/إلغاء كل المعروض">' },
+  { k:'sku',          l:'SKU',     flt:'search' },
+  { k:'productTitle', l:'المنتج' },
+  { k:'vendor',       l:'البراند', flt:'vendor' },
+  { k:'scanned',      l:'سكانر' },
+  { k:'manual',       l:'يدوي' },
+  { k:'counted',      l:'المعدود' },
+  { k:'expected',     l:'المتوقع' },
+  { k:'diff',         l:'الفرق' },
+  { k:'state',        l:'الحالة',  flt:'state' },
+  { k:'result',       l:'النتيجة', sort:false },
+];
+const BULK_T = {
+  id:'bulk', tblId:'bulkTbl', cgId:'bulkCg', headId:'bulkHeadRow', chipsId:'bulkChipsZone', zoneId:'bulkTableZone', togId:'bulkTog',
+  lsKey:'stockaudit_col_widths_bulk_v1',         // ⚠️ ارفع _v1 → _v2 لو الأعمدة اتغيّرت
+  cols: BULK_COLS,
+  FL: { state:'الحالة', vendor:'البراند', sel:'التحديد', search:'بحث SKU / اسم المنتج' },
+  ms: { state:new Set(), vendor:new Set(), sel:new Set() },
+  q:  { search:'' },
+  date: null,
+  debounce: 250,
+  items: (k) => BULK_OPTS[k],
+  sort: () => bulkSortState,
+  toggleSort: (k) => toggleBulkSort(k),
+  onChange: () => applyBulkFilters(),
+  hasRows: () => bulkFiltered.length > 0,
+};
+tblReg(BULK_T);
 
 // ─── §BULK-JS::index — تحميل الفهرس ───
 // ⚠️ إعادة التحميل **بتحافظ على المسحات** عن قصد. واللي بيتمسح هو نتيجة
@@ -2826,10 +3021,9 @@ async function loadBulkIndex(){
     // خيارات البراند للفلتر وللنطاق
     const vendors = [...new Set(variants.map(v => v.vendor || '—'))].sort((a,b) => a.localeCompare(b,'ar'));
     const opts = vendors.map(v => ({ v, t: v }));
-    bmsState.vendor.options = opts;
-    bmsRenderList('vendor');
-    bmsState.state.options = Object.keys(BULK_STATES).map(k => ({ v:k, t:BULK_STATES[k].label }));
-    bmsRenderList('state'); bmsRenderList('sel');
+    BULK_OPTS.vendor = opts;
+    BULK_OPTS.state  = Object.keys(BULK_STATES).map(k => ({ v:k, t:BULK_STATES[k].label }));
+    tblRefresh(BULK_T);
 
     renderBulkIndexWarn();
     updateBulkIndexTs();
@@ -3175,12 +3369,6 @@ function bulkSelectAll(on){
 }
 
 // ─── §BULK-JS::filters+table ───
-document.getElementById('bulkSearch').addEventListener('input', (e) => {
-  e.target.classList.toggle('has-value', !!e.target.value.trim());
-  clearTimeout(_bulkSearchTimer);
-  _bulkSearchTimer = setTimeout(() => { renderBulkChips(); applyBulkFilters(); }, 250);
-});
-
 const BULK_SORT_CFG = {
   sku:{type:'string'}, productTitle:{type:'string'}, vendor:{type:'string'},
   scanned:{type:'number'}, manual:{type:'number'}, counted:{type:'number'},
@@ -3190,6 +3378,7 @@ function toggleBulkSort(key){
   if (bulkSortState.key !== key){ bulkSortState.key = key; bulkSortState.dir = 'asc'; }
   else if (bulkSortState.dir === 'asc'){ bulkSortState.dir = 'desc'; }
   else { bulkSortState.key = null; bulkSortState.dir = null; }
+  tblRefresh(BULK_T);
   applyBulkFilters();
 }
 // ⚠️ الترتيب دايمًا على **نسخة** من المصفوفة — الترتيب في المكان بيعدّل مصدر
@@ -3206,8 +3395,8 @@ function applyBulkSort(rows){
 }
 
 function applyBulkFilters(){
-  const q     = document.getElementById('bulkSearch').value.trim().toLowerCase();
-  const stSel = bmsState.state.selected, vnSel = bmsState.vendor.selected, seSel = bmsState.sel.selected;
+  const q     = BULK_T.q.search.trim().toLowerCase();
+  const stSel = BULK_T.ms.state, vnSel = BULK_T.ms.vendor, seSel = BULK_T.ms.sel;
   const filtered = bulkRows.filter(r => {
     if (stSel.size && !stSel.has(r.state)) return false;
     if (vnSel.size && !vnSel.has(r.vendor)) return false;
@@ -3219,40 +3408,20 @@ function applyBulkFilters(){
     return true;
   });
   bulkFiltered = applyBulkSort(filtered);
+  tblRefresh(BULK_T);
   renderBulkTable();
+  tblEnsureW(BULK_T);
   renderBulkStats();
   updateBulkButtons();
   document.getElementById('bulkResultsCount').textContent = filtered.length.toLocaleString('en-US');
 }
 
-const BULK_COLS = [
-  { key:null,           label:'', sortable:false },
-  { key:'sku',          label:'SKU' },
-  { key:'productTitle', label:'المنتج' },
-  { key:'vendor',       label:'البراند' },
-  { key:'scanned',      label:'سكانر' },
-  { key:'manual',       label:'يدوي' },
-  { key:'counted',      label:'المعدود' },
-  { key:'expected',     label:'المتوقع' },
-  { key:'diff',         label:'الفرق' },
-  { key:'state',        label:'الحالة' },
-  { key:null,           label:'النتيجة', sortable:false },
-];
+// الرأس بيتبني مرة واحدة (tblBuildHead) — هنا حالة checkbox «تحديد الكل» بس
 function renderBulkHead(){
-  const row = document.getElementById('bulkHeadRow');
-  row.innerHTML = BULK_COLS.map((c, i) => {
-    if (i === 0){
-      const pick = bulkFiltered.filter(r => BULK_STATES[r.state]?.sel && !bulkDone.has(r.variantId));
-      const all  = pick.length > 0 && pick.every(isBulkSelected);
-      const dis  = isUpdatingBulk || !pick.length ? 'disabled' : '';
-      return `<th style="width:34px;"><input type="checkbox" id="bulkSelAll" ${dis} ${all ? 'checked' : ''}
-                onchange="bulkSelectAll(this.checked)" title="تحديد/إلغاء كل المعروض"></th>`;
-    }
-    if (c.sortable === false) return `<th>${esc(c.label)}</th>`;
-    const on  = bulkSortState.key === c.key;
-    const ind = on ? `<span class="sort-ind">${bulkSortState.dir === 'asc' ? '▲' : '▼'}</span>` : '';
-    return `<th class="sortable-th" data-sort-key="${esc(c.key)}" onclick="toggleBulkSort('${esc(c.key)}')">${esc(c.label)}${ind}</th>`;
-  }).join('');
+  const cb = document.getElementById('bulkSelAll'); if (!cb) return;
+  const pick = bulkFiltered.filter(r => BULK_STATES[r.state]?.sel && !bulkDone.has(r.variantId));
+  cb.checked  = pick.length > 0 && pick.every(isBulkSelected);
+  cb.disabled = isUpdatingBulk || !pick.length;
 }
 
 function renderBulkTable(){
