@@ -478,6 +478,20 @@ td.centered{text-align:center;}
 .bulk-scan-wrap input{flex:1;border:none;background:transparent;outline:none;font-family:var(--font-body);font-size:16px;font-weight:700;color:var(--text-primary);}
 .bulk-scan-wrap input:disabled{cursor:not-allowed;}
 
+/* ─── جلسة المسح: مقفولة لحد «ابدأ المسح» — مفيش ظاهر غير الزرار الأخضر ─── */
+.bulk-scan-collapse{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:1fr;transition:grid-template-rows .3s ease;}
+.bulk-scan-collapse>.bulk-scan-collapse-in{min-height:0;overflow:hidden;}
+.bulk-scan-card.closed .bulk-scan-collapse{grid-template-rows:0fr;}
+.bulk-scan-card.closed .bulk-card-hdr{border-bottom-color:transparent;}
+.bulk-scan-card.closed .bulk-card-title,.bulk-scan-card.closed .bulk-card-sub{display:none;}
+
+/* ─── نافذة تحميل الباركودات (بتفضل لحد ما التحميل يخلص — مفيش إغلاق بالضغط بره) ─── */
+#bulkLoadOverlay{z-index:700;}
+.bulk-load-modal{text-align:center;padding:30px 24px;}
+.bulk-load-modal .loading-spinner{width:38px;height:38px;border-width:4px;margin-bottom:14px;}
+.bulk-load-title{font-size:15px;font-weight:800;color:var(--text-primary);}
+.bulk-load-sub{font-size:12.5px;font-weight:600;color:var(--text-secondary);line-height:1.8;margin-top:6px;}
+
 .bulk-live{padding:10px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface-2);font-size:13px;font-weight:700;color:var(--text-secondary);min-height:42px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .bulk-live.ok{border-color:var(--green-border);background:var(--green-light);color:var(--green-dark);}
 .bulk-live.bad{border-color:var(--red-border);background:var(--red-light);color:var(--red);}
@@ -659,6 +673,15 @@ col.hl{background:var(--accent-light);}
     <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeSettings()">إلغاء</button><button class="btn-save" onclick="saveSettings()">حفظ</button></div>
   </div>
 </div>
+<!-- نافذة تحميل الباركودات — بتتفتح من loadBulkIndex وبتتقفل في finally بس -->
+<div class="modal-overlay" id="bulkLoadOverlay" role="alertdialog" aria-modal="true" aria-live="polite">
+  <div class="modal bulk-load-modal">
+    <div class="loading-spinner"></div>
+    <div class="bulk-load-title">⏳ جاري تحميل الباركودات...</div>
+    <div class="bulk-load-sub">استنى لحد ما التحميل يخلص — ممكن ياخد شوية وقت لو المتجر كبير.</div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="confirmOverlay">
   <div class="modal" style="max-width:460px;">
     <div class="modal-header" id="confirmHeader"></div>
@@ -1137,13 +1160,14 @@ col.hl{background:var(--accent-light);}
     <div id="bulkIndexWarn" class="export-warn" style="display:none;"></div>
 
     <!-- ─── §BULK::scan — جلسة المسح المتواصل ─── -->
-    <div class="bulk-card">
+    <div class="bulk-card bulk-scan-card closed" id="bulkScanCard">
       <div class="bulk-card-hdr">
         <span class="bulk-card-title">② 🔫 جلسة المسح</span>
         <span class="bulk-card-sub" id="bulkScanHint">امسح كل القطع على الرفوف واحدة ورا التانية — من غير توقّف ومن غير إنترنت.</span>
         <div class="bulk-card-spacer"></div>
         <button class="bulk-btn go" id="bulkScanToggle" onclick="toggleBulkScan()" disabled>▶ ابدأ المسح</button>
       </div>
+      <div class="bulk-scan-collapse"><div class="bulk-scan-collapse-in">
       <div class="bulk-card-body">
         <div class="bulk-scan-row">
           <div class="bulk-scan-wrap disabled" id="bulkScanWrap">
@@ -1172,6 +1196,7 @@ col.hl{background:var(--accent-light);}
           <button class="bulk-btn" onclick="addBulkBySku()">➕ أضف</button>
         </div>
       </div>
+      </div></div>
     </div>
 
     <!-- ─── §BULK::problems — الأكواد اللي الأداة ما عرفتهاش (Standards #44) ─── -->
@@ -2994,7 +3019,8 @@ async function loadBulkIndex(){
   if (isUpdatingBulk) return;
   const btn = document.getElementById('bulkLoadBtn');
   btn.disabled = true; const old = btn.textContent; btn.textContent = '⏳ جاري التحميل...';
-  showToast('⏳ جاري تحميل الباركودات...', 'neutral');
+  const loadOv = document.getElementById('bulkLoadOverlay');
+  loadOv.classList.add('open');                // نافذة بتفضل لحد ما التحميل يخلص (نجاح أو فشل)
   try {
     const data = await apiGet('get_bulk_index');
     const variants = data.variants || [];
@@ -3044,7 +3070,10 @@ async function loadBulkIndex(){
     showToast(`✓ الفهرس اتحمّل — ${variants.length.toLocaleString('en-US')} صنف`, 'success');
   } catch (e){
     showToast('تعذّر تحميل الفهرس: ' + e.message, 'error', 9000);
-  } finally { btn.disabled = false; btn.textContent = bulkIndex ? '🔄 إعادة تحميل الباركودات' : old; }
+  } finally {
+    loadOv.classList.remove('open');
+    btn.disabled = false; btn.textContent = bulkIndex ? '🔄 إعادة تحميل الباركودات' : old;
+  }
 }
 
 // بانر ثابت — التقصّ لازم يبان (ممكن يكون فيه مقاسات مش في الفهرس).
@@ -3111,6 +3140,8 @@ function toggleBulkScan(){
   bulkScanInputEl.placeholder = bulkScanActive
     ? 'امسح... (سيب المؤشر هنا)'
     : 'اضغط «ابدأ المسح» قبل ما تمسح';
+  // القسم بيتفتح عند أول «ابدأ المسح» ويفضل مفتوح (العدّادات والإضافة اليدوية جواه)
+  if (bulkScanActive) document.getElementById('bulkScanCard').classList.remove('closed');
   if (bulkScanActive) setTimeout(() => bulkScanInputEl.focus(), 40);
 }
 
