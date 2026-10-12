@@ -2,11 +2,11 @@
 
 # جرد المخزون (`inventory-audit-updater`)
 
-![version](https://img.shields.io/badge/version-v2.1.0-blue)
+![version](https://img.shields.io/badge/version-v2.2.0-blue)
 
 **بتعمل إيه:** الموظفين بيراجعوا أرصدة المخزون بالباركود/SKU، يصلّحوا الفرق (`adjust_inventory`)، أو يأكّدوا إن الجرد مظبوط (`set_audit_date`) — مع قايمة أولويات جرد وتفاصيل الأوردرات الغير مجهّزة لكل صنف، و**جرد جماعي** (`§BULK`) لرفوف كاملة بالسكانر في جلسة واحدة.
 **مين بيستخدمها:** المخزن
-**الإصدار:** Worker `v6.1.1` · الواجهة `v6.1.0`
+**الإصدار:** Worker `v6.1.1` · الواجهة `v6.2.1`
 
 ## الروابط
 
@@ -329,14 +329,24 @@ git show 7f0cce9:index.html
 | المهارة | الإصدار وقت آخر تعديل |
 |---|---|
 | ecommoda-worker-builder | v3.8.0 |
-| ecommoda-html-builder | v7.0.0 |
+| ecommoda-html-builder | v8.3.1 |
 | ecommoda-constants | v3.1.0 |
 | shopify-graphql-helper | v1.0.0 |
 
-آخر مطابقة: 24-09-2026 · `index.js` v6.1.1 · `index.html` v6.1.0
+آخر مطابقة: 12-10-2026 · `index.js` v6.1.1 · `index.html` v6.2.1
 🔴 معلّقة: — لا شيء
 
 ## مسائل مفتوحة
+
+### 🟡 فجوات مقابل `ecommoda-html-builder` v8.3.1 (مراجعة 12-10-2026)
+
+اتصلّح في v6.2.1: لون `#6b7280` (S48) · الخروج التلقائي 60 د + الخروج اليدوي بلا تأكيد (S52) · `esc()` في نوافذ التأكيد وقايمة البحث.
+**لسه مفتوح** (تغييرات أكبر، المهارة نفسها بتقول «عند أول فتح للأداة»):
+
+- **S47/S51 + data-table-standard:** سجل العمليات والجدول الجماعي لسه فلاترهم في قسم فوق الجدول مش في رأس العمود، ومفيش تحكم في عرض الأعمدة (`data-rz`)، ومفيش `.tbl-scroll` بعناوين `sticky`، وطي الجدول بـ `display:none` مش `grid-template-rows`.
+- **Freeze on Scroll** (`.sticky-header-wrap` + `measureSticky`) مش موجود رغم إن الأداة فيها main tabs.
+- **جدول الأولويات** (`priority-table`) بتنسيق خاص مش بمعيار الجداول الموحّد.
+- **خروج الجرد الجماعي:** `performLogout` مابيفضّيش جلسة الجرد الجماعي (في الذاكرة) — الموظف التالي على نفس الجهاز يشوفها.
 
 ### ✅ Flow Companion — اتشال بالكامل (12-09-2026)
 
@@ -412,6 +422,6 @@ node <skill>/scripts/js-undef-check.js index.html # Step 9B — الربط
 
 ---
 
-آخر تحديث: 24-09-2026
+آخر تحديث: 12-10-2026 — 10:30
 
 </div>
