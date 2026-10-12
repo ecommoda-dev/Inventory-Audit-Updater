@@ -1580,7 +1580,7 @@ let allEmployees=[];
 let currentEmployee=null,loginMode='employee',pinDigits=[],pendingNewPin='',isLoginBusy=false,autoLoginTimer=null;
 let _audioCtx=null;
 function _getACtx(){if(!_audioCtx)_audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(_audioCtx.state==='suspended')_audioCtx.resume();return _audioCtx;}
-function playBeep(type){try{const ctx=_getACtx();const run=()=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);if(type==='success'){o.frequency.setValueAtTime(880,ctx.currentTime);o.frequency.setValueAtTime(1100,ctx.currentTime+0.1);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.25);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.25);}else{o.frequency.setValueAtTime(300,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+0.15);g.gain.setValueAtTime(0.4,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.35);}};if(ctx.state==='suspended')ctx.resume().then(run);else run();}catch{}}
+function playBeep(type){try{const ctx=_getACtx();const run=()=>{if(type==='alarm'){const t0=ctx.currentTime;for(let i=0;i<3;i++){const o=ctx.createOscillator(),g=ctx.createGain(),t=t0+i*0.28;o.type='square';o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(900,t);o.frequency.setValueAtTime(450,t+0.13);g.gain.setValueAtTime(0.9,t);g.gain.setValueAtTime(0.9,t+0.23);g.gain.exponentialRampToValueAtTime(0.001,t+0.27);o.start(t);o.stop(t+0.27);}return;}const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);if(type==='success'){o.frequency.setValueAtTime(880,ctx.currentTime);o.frequency.setValueAtTime(1100,ctx.currentTime+0.1);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.25);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.25);}else{o.frequency.setValueAtTime(300,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+0.15);g.gain.setValueAtTime(0.4,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.35);}};if(ctx.state==='suspended')ctx.resume().then(run);else run();}catch{}}
 function vibrateDevice(pattern){try{if(navigator.vibrate)navigator.vibrate(pattern);}catch{}}
 async function loadEmployeesList(){
   const sel=document.getElementById('loginSelect'),status=document.getElementById('loginStatus');
@@ -3192,7 +3192,7 @@ function addBulkProblem(code, reason, candidates){
   const rec = bulkProblems.get(code) || { code, count: 0, reason, candidates: candidates || [] };
   rec.count++; rec.reason = reason; rec.candidates = candidates || [];
   bulkProblems.set(code, rec);
-  playBeep('error'); vibrateDevice([100,50,100]);
+  playBeep('alarm'); vibrateDevice([300,100,300,100,300]);   // 🔴 صوت عالي ومميّز — مشكلة بتقفل التنفيذ
   setBulkLive('bad', reason === 'unknown'
     ? `الكود ${code} مش موجود في الفهرس — لاصقة غلط أو صنف مش متتبّع أو الفهرس قديم`
     : `الكود ${code} متكرر على ${(candidates||[]).length} أصناف — الأداة مش هتخمّن`, null);
