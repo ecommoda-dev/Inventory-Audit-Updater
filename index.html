@@ -544,9 +544,6 @@ td.centered{text-align:center;}
 
 
 /* ─── الجدول ─── */
-.bulk-manual-cell{width:74px;height:30px;padding:0 8px;border:1.5px solid var(--border-strong);border-radius:6px;background:var(--surface);font-family:var(--font-body);font-size:12.5px;font-weight:700;color:var(--text-primary);text-align:center;outline:none;}
-.bulk-manual-cell:focus{border-color:var(--accent);}
-.bulk-manual-cell:disabled{opacity:.5;cursor:not-allowed;}
 
 .bulk-state{display:inline-block;padding:2px 9px;border-radius:5px;font-size:11.5px;font-weight:700;white-space:nowrap;}
 /* مربعات الحالة في شريط الإحصاء = فلتر «الحالة» نفسه (v6.7.0) — بتكتب في BULK_T.ms.state */
@@ -574,7 +571,6 @@ button.bulk-state.on::after{content:' ✕';font-weight:800;}
 .st-match{background:var(--green-light);color:var(--green-dark);border:1px solid var(--green-border);}
 .st-short{background:var(--red-light);color:var(--red);border:1px solid var(--red-border);}
 .st-over{background:var(--accent-light);color:var(--accent);border:1px solid var(--accent-border);}
-.st-missing{background:var(--orange-light);color:var(--orange);border:1px solid var(--orange-border);}
 .st-no_barcode{background:var(--surface-2);color:var(--text-secondary);border:1px solid var(--border-strong);}
 .st-needs_check{background:var(--amber-light);color:var(--amber-dark);border:1px solid var(--amber-border);}
 .st-other_states{background:var(--purple-light);color:var(--purple-dark);border:1px solid var(--purple-border);}
@@ -751,7 +747,12 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.11.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.12.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> بعد تنفيذ التعديلات بنجاح كامل، قسم ③ النتائج بيختفي والجلسة بتبدأ من جديد تلقائيًا (لو فيه فشل أو تحذير أو رصيد اتغيّر، الجدول بيفضل للمراجعة). وعمود «يدوي» في الجدول بقى للعرض بس — مفيش تعديل رقم يدوي من الجدول.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> حالة «مش متسكن» اتشالت — المقاس اللي ما اتمسحش من منتج اتمسح منه حاجة بيتحسب معدوده صفر، فبيظهر «🔴 عجز» (ومتحدّد تلقائيًا) لو شوبيفاي شايفة منه رصيد، و«✅ مظبوط» لو صفر.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.11.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>نافذة تأكيد الجرد الجماعي:</b> العنوان بقى «نافذة تأكيد تسجيل الجرد الجماعي»، الصفوف منظّمة بمسافات وخطوط فاصلة، زرار التأكيد أخضر وزرار الإلغاء بإطار أحمر.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>«ابدأ المسح» بقى «ابدأ الجرد» و«إيقاف المسح» بقى «إيقاف الجرد».</span></li>
@@ -939,7 +940,7 @@ col.hl{background:var(--accent-light);}
             <li><b>جلسة المسح</b> — مسح متواصل لرفوف كاملة. الكود المجهول أو المتكرر على أكتر من صنف
                 بيروح لقايمة حمرا و<b>بيقفل التنفيذ</b> لحد ما تتفضى.</li>
             <li><b>النطاق (ثابت)</b> — اللي اتمسح <b>+ باقي مقاسات نفس المنتج</b>:
-              لو المنتج اتمسح منه مقاس واحد على الأقل، باقي مقاساته بتظهر «مش متسكن».
+              لو المنتج اتمسح منه مقاس واحد على الأقل، باقي مقاساته بتتحسب معدودها صفر — يعني «🔴 عجز» لو شوبيفاي شايفة منها رصيد (ومتحدّدة تلقائيًا).
               المنتج اللي ما اتلمسش خالص مش بيظهر.
               <b>التجميع بـ <code>productId</code></b> — في المتجر ده كل لون منتج مستقل في شوبيفاي
               والمتغيّرات هي المقاسات (<code>GT1 / Black</code> منتج · <code>GT1 / White</code> منتج
@@ -1033,7 +1034,7 @@ col.hl{background:var(--accent-light);}
             <li><b>الجرد الجماعي مافيهوش قيم <code>type</code> جديدة</b> — بيكتب تحت <code>adjustment</code> و<code>ok</code> زي الفردي، والفرق في <code>extra.mode = 'bulk'</code> و<code>extra.batchId</code>.</li>
             <li><b>الصنف اللي <code>onHand ≠ available + committed</code></b> (عليه حالات مخزون تانية زي تالف أو فحص جودة) بيتشال من التنفيذ الجماعي — معادلة الرف مابتغطّيهاش.</li>
             <li><b>الصنف بدون باركود</b> بياخد حالة مستقلة «🚫 بدون باركود» ومش بيتصفّر — لأنه أصلاً مايتجردش بالسكانر.</li>
-            <li><b>«⚠️ مش متسكن» مشروطة بإن المتوقع أكبر من صفر.</b> المقاس اللي شوبيفاي بتقول عنه صفر والرف فاضي = «✅ مظبوط»، وبيتسجّل إنه اتراجع. المقاسات الصفر بتتضم لأن نطاق «باقي المقاسات» صغير والتسجيل ده هو نص فايدة جرد الرف.</li>
+            <li><b>المقاس اللي ما اتمسحش بيتحسب «عجز» (من v6.12.0)</b> — حالة «مش متسكن» اتشالت. المقاس اللي شوبيفاي بتقول عنه صفر والرف فاضي = «✅ مظبوط»، وبيتسجّل إنه اتراجع.</li>
             <li><b>الفهرس المقصوص</b> بيطلّع لافتة تنبّه إن ممكن يكون فيه مقاسات مش في الفهرس.</li>
             <li>🔴 <b>الأرقام المبدئية مقابل الأرقام المقارَنة:</b> الفهرس بيتحمّل <b>قبل</b> العدّ، فأرقامه بتقدم أثناء جلسة المسح (بيعة · شحنة). عشان كده صفوف ما اتقارنتش بتتعرض بعلامة «؟» و<b>التنفيذ عليها مقفول</b>. الكتابة نفسها محميّة بالـ CAS، فالخطر مكانش على المخزون — كان إن <b>الشاشة تعرض رقم قديم</b> والموظف ياخد قرار عليه.</li>
             <li><b>كل الباركودات في ذاكرة المتصفح</b> — الجلسة بتضيع مع أي refresh. ده مقصود: مفيش عدّ بيتخزّن في <code>localStorage</code>.</li>
@@ -1450,7 +1451,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.11.0';
+const TOOL_VERSION = '6.12.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -3010,9 +3011,8 @@ async function exportLogXLSX(){
 // بالمتوقع من شوبيفاي وتنفّذ التعديلات دفعة واحدة.
 //
 // 🔴 النطاق ثابت: اللي اتمسح + باقي مقاسات نفس المنتج (التجميع بـ productId).
-//    الصنف اللي ما اتمسحش من منتج اتمسح منه حاجة بيظهر «مش متسكن» ومش متحدّد
-//    افتراضيًا. منتج ما اتلمسش خالص مش بيظهر. (وضعا «اللي اتمسح بس» و«الشامل»
-//    اتشالوا في v6.2.0.)
+//    الصنف اللي ما اتمسحش من منتج اتمسح منه حاجة بيتحسب معدوده صفر → «عجز».
+//    منتج ما اتلمسش خالص مش بيظهر. (وضعا «اللي اتمسح بس» و«الشامل» اتشالوا في v6.2.0.)
 
 // ─── §BULK-JS::state ───
 let bulkIndex      = null;      // { variants, byId, byBarcode, bySku, dupBarcodes, loadedAt, truncated }
@@ -3051,7 +3051,6 @@ const BULK_STATES = {
   match:        { label: '✅ مظبوط',            sel: true,  auto: true  },
   short:        { label: '🔴 عجز',              sel: true,  auto: true  },
   over:         { label: '🟢 زيادة',            sel: true,  auto: true  },
-  missing:      { label: '⚠️ مش متسكن',          sel: true,  auto: false },
   no_barcode:   { label: '🚫 بدون باركود',       sel: false, auto: false },
   not_compared: { label: '⏳ لسه ما اتقارنش',    sel: false, auto: false },
   compare_failed:{label: '❌ تعذّرت المقارنة',   sel: false, auto: false },
@@ -3428,10 +3427,8 @@ function computeBulkRows(){
     else if (live && live.ok === false)    state = 'compare_failed';
     else if (!compared)                    state = 'not_compared';
     else if (otherStates)                  state = 'other_states';
-    // «مش متسكن» معناها **متوقع منه حاجة والرف فاضي**. المقاس اللي شوبيفاي
-    // أصلاً بتقول عنه صفر والرف فاضي = مظبوط، مش ناقص — وده أهم صف في وضع
-    // «باقي المقاسات»: بيسجّل إن المقاس اتراجع فعلاً.
-    else if (untouched && expected > 0)    state = 'missing';
+    // (v6.12.0) مفيش حالة «مش متسكن» — المقاس اللي ما اتمسحش بيتحسب معدوده صفر،
+    // فلو شوبيفاي شايفة منه رصيد بيطلع «عجز» تلقائيًا، ولو صفر بيطلع «مظبوط».
     else if (diff === 0)                   state = 'match';
     else if (diff < 0)                     state = 'short';
     else                                   state = 'over';
@@ -3443,7 +3440,7 @@ function computeBulkRows(){
       sku: v.sku, barcode: v.barcode, productTitle: v.productTitle,
       variantTitle: v.variantTitle, vendor: v.vendor || '—',
       lastAuditDate: v.lastAuditDate,
-      scanned, manual, counted, expected, diff, state,
+      scanned, manual, counted, expected, diff, state, untouched,
       available, committed, onHand, packed,
       compared, comparedAt: compared ? live.at : null,
       compareError: live && live.ok === false ? live.error : null,
@@ -3617,8 +3614,7 @@ function renderBulkTable(){
       <td><span class="log-sku-badge">${esc(r.sku)}</span></td>
       <td>${esc(r.vendor)}</td>
       <td class="col-num">${r.scanned.toLocaleString('en-US')}</td>
-      <td><input type="number" min="0" class="bulk-manual-cell" value="${r.manual}" ${isUpdatingBulk || done ? 'disabled' : ''}
-           onchange="setBulkManualIdx(${i}, this.value)"></td>
+      <td class="col-num">${r.manual.toLocaleString('en-US')}</td>
       <td class="col-num">${r.counted.toLocaleString('en-US')}</td>
       <td class="col-num" title="${r.compared ? `available ${r.available} + committed ${r.committed} − مغلَّف ${r.packed}` : 'رقم مبدئي من وقت تحميل الباركودات — اضغط «قارن بشوبيفاي»'}">${
         r.compared ? r.expected.toLocaleString('en-US')
@@ -3838,7 +3834,7 @@ function bulkNoteFor(r){
   let s = `جرد جماعي — معدود ${r.counted} مقابل المتوقع ${r.expected}`;
   s += ` (سكانر ${r.scanned}${r.manual ? ` + يدوي ${r.manual}` : ''})`;
   if (r.packed)             s += ` · مغلَّف ${r.packed}`;
-  if (r.state === 'missing') s += ' · مش متسكن في الجرد الشامل';
+  if (r.untouched)          s += ' · ما اتمسحش (باقي مقاسات المنتج)';
   return s;
 }
 
@@ -3854,7 +3850,7 @@ function confirmBulkExecute(){
 
   const nAdjust  = rows.filter(r => r.diff !== 0).length;
   const nOk      = rows.filter(r => r.diff === 0).length;
-  const nMissing = rows.filter(r => r.state === 'missing').length;
+  const nMissing = rows.filter(r => r.untouched && r.diff < 0).length;
   const plus     = rows.reduce((s, r) => s + (r.diff > 0 ?  r.diff : 0), 0);
   const minus    = rows.reduce((s, r) => s + (r.diff < 0 ? -r.diff : 0), 0);
   const nNeg     = rows.filter(r => r.available + r.diff < 0).length;
@@ -3868,8 +3864,8 @@ function confirmBulkExecute(){
     + line('أصناف هتتسجّل «مظبوط» بس', `${nOk.toLocaleString('en-US')} صنف`, 'green')
     + line('إجمالي القطع', `+${plus.toLocaleString('en-US')} / −${minus.toLocaleString('en-US')}`, '');
   if (nMissing)
-    body += `<div class="confirm-note">⚠️ من ضمنهم <b>${nMissing.toLocaleString('en-US')}</b> صنف «مش متسكن» `
-          + `(ما اتمسحش خالص) — رصيدهم هينزل لحد المغلَّف بس. `
+    body += `<div class="confirm-note">⚠️ من ضمنهم <b>${nMissing.toLocaleString('en-US')}</b> صنف «عجز» `
+          + `ما اتمسحوش خالص — رصيدهم هينزل لحد المغلَّف بس. `
           + `دول مقاسات من منتجات مسحت منها حاجة تانية. `
           + `لو فيهم مقاس على رف تاني ما مسحتوش، شيله من التحديد الأول.</div>`;
   if (nNeg)
@@ -3947,6 +3943,9 @@ async function executeBulk(){
     computeBulkRows(); applyBulkFilters(); updateBulkScanStats();
   }
   showBulkSummary(counts, batch.length, doneCount, netErr);
+  // لو الدفعة كلها نجحت: الجدول بيختفي والجلسة بتبدأ من جديد. لو في فشل/تحذير/رفض
+  // بسبب تغيّر الرصيد، الجدول بيفضل عشان الموظف يراجع الصفوف دي ويعيد عليها.
+  if (!(counts.error || counts.warning || counts.mismatched || counts.stale || netErr)) resetBulkSession(true);
 }
 
 // نافذة ملخّص **إجبارية** — التوست بيختفي في ثواني وفي مخزن دي مدة كافية
@@ -3998,7 +3997,7 @@ function confirmResetBulkSession(){
     + `التعديلات اللي اتنفّذت خلاص على شوبيفاي <b>مابتترجعش</b> — دي مسح للشاشة بس.</div>`,
     'امسح وابدأ من جديد', 'btn-red', resetBulkSession);
 }
-function resetBulkSession(){
+function resetBulkSession(silent){
   bulkScans.clear(); bulkLive.clear(); bulkResults.clear(); bulkComparedAt = null;
   bulkProblems.clear(); bulkSelOverride.clear(); bulkDone.clear();
   bulkSessionScans = 0; bulkBatchId = null;
@@ -4008,7 +4007,7 @@ function resetBulkSession(){
   setBulkLive('', '', null);
   renderBulkProblems(); updateBulkScanStats();
   computeBulkRows(); applyBulkFilters();
-  showToast('جلسة جديدة — الشاشة اتمسحت', 'neutral');
+  if (silent !== true) showToast('جلسة جديدة — الشاشة اتمسحت', 'neutral');
 }
 
 // ─── §BULK-JS::export ───
