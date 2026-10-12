@@ -408,6 +408,18 @@ td.centered{text-align:center;}
 .export-warn{margin:0 16px 12px;padding:10px 14px;border-radius:9px;background:var(--amber-light);border:1px solid var(--amber);color:var(--amber-dark);font-size:13px;font-weight:600;line-height:1.7;}
 
 /* ─── الجدول (Standards #26 — السجل جدول مش بطاقات) ─── */
+.dup-modal{max-width:820px;display:flex;flex-direction:column;max-height:88vh;}
+.dup-modal-body{overflow:auto;flex:1;min-height:0;}
+.dup-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.dup-tbl th{position:sticky;top:0;z-index:1;background:var(--surface-2);color:var(--text-secondary);font-size:12px;font-weight:700;text-align:start;padding:9px 12px;border-bottom:1.5px solid var(--border-strong);white-space:nowrap;}
+.dup-tbl td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.dup-tbl tr.dup-first td{border-top:1.5px solid var(--border-strong);}
+.dup-tbl tr.dup-first:first-child td{border-top:none;}
+.dup-tbl a.dup-sku{color:var(--accent);font-weight:700;font-family:var(--font-mono);text-decoration:none;white-space:nowrap;}
+.dup-tbl a.dup-sku:hover{text-decoration:underline;}
+.dup-tbl .dup-bc{white-space:nowrap;}
+.dup-tbl .dup-prod{min-width:200px;}
+@media(max-width:600px){.dup-tbl th,.dup-tbl td{padding:7px 8px;font-size:12px;}}
 .log-sku-badge{display:inline-block;padding:2px 8px;border-radius:5px;background:var(--accent-light);border:1px solid var(--accent-border);color:var(--accent);font-size:12px;font-weight:700;}
 .log-type-badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:12px;font-weight:700;white-space:nowrap;}
 .log-type-ok{background:var(--green-light);color:var(--green-dark);border:1px solid var(--green-border);}
@@ -687,11 +699,22 @@ col.hl{background:var(--accent-light);}
     <div class="modal-footer"><button class="btn-modal-cancel" id="confirmCancelBtn">إلغاء</button><button class="btn-confirm-ok" id="confirmOkBtn">تأكيد</button></div>
   </div>
 </div>
+<div class="modal-overlay" id="dupOverlay" onclick="if(event.target===this)closeBulkDupDetails()">
+  <div class="modal dup-modal">
+    <div class="modal-header" id="dupHeader"></div>
+    <div class="dup-modal-body" id="dupBody"></div>
+    <div class="modal-footer"><button class="btn-confirm-ok accent-btn" onclick="closeBulkDupDetails()">تمام</button></div>
+  </div>
+</div>
 <div class="modal-overlay" id="changelogOverlay" onclick="if(event.target===this)closeChangelog()">
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.5.1</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.6.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الباركودات المتكررة:</b> الباركود المتكرر على متغيّرات بنفس الـ SKU بالظبط مبقاش بيظهر في العدّاد ولا في القايمة. والنافذة بقت جدول منظّم (الباركود · SKU · المنتج · المقاس) والـ SKU رابط بيفتح صفحة الـ variant على شوبيفاي.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.5.1</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الأداة بتجرد بغض النظر عن حالة المنتج:</b> المنتجات Draft وArchived بتدخل الجرد الجماعي وقايمة الأولويات، وخانة «ACTIVE فقط» اتشالت من تاب الأولويات.</span></li>
       </ul>
@@ -1358,7 +1381,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.5.1';
+const TOOL_VERSION = '6.6.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -3554,7 +3577,7 @@ function renderBulkNotices(){
         + `و<b>${extra.toLocaleString('en-US')}</b> مقاس منهم ما اتمسحش — ظاهرين في الجدول تحت. `
         + `المنتجات اللي ما اتلمستش خالص مش هنا أصلاً.`);
   }
-  const dups = bulkIndex ? Object.keys(bulkIndex.dupBarcodes || {}) : [];
+  const dups = bulkDupList();
   if (dups.length)
     out.push(`ℹ️ في <b>${dups.length.toLocaleString('en-US')}</b> باركود متكرر على أكتر من صنف في المتجر — `
       + `مسح أي واحد منهم هيروح لقايمة «أكواد فيها مشكلة» بدل ما الأداة تخمّن، `
@@ -3565,19 +3588,39 @@ function renderBulkNotices(){
 }
 
 // تفاصيل الباركودات المتكررة: كل باركود وتحته الأصناف اللي شايلاه (SKU · المنتج)
+// الباركود المتكرر على متغيّرات بنفس الـ SKU بالظبط (EXACT) مش بيتعرض —
+// بيظهر بس لو فيه على الأقل SKUين مختلفين.
+function bulkDupList(){
+  if (!bulkIndex) return [];
+  return Object.entries(bulkIndex.dupBarcodes || {})
+    .filter(([, list]) => new Set(list.map(c => c.sku)).size > 1);
+}
+
+function closeBulkDupDetails(){ document.getElementById('dupOverlay').classList.remove('open'); }
+
+// تفاصيل الباركودات المتكررة: جدول (الباركود · SKU كرابط لصفحة الـ variant · المنتج · المقاس)
 function showBulkDupDetails(){
-  const dups = bulkIndex ? Object.entries(bulkIndex.dupBarcodes || {}) : [];
+  const dups = bulkDupList();
   if (!dups.length) return;
-  const body = '<div style="max-height:60vh;overflow-y:auto;">'
-    + dups.map(([bc, list]) =>
-        `<div style="margin-bottom:12px;">`
-        + `<div style="font-weight:800;margin-bottom:4px;"><span class="log-sku-badge">${esc(bc)}</span> `
-        + `<span class="bulk-card-sub">· ${list.length.toLocaleString('en-US')} أصناف</span></div>`
-        + list.map(c => `<div class="confirm-detail-row"><span class="confirm-detail-label">${esc(c.sku || '—')}</span>`
-            + `<span class="confirm-detail-val">${esc(c.productTitle || '—')}</span></div>`).join('')
-        + `</div>`).join('')
-    + '</div>';
-  openConfirm(`ℹ️ باركودات متكررة (${dups.length.toLocaleString('en-US')})`, body, 'تمام', 'accent-btn', () => {});
+  const num = n => Number(n).toLocaleString('en-US');
+  const gidTail = g => String(g || '').split('/').pop();
+  const rows = dups.map(([bc, list]) => list.map((c, i) => {
+    const v   = bulkIndex.byId.get(c.variantId) || {};
+    const pid = gidTail(v.productId), vid = gidTail(c.variantId);
+    const sku = c.sku
+      ? (pid && vid
+          ? `<a class="dup-sku" href="https://admin.shopify.com/store/6c7e1a-53/products/${esc(pid)}/variants/${esc(vid)}" target="_blank" rel="noopener">${esc(c.sku)}</a>`
+          : `<span class="dup-sku">${esc(c.sku)}</span>`)
+      : '—';
+    const first = i === 0
+      ? `<td class="dup-bc" rowspan="${list.length}"><span class="log-sku-badge">${esc(bc)}</span><div class="bulk-card-sub">${num(list.length)} أصناف</div></td>` : '';
+    return `<tr${i === 0 ? ' class="dup-first"' : ''}>${first}<td>${sku}</td>`
+      + `<td class="dup-prod">${esc(c.productTitle || '—')}</td><td>${esc(v.variantTitle || '—')}</td></tr>`;
+  }).join('')).join('');
+  document.getElementById('dupHeader').innerHTML = `ℹ️ باركودات متكررة (${num(dups.length)})`;
+  document.getElementById('dupBody').innerHTML =
+    `<table class="dup-tbl"><thead><tr><th>الباركود</th><th>SKU</th><th>المنتج</th><th>المقاس</th></tr></thead><tbody>${rows}</tbody></table>`;
+  document.getElementById('dupOverlay').classList.add('open');
 }
 
 function updateBulkButtons(){
