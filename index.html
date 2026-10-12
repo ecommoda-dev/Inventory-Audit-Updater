@@ -181,8 +181,9 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary)
 .btn-next-priority{background:var(--green-light);color:var(--green);border-color:var(--green);}
 .post-audit-icon{font-size:20px;flex-shrink:0;}
 /* Priority Queue */
-.priority-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
-.priority-toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);flex-wrap:wrap;}
+/* ⚠️ مفيش overflow:hidden — القايمة العائمة على body بس القاعدة سارية على أي أب */
+.priority-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
+.priority-toolbar{border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);flex-wrap:wrap;}
 .priority-refresh-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border:1px solid var(--green-border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:700;color:var(--green);background:var(--green-light);cursor:pointer;}
 .priority-refresh-btn:hover{background:var(--green);color:var(--on-accent);}
 .priority-refresh-btn:disabled{opacity:.5;cursor:not-allowed;}
@@ -205,10 +206,6 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary)
 .p-chip-p4{background:var(--accent-light);color:var(--accent);border-color:var(--accent-border);}
 .p-chip-p5{background:var(--bg);color:var(--text-secondary);border-color:var(--border);}
 .p-chip-p6{background:var(--green-light);color:var(--green);border-color:var(--green-border);}
-.priority-table-wrap{overflow-y:auto;max-height:620px;}
-.priority-table{width:100%;border-collapse:collapse;}
-.priority-table th{padding:10px 14px;text-align:right;font-size:12px;font-weight:700;background:var(--border);border-bottom:2px solid var(--border-strong);white-space:nowrap;position:sticky;top:0;z-index:1;}
-.priority-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
 .priority-row{cursor:pointer;transition:background .1s;}
 .priority-row:hover{background:var(--accent-light);}
 .priority-row:hover .priority-sku{text-decoration:underline;}
@@ -383,17 +380,6 @@ td.centered{text-align:center;}
 .state-box p{font-size:12px;}
 .loading-spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.log-filters-header{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;background:var(--surface-2);cursor:pointer;user-select:none;}
-.log-filters-title{font-size:12px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px;}
-.log-filters-toggle{font-size:13px;color:var(--text-muted);transition:transform .25s;}
-.log-filters-toggle.open{transform:rotate(180deg);}
-.log-filters-body{padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
-.log-filters-body.collapsed{display:none;}
-.log-frow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
-.log-fg{display:flex;flex-direction:column;gap:3px;}
-.log-flabel{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
-.log-fsel,.log-finput{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;height:34px;}
-.log-fsel.w-emp{width:160px;}.log-fsel.w-type{width:155px;}.log-fsel.w-count{width:130px;}.log-finput.w-search{width:220px;}
 
 /* ══════════════════════════════════════════════════════════════
    §LOG-CSS — القسم الموحّد (data-table-standard.md)
@@ -552,8 +538,6 @@ td.centered{text-align:center;}
 /* حقول بحث/مدخلات مستخدمة برّه الجدول (إضافة صنف يدويًا · تاب الأولويات) */
 .uf-fg{display:flex;flex-direction:column;gap:5px;}
 .uf-flabel{font-size:11px;font-weight:800;color:var(--text-secondary);}
-.log-clear-btn{padding:7px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--red-border);background:var(--red-light);color:var(--red);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;}
-.log-clear-btn:hover{background:var(--red);color:var(--on-accent);}
 .uf-search{position:relative;}
 .uf-search>span{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;color:var(--text-muted);}
 .uf-input{width:100%;height:38px;padding:0 12px 0 34px;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-primary);outline:none;transition:border-color .15s,background .15s;}
@@ -686,7 +670,13 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.3.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.4.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>جدول أولويات الجرد بنفس معيار باقي الجداول:</b> فلاتر الأولوية وآخر جرد والبحث بقت في رأس العمود (اختيار متعدد) بدل القوايم فوق الجدول، مع صف نتائج و«مسح كل الفلاتر» وchips.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>ترتيب من اسم أي عمود (تصاعدي ← تنازلي ← بلا ترتيب = أولوية ثم الأقدم جردًا)، وتحكّم لايف في عرض الأعمدة، وعناوين ثابتة أثناء السكرول.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span>SKU في الجدول بقى بيتهرّب قبل العرض، وفتح الصنف من الصف مابقاش بيحط بيانات الصنف كاملة في الـ HTML.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.3.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الفلاتر بقت في رأس كل عمود</b> (أيقونة قمع جنب اسم العمود ← قايمة عائمة) في سجل العمليات والجرد الجماعي — مفيش قسم فلاتر فوق الجدول. «مسح كل الفلاتر» في صف النتائج والـ chips تحته.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>تحكّم لايف في عرض الأعمدة:</b> اسحب الخط الرأسي على حافة أي عنوان، ودبل كليك = ضبط تلقائي على أطول محتوى. العرض بيتحفظ على الجهاز.</span></li>
@@ -885,17 +875,18 @@ col.hl{background:var(--accent-light);}
             <li><code>§SCAN</code> — <code>handleBarcodeScan</code> · <code>handleScanCountInput</code> · <code>§SCAN::plausibility</code></li>
             <li><code>§TOOL-JS</code> — الأولويات · بطاقة المنتج · لوحة التعديل · العد بالسكانر · كارت الأوردرات غير المشحونة (<b>عرض فقط</b> — مفيش أي فعل عليها من الأداة دي)</li>
             <li><code>§BULK-JS</code> — <code>loadBulkIndex</code> · <code>processBulkScanCode</code> · <code>computeBulkRows</code> · <code>runBulkCompare</code> · <code>executeBulk</code> · <code>bms*</code> (فلاتر التاب) · <code>exportBulkXLSX</code></li>
+            <li><code>§PRIORITY-JS</code> — إعداد جدول الأولويات (<code>PRIO_T</code>) · <code>applyPriorityFilters</code> · <code>sortPriorityRows</code></li>
             <li><code>§TBL-JS</code> — محرّك الجدول الموحّد: <code>tblReg</code> · <code>tblOpenPop</code> · <code>tblRefresh</code> · <code>tblEnsureW</code> (فلاتر رأس العمود + عرض الأعمدة)</li>
             <li><code>§LOG-JS</code> — <code>logParams</code> · <code>fetchLog</code> · <code>renderLogTable</code> · <code>LOG_T</code> · <code>exportLogXLSX</code></li>
           </ul>
 
           <h4>KEY VARIABLES</h4>
           <ul>
-            <li><code>LS_SECRET = 'stockaudit_worker_secret'</code> — السر الوحيد في localStorage. الاستثناء: تفضيل عرض الأعمدة <code>stockaudit_col_widths_log_v1</code> / <code>stockaudit_col_widths_bulk_v1</code> (تفضيل واجهة مش هوية — ارفع <code>_v1</code> لو الأعمدة اتغيّرت)</li>
+            <li><code>LS_SECRET = 'stockaudit_worker_secret'</code> — السر الوحيد في localStorage. الاستثناء: تفضيل عرض الأعمدة <code>stockaudit_col_widths_log_v1</code> / <code>stockaudit_col_widths_bulk_v1</code> / <code>stockaudit_col_widths_priority_v1</code> (تفضيل واجهة مش هوية — ارفع <code>_v1</code> لو الأعمدة اتغيّرت)</li>
             <li><code>WORKER_URL</code> — constant مش حقل إعدادات (Standards #28)</li>
             <li><code>TOOL_VERSION</code> / <code>MIN_WORKER_VERSION</code> — مصدر واحد لرقم النسخة وحارس نسخة الـ Worker</li>
             <li><code>currentEmployee</code> — في الذاكرة بس، عمره ما يدخل localStorage</li>
-            <li><code>LOG_PAGE_SIZE = 100</code> · <code>LOG_T</code> / <code>BULK_T</code> — إعداد وحالة فلاتر كل جدول (قيم · بحث · تاريخ) لمحرّك <code>§TBL-JS</code></li>
+            <li><code>LOG_PAGE_SIZE = 100</code> · <code>LOG_T</code> / <code>BULK_T</code> / <code>PRIO_T</code> — إعداد وحالة فلاتر كل جدول (قيم · بحث · تاريخ) لمحرّك <code>§TBL-JS</code></li>
             <li><code>bulkIndex</code> · <code>bulkScans</code> · <code>bulkLive</code> · <code>bulkDone</code> — حالة الجلسة الجماعية، كلها في الذاكرة بس</li>
             <li><code>bulkCaps</code> — السقوف <b>بتيجي من الـ Worker</b> (<code>chunkHint</code>/<code>maxBatch</code>/<code>compareChunkHint</code>...) عشان مايبقاش فيه مصدرين بيتعتّقوا</li>
             <li><code>bulkComparedAt</code> · <code>BULK_COMPARE_STALE_MS</code> — لحظة آخر مقارنة وعتبة التنبيه</li>
@@ -1095,46 +1086,27 @@ col.hl{background:var(--accent-light);}
       </div>
       <label class="priority-active-toggle"><input type="checkbox" id="priorityActiveOnly" checked onchange="applyPriorityFilters()" /> ACTIVE فقط</label>
     </div>
-    <div style="border-bottom:1px solid var(--border);">
-      <div class="log-filters-header" onclick="togglePriorityFilters()">
-        <div class="log-filters-title"><span>🔽</span><span>الفلاتر</span></div>
-        <span class="log-filters-toggle open" id="pfFiltersToggle">▲</span>
+    <!-- ─── §PRIORITY::results — الفلاتر في رأس العمود (data-table-standard.md) ─── -->
+    <div class="tbl-bar" data-tbar="prio" style="border-radius:0;">
+      <div class="tbl-bar-right">
+        <span class="tbl-toggle open" id="prioTog">▲</span>
+        <div class="results-wrap"><span class="results-label">النتائج:</span><span class="results-count" id="priorityResultsCount">—</span></div>
       </div>
-      <div class="log-filters-body" id="pfFiltersBody">
-        <div class="log-frow">
-          <div class="log-fg">
-            <span class="log-flabel">الأولوية</span>
-            <select class="log-fsel" style="width:210px;" id="pfPriority" onchange="applyPriorityFilters()">
-              <option value="">كل الأولويات</option>
-              <option value="0">🚨 خطأ محتمل</option>
-              <option value="1">🔴 محجوز بالكامل</option>
-              <option value="2">🟠 محجوز أقل من 3 قطع</option>
-              <option value="3">🟡 من 1-3 قطع</option>
-              <option value="4">🔵 من 4-6 قطع</option>
-              <option value="5">⚪ من 7-10 قطع</option>
-              <option value="6">✅ أكبر من 10 قطع</option>
-            </select>
-          </div>
-          <div class="log-fg">
-            <span class="log-flabel">آخر جرد</span>
-            <select class="log-fsel" style="width:160px;" id="pfAuditStatus" onchange="applyPriorityFilters()">
-              <option value="">الكل</option>
-              <option value="never">لم يُجرد قط</option>
-              <option value="audited">جُرد من قبل</option>
-            </select>
-          </div>
-          <div class="log-fg" style="flex:1;">
-            <span class="log-flabel">بحث SKU / اسم المنتج</span>
-            <input type="text" class="log-finput" style="width:100%;" id="pfSearch" placeholder="ابحث..." oninput="onPfSearchInput()" />
-          </div>
-          <div class="log-fg" style="align-self:flex-end;">
-            <button class="log-clear-btn" onclick="clearPriorityFilters()">✕ مسح</button>
-          </div>
-        </div>
+      <div class="tbl-bar-left">
+        <button class="clear-btn inactive" type="button" data-clearall="prio">✕ مسح كل الفلاتر</button>
       </div>
     </div>
+    <div class="chips-zone pad" id="prioChipsZone"></div>
     <div class="priority-stats-bar" id="priorityStatsBar" style="display:none;"><div id="priorityStatsContent" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;"></div></div>
-    <div id="priorityTableWrap"><div class="state-box"><div class="state-icon">🎯</div><p>اضغط "تحديث القائمة" لتحميل أولويات الجرد</p></div></div>
+    <div class="tbl-body-wrap" id="prioTableZone"><div>
+      <div class="tbl-scroll">
+        <table class="data-table auto measuring" id="prioTbl">
+          <colgroup id="prioCg"></colgroup>
+          <thead><tr id="prioHeadRow"></tr></thead>
+          <tbody id="priorityBody"><tr><td colspan="5"><div class="state-box"><div class="state-icon">🎯</div><p>اضغط "تحديث القائمة" لتحميل أولويات الجرد</p></div></td></tr></tbody>
+        </table>
+      </div>
+    </div></div>
   </div>
 </div>
 
@@ -1354,7 +1326,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.3.0';
+const TOOL_VERSION = '6.4.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -1855,7 +1827,7 @@ function handleScanCountInput(){
 // ══════════════════════════════════════════════════════
 let currentSku=null,currentVariant=null,currentShelfQty=null,_searchDebounce=null,currentImgUrl=null;
 let priorityData=null,priorityFiltered=[],priorityMode={active:false,currentProductId:null};
-let lastPriorityRefreshTime=null,pfFiltersOpen=true,_pfSearchDebounce=null;
+let lastPriorityRefreshTime=null,priorityShown=[],prioSort={key:null,dir:null};   // priorityShown = اللي معروض فعلًا (بعد ترتيب المستخدم) · priorityFiltered = الترتيب الافتراضي (للتالي)
 let scanCountState={active:false,scannerCount:0,targetBarcode:null};
 
 // New Arabic priority names
@@ -1893,22 +1865,10 @@ function updatePriorityTimestamp(){
 }
 setInterval(()=>{if(lastPriorityRefreshTime)updatePriorityTimestamp();},60000);
 
-function togglePriorityFilters(){
-  pfFiltersOpen=!pfFiltersOpen;
-  document.getElementById('pfFiltersBody').classList.toggle('collapsed',!pfFiltersOpen);
-  document.getElementById('pfFiltersToggle').classList.toggle('open',pfFiltersOpen);
-}
-function onPfSearchInput(){clearTimeout(_pfSearchDebounce);_pfSearchDebounce=setTimeout(applyPriorityFilters,300);}
-function clearPriorityFilters(){
-  document.getElementById('pfPriority').value='';
-  document.getElementById('pfAuditStatus').value='';
-  document.getElementById('pfSearch').value='';
-  applyPriorityFilters();
-}
-
 async function loadPriorityData(){
-  const wrap=document.getElementById('priorityTableWrap'),statsBar=document.getElementById('priorityStatsBar'),refreshBtn=document.getElementById('priorityRefreshBtn');
-  wrap.innerHTML='<div class="state-box"><div class="loading-spinner"></div><p style="margin-top:8px;font-size:12px;">\u062c\u0627\u0631\u064a \u062a\u062d\u0645\u064a\u0644 \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0645\u0646 \u0627\u0644\u0645\u062a\u062c\u0631...</p></div>';
+  const body=document.getElementById('priorityBody'),statsBar=document.getElementById('priorityStatsBar'),refreshBtn=document.getElementById('priorityRefreshBtn');
+  priorityShown=[];
+  body.innerHTML='<tr><td colspan="5"><div class="state-box"><div class="loading-spinner"></div><p style="margin-top:8px;font-size:12px;">\u062c\u0627\u0631\u064a \u062a\u062d\u0645\u064a\u0644 \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0645\u0646 \u0627\u0644\u0645\u062a\u062c\u0631...</p></div></td></tr>';
   statsBar.style.display='none';if(refreshBtn)refreshBtn.disabled=true;
   try{
     const data=await apiGet('get_audit_priorities');
@@ -1918,24 +1878,21 @@ async function loadPriorityData(){
     applyPriorityFilters();
     showToast('\u062a\u0645 \u062a\u062d\u0645\u064a\u0644 '+priorityData.length.toLocaleString('en-US')+' variant \u2713','success');
   }
-  catch(e){wrap.innerHTML='<div class="state-box"><div class="state-icon">\u26a0\ufe0f</div><p>'+esc(e.message)+'</p></div>';showToast('\u062e\u0637\u0623: '+e.message,'error');}
+  catch(e){body.innerHTML='<tr><td colspan="5"><div class="state-box"><div class="state-icon">\u26a0\ufe0f</div><p>'+esc(e.message)+'</p></div></td></tr>';document.getElementById('priorityResultsCount').textContent='\u2014';showToast('\u062e\u0637\u0623: '+e.message,'error');}
   finally{if(refreshBtn)refreshBtn.disabled=false;}
 }
 
 function applyPriorityFilters(){
   if(!priorityData)return;
   const threshold=parseInt(document.getElementById('priorityThreshold').value)||30;
-  const pfPriority=document.getElementById('pfPriority')?.value??'';
-  const pfAuditStatus=document.getElementById('pfAuditStatus')?.value??'';
-  const pfSearch=(document.getElementById('pfSearch')?.value||'').trim().toLowerCase();
+  const pm=PRIO_T.ms.priority,am=PRIO_T.ms.audit,q=PRIO_T.q.search.trim().toLowerCase();
 
   let filtered=priorityData.filter(v=>needsAudit(v.lastAuditDate,threshold));
+  if(pm.size)filtered=filtered.filter(v=>pm.has(String(getPriority(v.available,v.committed))));
+  if(am.size)filtered=filtered.filter(v=>(v.lastAuditDate?am.has('audited'):am.has('never')));
+  if(q)filtered=filtered.filter(v=>(v.sku||'').toLowerCase().includes(q)||(v.productTitle||'').toLowerCase().includes(q));
 
-  if(pfPriority!=='')filtered=filtered.filter(v=>getPriority(v.available,v.committed)===parseInt(pfPriority));
-  if(pfAuditStatus==='never')filtered=filtered.filter(v=>!v.lastAuditDate);
-  else if(pfAuditStatus==='audited')filtered=filtered.filter(v=>!!v.lastAuditDate);
-  if(pfSearch)filtered=filtered.filter(v=>(v.sku||'').toLowerCase().includes(pfSearch)||(v.productTitle||'').toLowerCase().includes(pfSearch));
-
+  // الترتيب الافتراضي (أولوية ثم الأقدم جردًا) = «بلا ترتيب» + اللي بيعتمد عليه «التالي» بعد الجرد
   filtered.sort((a,b)=>{
     const pa=getPriority(a.available,a.committed),pb=getPriority(b.available,b.committed);
     if(pa!==pb)return pa-pb;
@@ -1944,7 +1901,29 @@ function applyPriorityFilters(){
     if(da===Infinity)return -1;if(db===Infinity)return 1;
     return db-da;
   });
-  priorityFiltered=filtered;renderPriorityTable(filtered);renderPriorityStats(filtered);
+  priorityFiltered=filtered;
+  priorityShown=sortPriorityRows(filtered);
+  document.getElementById('priorityResultsCount').textContent=filtered.length.toLocaleString('en-US');
+  tblRefresh(PRIO_T);
+  renderPriorityTable(priorityShown);renderPriorityStats(filtered);
+  tblEnsureW(PRIO_T);
+}
+// ترتيب المستخدم من اسم العمود — على نسخة، مش على priorityFiltered
+const PRIO_SORTV={
+  priority:v=>getPriority(v.available,v.committed),sku:v=>String(v.sku||''),
+  available:v=>v.available??-Infinity,committed:v=>v.committed??-Infinity,
+  lastAudit:v=>{const d=getDaysSince(v.lastAuditDate);return d===Infinity?1e9:d;}
+};
+function sortPriorityRows(rows){
+  if(!prioSort.key)return rows;
+  const g=PRIO_SORTV[prioSort.key],d=prioSort.dir==='asc'?1:-1;
+  return [...rows].sort((a,b)=>{const x=g(a),y=g(b);return(typeof x==='string'?x.localeCompare(y):x-y)*d;});
+}
+function togglePrioSort(key){
+  if(prioSort.key!==key){prioSort={key,dir:'asc'};}
+  else if(prioSort.dir==='asc'){prioSort.dir='desc';}
+  else{prioSort={key:null,dir:null};}
+  applyPriorityFilters();
 }
 
 function renderPriorityStats(filtered){
@@ -1956,9 +1935,9 @@ function renderPriorityStats(filtered){
 }
 
 function renderPriorityTable(variants){
-  const wrap=document.getElementById('priorityTableWrap');
-  if(!variants.length){wrap.innerHTML='<div class="state-box"><div class="state-icon">\u{1F389}</div><p>\u062a\u0645 \u062c\u0631\u062f \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u2014 \u0623\u0648 \u0644\u0627 \u062a\u0648\u062c\u062f \u0646\u062a\u0627\u0626\u062c.</p></div>';return;}
-  const rows=variants.map(v=>{
+  const body=document.getElementById('priorityBody');
+  if(!variants.length){body.innerHTML='<tr><td colspan="5"><div class="state-box"><div class="state-icon">\u{1F389}</div><p>\u062a\u0645 \u062c\u0631\u062f \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u2014 \u0623\u0648 \u0644\u0627 \u062a\u0648\u062c\u062f \u0646\u062a\u0627\u0626\u062c.</p></div></td></tr>';return;}
+  body.innerHTML=variants.map((v,i)=>{
     const p=getPriority(v.available,v.committed),cfg=PRIORITY_CFG[p],days=getDaysSince(v.lastAuditDate);
     let auditText,auditCls;
     if(days===Infinity){auditText='\u0644\u0645 \u064a\u064f\u062c\u0631\u062f \u0642\u0637';auditCls='audit-age-never';}
@@ -1967,20 +1946,16 @@ function renderPriorityTable(variants){
     else{auditText='\u0645\u0646\u0630 '+days+' \u064a\u0648\u0645';auditCls='audit-age-recent';}
     const avail=v.available!=null?v.available.toLocaleString('en-US'):'\u2014',comm=v.committed!=null?v.committed.toLocaleString('en-US'):'\u2014';
     const neg=(v.available!=null&&v.available<0)?' val-negative':'';
-    const vJson=JSON.stringify(v).replace(/"/g,'&quot;');
-    return '<tr class="priority-row" onclick="loadVariantFromPriority('+vJson+')">'
-      +'<td><span class="priority-badge priority-badge-'+cfg.cls+'">'+cfg.label+'</span></td>'
-      +'<td><span class="priority-sku">'+v.sku+'</span></td>'
+    // الفهرس مش JSON في الـ attribute — الصف بيرجع للعنصر من priorityShown
+    return '<tr class="priority-row" onclick="loadVariantFromPriorityIdx('+i+')">'
+      +'<td><span class="priority-badge priority-badge-'+cfg.cls+'">'+esc(cfg.label)+'</span></td>'
+      +'<td><span class="priority-sku">'+esc(v.sku)+'</span></td>'
       +'<td class="centered'+neg+'">'+avail+'</td>'
       +'<td class="centered">'+comm+'</td>'
       +'<td><span class="'+auditCls+'">'+auditText+'</span></td></tr>';
   }).join('');
-  wrap.innerHTML='<div class="priority-table-wrap"><table class="priority-table"><thead><tr>'
-    +'<th>\u0627\u0644\u0623\u0648\u0644\u0648\u064a\u0629</th><th>SKU</th>'
-    +'<th style="text-align:center;">Available</th><th style="text-align:center;">Committed</th>'
-    +'<th>\u0622\u062e\u0631 \u062c\u0631\u062f</th>'
-    +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
+function loadVariantFromPriorityIdx(i){const v=priorityShown[i];if(v)loadVariantFromPriority(v);}
 
 async function loadVariantFromPriority(item){
   priorityMode={active:true,currentProductId:item.productId};switchMainTab('audit');
@@ -2627,6 +2602,32 @@ function tblFitCol(T, k){
 document.addEventListener('dblclick', (e) => {
   const h = e.target.closest && e.target.closest('[data-rz]'); if (h && TBL[h.dataset.tb]) tblFitCol(TBL[h.dataset.tb], h.dataset.rz);
 });
+
+// ─── §PRIORITY-JS — إعداد جدول الأولويات على المحرّك (فلترة client-side) ───
+const PRIO_T = {
+  id:'prio', tblId:'prioTbl', cgId:'prioCg', headId:'prioHeadRow', chipsId:'prioChipsZone', zoneId:'prioTableZone', togId:'prioTog',
+  lsKey:'stockaudit_col_widths_priority_v1',     // ⚠️ ارفع _v1 → _v2 لو الأعمدة اتغيّرت
+  cols:[
+    { k:'priority',  l:'الأولوية', flt:'priority' },
+    { k:'sku',       l:'SKU',      flt:'search' },
+    { k:'available', l:'Available' },
+    { k:'committed', l:'Committed' },
+    { k:'lastAudit', l:'آخر جرد',  flt:'audit' },
+  ],
+  FL:{ priority:'الأولوية', audit:'آخر جرد', search:'بحث SKU / اسم المنتج' },
+  ms:{ priority:new Set(), audit:new Set() },
+  q:{ search:'' },
+  date:null,
+  debounce:300,
+  items:(k)=>k==='priority'
+    ? Object.keys(PRIORITY_CFG).map(p=>({ v:String(p), t:PRIORITY_CFG[p].label }))
+    : [{ v:'never', t:'لم يُجرد قط' },{ v:'audited', t:'جُرد من قبل' }],
+  sort:()=>prioSort,
+  toggleSort:(k)=>togglePrioSort(k),
+  onChange:()=>applyPriorityFilters(),
+  hasRows:()=>priorityShown.length>0,
+};
+tblReg(PRIO_T);
 
 // ─── §LOG-JS::filters — الحالة جوّه LOG_T (أسفل) والقوائم في رأس العمود ───
 // مصدر **واحد** لباراميترات الفلاتر — بتستخدمه التلات نداءات، فمفيش endpoint

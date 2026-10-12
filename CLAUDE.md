@@ -2,11 +2,11 @@
 
 # جرد المخزون (`inventory-audit-updater`)
 
-![version](https://img.shields.io/badge/version-v2.3.0-blue)
+![version](https://img.shields.io/badge/version-v2.4.0-blue)
 
 **بتعمل إيه:** الموظفين بيراجعوا أرصدة المخزون بالباركود/SKU، يصلّحوا الفرق (`adjust_inventory`)، أو يأكّدوا إن الجرد مظبوط (`set_audit_date`) — مع قايمة أولويات جرد وتفاصيل الأوردرات الغير مجهّزة لكل صنف، و**جرد جماعي** (`§BULK`) لرفوف كاملة بالسكانر في جلسة واحدة.
 **مين بيستخدمها:** المخزن
-**الإصدار:** Worker `v6.1.1` · الواجهة `v6.3.0`
+**الإصدار:** Worker `v6.1.1` · الواجهة `v6.4.0`
 
 ## الروابط
 
@@ -296,7 +296,7 @@ SELECT COUNT(*) FROM logs WHERE tool = 'inventory_audit' AND type = 'adjustment'
 - **رابط الواجهة بقى constant في الكود** (`WORKER_URL` في `§CONFIG`) — مش في
   `localStorage` ومش حقل إعدادات. الموظف اللي عنده `stockaudit_worker_url`
   قديم محفوظ في المتصفح مش هيتأثر، القيمة بقت متجاهلة.
-- **السر الوحيد في `localStorage`:** `stockaudit_worker_secret`. والاستثناء الوحيد تفضيل واجهة مش هوية: `stockaudit_col_widths_log_v1` و`stockaudit_col_widths_bulk_v1` (عرض الأعمدة — ارفع `_v1` لو الأعمدة اتغيّرت).
+- **السر الوحيد في `localStorage`:** `stockaudit_worker_secret`. والاستثناء الوحيد تفضيل واجهة مش هوية: `stockaudit_col_widths_log_v1` و`stockaudit_col_widths_bulk_v1` و`stockaudit_col_widths_priority_v1` (عرض الأعمدة — ارفع `_v1` لو الأعمدة اتغيّرت).
 - **جلسة الجرد الجماعي كلها في الذاكرة** — أي refresh بيضيّعها. ده مقصود
   (مفيش عدّ بيتخزّن في `localStorage`)، بس لازم الموظف يعرفه.
 - **الفهرس والمقارنة الاتنين بياخدوا أرقامهم من `LOCATION_ID` صراحةً**
@@ -333,7 +333,7 @@ git show 7f0cce9:index.html
 | ecommoda-constants | v3.1.0 |
 | shopify-graphql-helper | v1.0.0 |
 
-آخر مطابقة: 12-10-2026 · `index.js` v6.1.1 · `index.html` v6.3.0
+آخر مطابقة: 12-10-2026 · `index.js` v6.1.1 · `index.html` v6.4.0
 🔴 معلّقة: — لا شيء
 
 ## مسائل مفتوحة
@@ -341,12 +341,13 @@ git show 7f0cce9:index.html
 ### 🟡 فجوات مقابل `ecommoda-html-builder` v8.3.1 (مراجعة 12-10-2026)
 
 اتصلّح في v6.2.1: لون `#6b7280` (S48) · الخروج التلقائي 60 د + الخروج اليدوي بلا تأكيد (S52) · `esc()` في نوافذ التأكيد وقايمة البحث.
+اتصلّح في v6.4.0: جدول الأولويات بنفس المعيار (فلاتر رأس العمود multi-select · ترتيب · عرض أعمدة · sticky) على `PRIO_T`.
 اتصلّح في v6.3.0: **S47** فلاتر رأس العمود · **S51** عرض الأعمدة بالسحب · عناوين `sticky` · طي بـ `grid-template-rows` (S46) — في سجل العمليات والجرد الجماعي، بمحرّك `§TBL-JS` واحد.
 
 **لسه مفتوح:**
 
 - **Freeze on Scroll** (`.sticky-header-wrap` + `measureSticky`) مش موجود رغم إن الأداة فيها main tabs.
-- **جدول الأولويات** (`priority-table`) بتنسيق خاص وفلاتر `<select>` فوقه — مش بمعيار الجداول الموحّد (فلاتر رأس العمود + multi-select).
+- **خانة «ACTIVE فقط» في تاب الأولويات ميتة:** `priorityActiveOnly` مش بتتقرا في أي كود، والـ Worker أصلًا بيستثني غير ACTIVE دايمًا — الخانة بتوحي بتحكم مش موجود. محتاج قرار: تتشال ولا تتحوّل لفلتر فعلي.
 - **خروج الجرد الجماعي:** `performLogout` مابيفضّيش جلسة الجرد الجماعي (في الذاكرة) — الموظف التالي على نفس الجهاز يشوفها.
 - فلاتر الأعمدة الرقمية (نطاق من-إلى) في الجرد الجماعي (المعدود · المتوقع · الفرق) لسه مش موجودة — الفلاتر اللي اتنقلت هي اللي كانت موجودة بس.
 
