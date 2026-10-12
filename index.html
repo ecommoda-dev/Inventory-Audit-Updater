@@ -670,7 +670,13 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.4.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.5.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>الجرد الجماعي — تفاصيل الباركودات المتكررة:</b> زرار «📋 عرض التفاصيل» في تنبيه الباركودات المتكررة بيعرض كل باركود والأصناف (SKU · المنتج) اللي شايلاه.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>صوت إنذار قوي واهتزاز</b> لما يتمسح كود مجهول أو متكرر — أعلى وأوضح من بيب الخطأ العادي.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>عمود «المنتج» اتشال من جدول نتائج الجرد الجماعي (البحث بالاسم والتصدير زي ما هم).</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.4.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>جدول أولويات الجرد بنفس معيار باقي الجداول:</b> فلاتر الأولوية وآخر جرد والبحث بقت في رأس العمود (اختيار متعدد) بدل القوايم فوق الجدول، مع صف نتائج و«مسح كل الفلاتر» وchips.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>ترتيب من اسم أي عمود (تصاعدي ← تنازلي ← بلا ترتيب = أولوية ثم الأقدم جردًا)، وتحكّم لايف في عرض الأعمدة، وعناوين ثابتة أثناء السكرول.</span></li>
@@ -1326,7 +1332,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.4.0';
+const TOOL_VERSION = '6.5.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -1580,7 +1586,7 @@ let allEmployees=[];
 let currentEmployee=null,loginMode='employee',pinDigits=[],pendingNewPin='',isLoginBusy=false,autoLoginTimer=null;
 let _audioCtx=null;
 function _getACtx(){if(!_audioCtx)_audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(_audioCtx.state==='suspended')_audioCtx.resume();return _audioCtx;}
-function playBeep(type){try{const ctx=_getACtx();const run=()=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);if(type==='success'){o.frequency.setValueAtTime(880,ctx.currentTime);o.frequency.setValueAtTime(1100,ctx.currentTime+0.1);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.25);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.25);}else{o.frequency.setValueAtTime(300,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+0.15);g.gain.setValueAtTime(0.4,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.35);}};if(ctx.state==='suspended')ctx.resume().then(run);else run();}catch{}}
+function playBeep(type){try{const ctx=_getACtx();const run=()=>{if(type==='alarm'){const t0=ctx.currentTime;for(let i=0;i<3;i++){const o=ctx.createOscillator(),g=ctx.createGain(),t=t0+i*0.28;o.type='square';o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(900,t);o.frequency.setValueAtTime(450,t+0.13);g.gain.setValueAtTime(0.9,t);g.gain.setValueAtTime(0.9,t+0.23);g.gain.exponentialRampToValueAtTime(0.001,t+0.27);o.start(t);o.stop(t+0.27);}return;}const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);if(type==='success'){o.frequency.setValueAtTime(880,ctx.currentTime);o.frequency.setValueAtTime(1100,ctx.currentTime+0.1);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.25);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.25);}else{o.frequency.setValueAtTime(300,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+0.15);g.gain.setValueAtTime(0.4,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.35);}};if(ctx.state==='suspended')ctx.resume().then(run);else run();}catch{}}
 function vibrateDevice(pattern){try{if(navigator.vibrate)navigator.vibrate(pattern);}catch{}}
 async function loadEmployeesList(){
   const sel=document.getElementById('loginSelect'),status=document.getElementById('loginStatus');
@@ -2943,7 +2949,6 @@ const BULK_COLS = [
   { k:'_sel',         l:'', sort:false, flt:'sel',
     pre:'<input type="checkbox" id="bulkSelAll" onchange="bulkSelectAll(this.checked)" title="تحديد/إلغاء كل المعروض">' },
   { k:'sku',          l:'SKU',     flt:'search' },
-  { k:'productTitle', l:'المنتج' },
   { k:'vendor',       l:'البراند', flt:'vendor' },
   { k:'scanned',      l:'سكانر' },
   { k:'manual',       l:'يدوي' },
@@ -2955,7 +2960,7 @@ const BULK_COLS = [
 ];
 const BULK_T = {
   id:'bulk', tblId:'bulkTbl', cgId:'bulkCg', headId:'bulkHeadRow', chipsId:'bulkChipsZone', zoneId:'bulkTableZone', togId:'bulkTog',
-  lsKey:'stockaudit_col_widths_bulk_v1',         // ⚠️ ارفع _v1 → _v2 لو الأعمدة اتغيّرت
+  lsKey:'stockaudit_col_widths_bulk_v2',         // ⚠️ ارفع _v1 → _v2 لو الأعمدة اتغيّرت
   cols: BULK_COLS,
   FL: { state:'الحالة', vendor:'البراند', sel:'التحديد', search:'بحث SKU / اسم المنتج' },
   ms: { state:new Set(), vendor:new Set(), sel:new Set() },
@@ -3193,7 +3198,7 @@ function addBulkProblem(code, reason, candidates){
   const rec = bulkProblems.get(code) || { code, count: 0, reason, candidates: candidates || [] };
   rec.count++; rec.reason = reason; rec.candidates = candidates || [];
   bulkProblems.set(code, rec);
-  playBeep('error'); vibrateDevice([100,50,100]);
+  playBeep('alarm'); vibrateDevice([300,100,300,100,300]);   // 🔴 صوت عالي ومميّز — مشكلة بتقفل التنفيذ
   setBulkLive('bad', reason === 'unknown'
     ? `الكود ${code} مش موجود في الفهرس — لاصقة غلط أو صنف مش متتبّع أو الفهرس قديم`
     : `الكود ${code} متكرر على ${(candidates||[]).length} أصناف — الأداة مش هتخمّن`, null);
@@ -3452,7 +3457,6 @@ function renderBulkTable(){
       <td><input type="checkbox" ${sel ? 'checked' : ''} ${selectable ? '' : 'disabled'}
            onchange="toggleBulkRowIdx(${i})"></td>
       <td><span class="log-sku-badge">${esc(r.sku)}</span></td>
-      <td>${esc(r.productTitle)}${r.variantTitle ? ` <span class="bulk-card-sub">· ${esc(r.variantTitle)}</span>` : ''}</td>
       <td>${esc(r.vendor)}</td>
       <td class="col-num">${r.scanned.toLocaleString('en-US')}</td>
       <td><input type="number" min="0" class="bulk-manual-cell" value="${r.manual}" ${isUpdatingBulk || done ? 'disabled' : ''}
@@ -3522,9 +3526,26 @@ function renderBulkNotices(){
   if (dups.length)
     out.push(`ℹ️ في <b>${dups.length.toLocaleString('en-US')}</b> باركود متكرر على أكتر من صنف في المتجر — `
       + `مسح أي واحد منهم هيروح لقايمة «أكواد فيها مشكلة» بدل ما الأداة تخمّن، `
-      + `وهتحتاج تضيف الصنف الصح يدويًا بالـ SKU.`);
+      + `وهتحتاج تضيف الصنف الصح يدويًا بالـ SKU. `
+      + `<button class="log-refresh-btn" style="padding:2px 10px;margin-inline-start:6px;" onclick="showBulkDupDetails()">📋 عرض التفاصيل</button>`);
   box.innerHTML = out.map(t => `<div class="export-warn">${t}</div>`).join('');
   box.style.display = out.length ? '' : 'none';
+}
+
+// تفاصيل الباركودات المتكررة: كل باركود وتحته الأصناف اللي شايلاه (SKU · المنتج)
+function showBulkDupDetails(){
+  const dups = bulkIndex ? Object.entries(bulkIndex.dupBarcodes || {}) : [];
+  if (!dups.length) return;
+  const body = '<div style="max-height:60vh;overflow-y:auto;">'
+    + dups.map(([bc, list]) =>
+        `<div style="margin-bottom:12px;">`
+        + `<div style="font-weight:800;margin-bottom:4px;"><span class="log-sku-badge">${esc(bc)}</span> `
+        + `<span class="bulk-card-sub">· ${list.length.toLocaleString('en-US')} أصناف</span></div>`
+        + list.map(c => `<div class="confirm-detail-row"><span class="confirm-detail-label">${esc(c.sku || '—')}</span>`
+            + `<span class="confirm-detail-val">${esc(c.productTitle || '—')}</span></div>`).join('')
+        + `</div>`).join('')
+    + '</div>';
+  openConfirm(`ℹ️ باركودات متكررة (${dups.length.toLocaleString('en-US')})`, body, 'تمام', 'accent-btn', () => {});
 }
 
 function updateBulkButtons(){
