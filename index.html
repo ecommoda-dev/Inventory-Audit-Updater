@@ -493,7 +493,10 @@ td.centered{text-align:center;}
 .bulk-scan-collapse>.bulk-scan-collapse-in{min-height:0;overflow:hidden;}
 .bulk-scan-card.closed .bulk-scan-collapse{grid-template-rows:0fr;}
 .bulk-scan-card.closed .bulk-card-hdr{border-bottom-color:transparent;}
-.bulk-scan-card.closed .bulk-card-title,.bulk-scan-card.closed .bulk-card-sub{display:none;}
+.bulk-scan-card.closed:not(.started) .bulk-card-title{display:none;}
+.bulk-scan-card:not(.started) #bulkResetBtn{display:none;}
+.bulk-btn.new{background:var(--accent-light);border-color:var(--accent-border);color:var(--accent);}
+.bulk-btn.new:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
 
 /* ─── نافذة تحميل الباركودات (بتفضل لحد ما التحميل يخلص — مفيش إغلاق بالضغط بره) ─── */
 #bulkLoadOverlay{z-index:700;}
@@ -743,7 +746,7 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.9.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.10.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي: الجدول قبل أول مقارنة بقى بسيط</b> (SKU · البراند · سكانر · يدوي · المعدود) من غير المتوقع والفرق والحالة والنتيجة ومربعات الحالة. الجدول الكامل بيظهر بعد «قارن بشوبيفاي».</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>المقاسات اللي ما اتمسحتش (عدّها 0) بقت باهتة. رسايل «أرقام مبدئية» و«باقي المقاسات» اتشالت.</span></li>
@@ -1233,8 +1236,6 @@ col.hl{background:var(--accent-light);}
         <span class="priority-ts-relative" id="bxRelative"></span>
       </div>
       <div class="bulk-idx-stat" id="bulkIdxStat">الباركودات لسه ما اتحمّلتش</div>
-      <div class="bulk-card-spacer"></div>
-      <button class="bulk-btn" id="bulkResetBtn" onclick="confirmResetBulkSession()" disabled>🗑 جلسة جديدة</button>
     </div>
 
     <!-- بانر ثابت فوق كل حاجة — التقصّ لازم يبان، مش توست بيختفي -->
@@ -1244,8 +1245,8 @@ col.hl{background:var(--accent-light);}
     <div class="bulk-card bulk-scan-card closed" id="bulkScanCard">
       <div class="bulk-card-hdr">
         <span class="bulk-card-title">② 🔫 جلسة المسح</span>
-        <span class="bulk-card-sub" id="bulkScanHint">امسح كل القطع على الرفوف واحدة ورا التانية — من غير توقّف ومن غير إنترنت.</span>
         <div class="bulk-card-spacer"></div>
+        <button class="bulk-btn new" id="bulkResetBtn" onclick="confirmResetBulkSession()" disabled>🆕 جلسة جرد جديدة</button>
         <button class="bulk-btn go" id="bulkScanToggle" onclick="toggleBulkScan()" disabled>▶ ابدأ المسح</button>
       </div>
       <div class="bulk-scan-collapse"><div class="bulk-scan-collapse-in">
@@ -3017,6 +3018,7 @@ let bulkDone       = new Set(); // الأصناف اللي اتنفّذت في �
 let bulkRows = [], bulkFiltered = [];
 // النطاق ثابت: اللي اتمسح + باقي مقاسات نفس المنتج (مفيش اختيار نطاق)
 let bulkScanActive = false;
+let bulkScanStarted = false;   // اتبدأت مرة على الأقل في الجلسة دي → الزرار «استكمال» والكارت بيتطوي بعد الإيقاف
 let isUpdatingBulk = false;     // القفل أثناء أي دفعة (Standards #43)
 let bulkSessionScans = 0, bulkBatchId = null;
 let _bulkRecomputeTimer = null;
@@ -3219,14 +3221,18 @@ function toggleBulkScan(){
   bulkScanInputEl.disabled = !bulkScanActive;
   wrap.classList.toggle('disabled', !bulkScanActive);
   wrap.classList.toggle('armed', bulkScanActive);
-  btn.textContent = bulkScanActive ? '⏸ إيقاف المسح' : '▶ ابدأ المسح';
+  if (bulkScanActive) bulkScanStarted = true;
+  btn.textContent = bulkScanActive ? '⏸ إيقاف المسح'
+                  : bulkScanStarted ? '▶ استكمال جلسة الجرد' : '▶ ابدأ المسح';
   btn.classList.toggle('go', !bulkScanActive);
   btn.classList.toggle('amber', bulkScanActive);
   bulkScanInputEl.placeholder = bulkScanActive
     ? 'امسح... (سيب المؤشر هنا)'
     : 'اضغط «ابدأ المسح» قبل ما تمسح';
-  // القسم بيتفتح عند أول «ابدأ المسح» ويفضل مفتوح (العدّادات والإضافة اليدوية جواه)
-  if (bulkScanActive) document.getElementById('bulkScanCard').classList.remove('closed');
+  // القسم بيتفتح مع المسح ويتطوي عند الإيقاف عشان النتائج تبان؛ «استكمال» بيفتحه تاني
+  const card = document.getElementById('bulkScanCard');
+  card.classList.toggle('started', bulkScanStarted);
+  card.classList.toggle('closed', !bulkScanActive);
   if (bulkScanActive) setTimeout(() => bulkScanInputEl.focus(), 40);
   updateBulkResultsVisibility();
 }
@@ -3988,6 +3994,9 @@ function resetBulkSession(){
   bulkScans.clear(); bulkLive.clear(); bulkResults.clear(); bulkComparedAt = null;
   bulkProblems.clear(); bulkSelOverride.clear(); bulkDone.clear();
   bulkSessionScans = 0; bulkBatchId = null;
+  bulkScanStarted = false;
+  document.getElementById('bulkScanCard').classList.remove('started');
+  document.getElementById('bulkScanToggle').textContent = '▶ ابدأ المسح';
   setBulkLive('', 'مفيش مسحات لسه.', null);
   renderBulkProblems(); updateBulkScanStats();
   computeBulkRows(); applyBulkFilters();
