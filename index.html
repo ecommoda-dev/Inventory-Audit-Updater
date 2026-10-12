@@ -732,7 +732,11 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.7.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.7.1</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span><b>زرار «نفّذ التعديلات» ما كانش بيفتح نافذة التأكيد</b> (خطأ في v6.7.0). اتصلّح.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.7.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>مربعات الحالة (مظبوط · زيادة · عجز · مش متسكن …) بقت فلاتر:</b> الضغط على مربع بيفلتر الجدول على الحالة دي وبيكتب في نفس فلتر «الحالة» بتاع رأس العمود، والضغط التاني بيشيله. العدّ من الجدول الكامل.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>نافذة نتيجة الجرد الجماعي</b> بقت مربعات (نجاح · تحذير · فشل · الإجمالي) زي نافذة نتيجة الرفع في «رفع بوسطة».</span></li>
@@ -1412,7 +1416,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.7.0';
+const TOOL_VERSION = '6.7.1';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -3811,6 +3815,10 @@ function confirmBulkExecute(){
   const plus     = rows.reduce((s, r) => s + (r.diff > 0 ?  r.diff : 0), 0);
   const minus    = rows.reduce((s, r) => s + (r.diff < 0 ? -r.diff : 0), 0);
   const nNeg     = rows.filter(r => r.available + r.diff < 0).length;
+
+  const line = (label, val, cls) =>
+    `<div class="confirm-detail-row"><span class="confirm-detail-label">${label}</span>`
+    + `<span class="confirm-detail-val${cls ? ' ' + cls : ''}">${val}</span></div>`;
 
     let body = line('الموظف', esc(currentEmployee?.displayName || '—'), 'accent')
     + line('أصناف هيتعدّل رصيدها', `${nAdjust.toLocaleString('en-US')} صنف`, 'red')
