@@ -1057,13 +1057,13 @@ td.centered{text-align:center;}
 
     <!-- ─── §BULK::index — فهرس المنتجات ─── -->
     <div class="bulk-toolbar">
-      <button class="bulk-btn primary" id="bulkLoadBtn" onclick="loadBulkIndex()">① حمّل الباركودات</button>
+      <button class="bulk-btn primary" id="bulkLoadBtn" onclick="bulkLoadBtnClick()">🧾 ابدأ الجرد</button>
       <div class="priority-ts-badge" id="bulkIndexTs">
         <span class="priority-ts-part">📅 <span id="bxDate">—</span></span>
         <span class="priority-ts-part">🕐 <span id="bxTime">—</span></span>
         <span class="priority-ts-relative" id="bxRelative"></span>
       </div>
-      <div class="bulk-idx-stat" id="bulkIdxStat">لازم تحمّل الباركودات الأول عشان الأداة تعرف كل مسحة بتاعة أنهي صنف</div>
+      <div class="bulk-idx-stat" id="bulkIdxStat">الباركودات لسه ما اتحمّلتش</div>
       <div class="bulk-card-spacer"></div>
       <button class="bulk-btn" id="bulkResetBtn" onclick="confirmResetBulkSession()" disabled>🗑 جلسة جديدة</button>
     </div>
@@ -1596,6 +1596,7 @@ function switchMainTab(tab){
   });
   if (tab === 'log' && !logLoaded) { logLoaded = true; initLogFilters(); fetchLog(); }
   if (tab === 'priority' && priorityData === null) loadPriorityData();
+  if (tab === 'bulk' && !bulkIndex && !isUpdatingBulk) openBulkStartPrompt();
 }
 
 // §AUTH-JS
@@ -2778,10 +2779,22 @@ function toggleBulkTable(){
 // ⚠️ إعادة التحميل **بتحافظ على المسحات** عن قصد. واللي بيتمسح هو نتيجة
 //    المقارنة (`bulkLive`) — أرقامها بقت من لقطة أقدم من الفهرس الجديد،
 //    فالصفوف بترجع «لسه ما اتقارنش» لحد ما تضغط «قارن» تاني.
+// نافذة الدخول للتاب — الباركودات لازم تتحمّل قبل أي مسح عشان الأداة تعرف
+// كل مسحة بتاعة أنهي صنف.
+function openBulkStartPrompt(){
+  openConfirm('🧾 الجرد الجماعي',
+    '<div style="font-size:15px;font-weight:800;text-align:center;padding:8px 0;">هتبدأ الجرد؟</div>'
+    + '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-align:center;line-height:1.8;">'
+    + 'لازم تحمّل الباركودات الأول عشان الأداة تعرف كل مسحة بتاعة أنهي صنف.</div>',
+    'تحميل الباركودات للمنتجات كلها', 'accent-btn', () => loadBulkIndex());
+}
+function bulkLoadBtnClick(){ if (bulkIndex) loadBulkIndex(); else openBulkStartPrompt(); }
+
 async function loadBulkIndex(){
   if (isUpdatingBulk) return;
   const btn = document.getElementById('bulkLoadBtn');
   btn.disabled = true; const old = btn.textContent; btn.textContent = '⏳ جاري التحميل...';
+  showToast('⏳ جاري تحميل الباركودات...', 'neutral');
   try {
     const data = await apiGet('get_bulk_index');
     const variants = data.variants || [];
@@ -2832,7 +2845,7 @@ async function loadBulkIndex(){
     showToast(`✓ الفهرس اتحمّل — ${variants.length.toLocaleString('en-US')} صنف`, 'success');
   } catch (e){
     showToast('تعذّر تحميل الفهرس: ' + e.message, 'error', 9000);
-  } finally { btn.disabled = false; btn.textContent = old; }
+  } finally { btn.disabled = false; btn.textContent = bulkIndex ? '🔄 إعادة تحميل الباركودات' : old; }
 }
 
 // بانر ثابت — التقصّ لازم يبان (ممكن يكون فيه مقاسات مش في الفهرس).
