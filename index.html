@@ -534,6 +534,28 @@ td.centered{text-align:center;}
 .bulk-manual-cell:disabled{opacity:.5;cursor:not-allowed;}
 
 .bulk-state{display:inline-block;padding:2px 9px;border-radius:5px;font-size:11.5px;font-weight:700;white-space:nowrap;}
+/* مربعات الحالة في شريط الإحصاء = فلتر «الحالة» نفسه (v6.7.0) — بتكتب في BULK_T.ms.state */
+button.bulk-state{font-family:inherit;cursor:pointer;transition:box-shadow .12s,transform .12s;}
+button.bulk-state:hover{transform:translateY(-1px);}
+button.bulk-state.on{box-shadow:0 0 0 2px var(--text-primary);}
+button.bulk-state.on::after{content:' ✕';font-weight:800;}
+/* مربعات نافذة نتيجة الجرد الجماعي — نفس شكل نافذة نتيجة الرفع في «رفع بوسطة» */
+.res-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-bottom:12px;}
+.res-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 8px;border:2px solid var(--border);border-radius:var(--radius);background:var(--surface-2);text-align:center;}
+.res-stat-num{font-size:30px;font-weight:800;line-height:1;color:var(--text-secondary);font-variant-numeric:tabular-nums;}
+.res-stat-lbl{font-size:13px;font-weight:800;color:var(--text-secondary);line-height:1.35;}
+.res-stat.on.total{border-color:var(--purple-border);background:var(--purple-light);}
+.res-stat.on.total .res-stat-num,.res-stat.on.total .res-stat-lbl{color:var(--purple);}
+.res-stat.on.success{border-color:var(--green-border);background:var(--green-light);}
+.res-stat.on.success .res-stat-num,.res-stat.on.success .res-stat-lbl{color:var(--green-dark);}
+.res-stat.on.warn{border-color:var(--amber-border);background:var(--amber-light);}
+.res-stat.on.warn .res-stat-num,.res-stat.on.warn .res-stat-lbl{color:var(--amber-dark);}
+.res-stat.on.error{border-color:var(--red-border);background:var(--red-light);}
+.res-stat.on.error .res-stat-num,.res-stat.on.error .res-stat-lbl{color:var(--red-dark);}
+.res-verdict{font-size:13px;font-weight:800;line-height:1.8;padding:9px 12px;margin-bottom:10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.res-verdict.ok{border-color:var(--green-border);background:var(--green-light);color:var(--green-dark);}
+.res-verdict.warn{border-color:var(--amber-border);background:var(--amber-light);color:var(--amber-dark);}
+.res-verdict.bad{border-color:var(--red-border);background:var(--red-light);color:var(--red-dark);}
 .st-match{background:var(--green-light);color:var(--green-dark);border:1px solid var(--green-border);}
 .st-short{background:var(--red-light);color:var(--red);border:1px solid var(--red-border);}
 .st-over{background:var(--accent-light);color:var(--accent);border:1px solid var(--accent-border);}
@@ -710,7 +732,12 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.6.1</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.7.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>مربعات الحالة (مظبوط · زيادة · عجز · مش متسكن …) بقت فلاتر:</b> الضغط على مربع بيفلتر الجدول على الحالة دي وبيكتب في نفس فلتر «الحالة» بتاع رأس العمود، والضغط التاني بيشيله. العدّ من الجدول الكامل.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>نافذة نتيجة الجرد الجماعي</b> بقت مربعات (نجاح · تحذير · فشل · الإجمالي) زي نافذة نتيجة الرفع في «رفع بوسطة».</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.6.1</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>المسح:</b> الباركود المتكرر على متغيّرات بنفس الـ SKU بالظبط بقى بيتعدّ عادي (على أول متغيّر) ومبقاش بيروح لقايمة «أكواد فيها مشكلة». لو الـ SKUs مختلفة لسه بيتمسك.</span></li>
       </ul>
@@ -1385,7 +1412,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.6.1';
+const TOOL_VERSION = '6.7.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -3544,8 +3571,14 @@ function renderBulkStats(){
       if (r.diff > 0) plus += r.diff; else if (r.diff < 0) minus += -r.diff;
     }
   }
-  const chips = Object.keys(BULK_STATES).filter(k => by[k]).map(k =>
-    `<span class="bulk-state st-${k}">${esc(BULK_STATES[k].label)}: ${by[k].toLocaleString('en-US')}</span>`).join('');
+  // 🔴 المربع بيكتب في **نفس** فلتر «الحالة» بتاع رأس العمود (BULK_T.ms.state) —
+  //    مش حالة تانية جنبه، فالمربع والقمع والـ chips مستحيل يفترقوا. والعدّ من
+  //    الصفوف الكاملة (bulkRows) مش المفلترة، عشان الموظف يقدر يرجع من أي مربع.
+  const chips = Object.keys(BULK_STATES).filter(k => by[k] || BULK_T.ms.state.has(k)).map(k => {
+    const on = BULK_T.ms.state.has(k);
+    return `<button type="button" class="bulk-state st-${k}${on ? ' on' : ''}" data-bst="${k}" aria-pressed="${on}"`
+      + ` title="${on ? 'إلغاء الفلتر' : 'فلترة الجدول على الحالة دي'}">${esc(BULK_STATES[k].label)}: ${(by[k] || 0).toLocaleString('en-US')}</button>`;
+  }).join('');
   bar.style.display = 'flex';
   bar.innerHTML = chips
     + `<span class="bulk-card-spacer"></span>`
@@ -3553,6 +3586,13 @@ function renderBulkStats(){
     + `<span class="bulk-diff neg">−${minus.toLocaleString('en-US')}</span>`
     + `<span class="bulk-card-sub">قطعة في التحديد الحالي</span>`;
 }
+
+document.getElementById('bulkStatsBar').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-bst]'); if (!b) return;
+  const set = BULK_T.ms.state, k = b.dataset.bst;
+  if (set.has(k)) set.delete(k); else set.add(k);
+  tblChanged(BULK_T);
+});
 
 // تحذيرات دايمة فوق الجدول — مش توست بيختفي
 function renderBulkNotices(){
@@ -3772,11 +3812,7 @@ function confirmBulkExecute(){
   const minus    = rows.reduce((s, r) => s + (r.diff < 0 ? -r.diff : 0), 0);
   const nNeg     = rows.filter(r => r.available + r.diff < 0).length;
 
-  const line = (label, val, cls) =>
-    `<div class="confirm-detail-row"><span class="confirm-detail-label">${label}</span>`
-    + `<span class="confirm-detail-val${cls ? ' ' + cls : ''}">${val}</span></div>`;
-
-  let body = line('الموظف', esc(currentEmployee?.displayName || '—'), 'accent')
+    let body = line('الموظف', esc(currentEmployee?.displayName || '—'), 'accent')
     + line('أصناف هيتعدّل رصيدها', `${nAdjust.toLocaleString('en-US')} صنف`, 'red')
     + line('أصناف هتتسجّل «مظبوط» بس', `${nOk.toLocaleString('en-US')} صنف`, 'green')
     + line('إجمالي القطع', `+${plus.toLocaleString('en-US')} / −${minus.toLocaleString('en-US')}`, '');
@@ -3865,14 +3901,17 @@ async function executeBulk(){
 // نافذة ملخّص **إجبارية** — التوست بيختفي في ثواني وفي مخزن دي مدة كافية
 // إن النتيجة تضيع بالكامل.
 function showBulkSummary(counts, total, doneCount, netErr){
-  const line = (label, val, cls) =>
-    `<div class="confirm-detail-row"><span class="confirm-detail-label">${label}</span>`
-    + `<span class="confirm-detail-val${cls ? ' ' + cls : ''}">${val}</span></div>`;
-
-  let body = line('اتبعت', `${doneCount.toLocaleString('en-US')} من ${total.toLocaleString('en-US')}`, '')
-    + line('✓ تم',        (counts.success || 0).toLocaleString('en-US'), 'green')
-    + line('⚠ تم جزئيًا', (counts.warning || 0).toLocaleString('en-US'), 'amber')
-    + line('✗ فشل',      (counts.error   || 0).toLocaleString('en-US'), 'red');
+  const box = (cls, label, v, tone) =>
+    `<div class="res-stat ${tone}${v ? ' on' : ''}"><span class="res-stat-num">${v.toLocaleString('en-US')}</span>`
+    + `<span class="res-stat-lbl">${label}</span></div>`;
+  let body = `<div class="res-verdict ${(counts.error || counts.warning || counts.mismatched || netErr) ? 'warn' : 'ok'}">`
+    + `اتبعت ${doneCount.toLocaleString('en-US')} من ${total.toLocaleString('en-US')} صنف</div>`
+    + `<div class="res-stats">`
+    + box('success', 'نجاح',  counts.success || 0, 'success')
+    + box('warn',    'تحذير', counts.warning || 0, 'warn')
+    + box('error',   'فشل',   (counts.error || 0) + (counts.mismatched || 0), 'error')
+    + box('total',   'الإجمالي', total, 'total')
+    + `</div>`;
 
   if (counts.stale)
     body += `<div class="confirm-note">🔄 <b>${counts.stale.toLocaleString('en-US')}</b> صنف رصيده اتغيّر على شوبيفاي `
