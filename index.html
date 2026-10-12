@@ -194,8 +194,6 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary)
 .priority-threshold-wrap{display:flex;align-items:center;gap:6px;}
 .priority-threshold-label{font-size:11px;font-weight:700;color:var(--text-secondary);}
 .priority-threshold-sel{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:5px 8px;font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--text-primary);background:var(--surface);cursor:pointer;outline:none;}
-.priority-active-toggle{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
-.priority-active-toggle input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;}
 .priority-stats-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:var(--surface);}
 .priority-stat-total{font-size:12px;font-weight:700;color:var(--text-secondary);}
 .priority-stat-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid;}
@@ -693,7 +691,11 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.5.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.5.1</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الأداة بتجرد بغض النظر عن حالة المنتج:</b> المنتجات Draft وArchived بتدخل الجرد الجماعي وقايمة الأولويات، وخانة «ACTIVE فقط» اتشالت من تاب الأولويات.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.5.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>الجرد الجماعي — تفاصيل الباركودات المتكررة:</b> زرار «📋 عرض التفاصيل» في تنبيه الباركودات المتكررة بيعرض كل باركود والأصناف (SKU · المنتج) اللي شايلاه.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>صوت إنذار قوي واهتزاز</b> لما يتمسح كود مجهول أو متكرر — أعلى وأوضح من بيب الخطأ العادي.</span></li>
@@ -1113,7 +1115,6 @@ col.hl{background:var(--accent-light);}
           <option value="90">90 يوم</option>
         </select>
       </div>
-      <label class="priority-active-toggle"><input type="checkbox" id="priorityActiveOnly" checked onchange="applyPriorityFilters()" /> ACTIVE فقط</label>
     </div>
     <!-- ─── §PRIORITY::results — الفلاتر في رأس العمود (data-table-standard.md) ─── -->
     <div class="tbl-bar" data-tbar="prio" style="border-radius:0;">
@@ -1357,7 +1358,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.5.0';
+const TOOL_VERSION = '6.5.1';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
