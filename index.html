@@ -639,6 +639,10 @@ button.bulk-state.on::after{content:' ✕';font-weight:800;}
 .data-table tbody tr:hover{background:var(--surface-hover);}
 .data-table tbody tr.is-done{background:var(--green-light);}
 .data-table tbody tr.is-blocked{background:var(--amber-light);}
+.data-table tbody tr.is-zero td{opacity:.5;}
+.data-table.pre-cmp tbody tr.is-blocked{background:transparent;}
+#bulkTbl.pre-cmp th:nth-child(1),#bulkTbl.pre-cmp td:nth-child(1),#bulkTbl.pre-cmp th:nth-child(n+7),#bulkTbl.pre-cmp td:nth-child(n+7),
+#bulkTbl.pre-cmp col:nth-child(1),#bulkTbl.pre-cmp col:nth-child(n+7){display:none;}
 .data-table input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;}
 .data-table.measuring th,.data-table.measuring td{white-space:nowrap;}
 .data-table.measuring .th-in{flex-wrap:nowrap;max-width:none;}
@@ -739,7 +743,13 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.8.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.9.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي: الجدول قبل أول مقارنة بقى بسيط</b> (SKU · البراند · سكانر · يدوي · المعدود) من غير المتوقع والفرق والحالة والنتيجة ومربعات الحالة. الجدول الكامل بيظهر بعد «قارن بشوبيفاي».</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>المقاسات اللي ما اتمسحتش (عدّها 0) بقت باهتة. رسايل «أرقام مبدئية» و«باقي المقاسات» اتشالت.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الباركودات المتكررة</b> اتنقلت من قسم النتائج لجنب حالة تحميل الباركودات (زرار بالتفاصيل).</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.8.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي: قسم ③ النتائج (الجدول والمقارنة والتنفيذ) مش بيظهر غير بعد ما توقّف المسح.</b> أثناء المسح الشاشة بتفضل على العدّ بس.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>المربع الأخضر لآخر مسحة بقى 3 أجزاء:</b> الـ SKU · المقاس · إجمالي اللي اتعدّ من نفس الباركود. اسم المنتج اتشال.</span></li>
@@ -1428,7 +1438,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.8.0';
+const TOOL_VERSION = '6.9.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -3134,6 +3144,10 @@ async function loadBulkIndex(){
       + `<b>${byBarcode.size.toLocaleString('en-US')}</b> باركود`
       + (bulkIndex.skippedNoLevel
           ? ` · <b>${bulkIndex.skippedNoLevel.toLocaleString('en-US')}</b> صنف مش مخزّن في الموقع ده (اتشالوا)`
+          : '')
+      + (bulkDupList().length
+          ? ` · <button class="log-refresh-btn" style="padding:2px 10px;" onclick="showBulkDupDetails()" title="الباركود المتكرر على أكتر من صنف: مسحه بيروح لقايمة «أكواد فيها مشكلة» وتضيف الصنف الصح يدويًا بالـ SKU">`
+            + `ℹ️ <b>${bulkDupList().length.toLocaleString('en-US')}</b> باركود متكرر · 📋 التفاصيل</button>`
           : '');
     document.getElementById('bulkScanToggle').disabled = false;
     document.getElementById('bulkResetBtn').disabled   = false;
@@ -3556,6 +3570,10 @@ function renderBulkHead(){
 
 function renderBulkTable(){
   renderBulkHead();
+  // قبل أول مقارنة: جدول بسيط (SKU · البراند · سكانر · يدوي · المعدود) من غير أرقام مبدئية
+  const pre = !bulkRows.some(r => r.compared || r.compareError);
+  document.getElementById('bulkTbl').classList.toggle('pre-cmp', pre);
+
   const body = document.getElementById('bulkBody');
   if (!bulkRows.length){
     body.innerHTML = `<tr><td colspan="${BULK_COLS.length}"><div class="state-box"><div class="state-icon">🧾</div>`
@@ -3578,7 +3596,7 @@ function renderBulkTable(){
     const resHtml = res
       ? `<span class="log-res-badge res-${esc(res.status)}" title="${esc((res.warnings||[]).join(' · ') || res.error || (res.actions||[]).join(' · '))}">${esc(resultLabel(res.status))}</span>`
       : (r.compareError ? `<span class="log-res-badge res-error" title="${esc(r.compareError)}">تعذّرت المقارنة</span>` : '<span class="res-none">—</span>');
-    return `<tr class="${done ? 'is-done' : ''}${!BULK_STATES[r.state]?.sel ? ' is-blocked' : ''}">
+    return `<tr class="${done ? 'is-done' : ''}${!BULK_STATES[r.state]?.sel ? ' is-blocked' : ''}${bulkScans.has(r.variantId) ? '' : ' is-zero'}">
       <td><input type="checkbox" ${sel ? 'checked' : ''} ${selectable ? '' : 'disabled'}
            onchange="toggleBulkRowIdx(${i})"></td>
       <td><span class="log-sku-badge">${esc(r.sku)}</span></td>
@@ -3600,7 +3618,7 @@ function renderBulkTable(){
 function renderBulkStats(){
   renderBulkNotices();
   const bar = document.getElementById('bulkStatsBar');
-  if (!bulkRows.length){ bar.style.display = 'none'; bar.innerHTML = ''; return; }
+  if (!bulkRows.length || !bulkRows.some(r => r.compared || r.compareError)){ bar.style.display = 'none'; bar.innerHTML = ''; return; }
   const by = {};
   let plus = 0, minus = 0;
   for (const r of bulkRows){
@@ -3636,36 +3654,13 @@ document.getElementById('bulkStatsBar').addEventListener('click', (e) => {
 function renderBulkNotices(){
   const box = document.getElementById('bulkNotices');
   const out = [];
-  // حالة المقارنة — أهم سطر في الشاشة: الأرقام دي من إمتى؟
-  const nCmp = bulkRows.filter(r => !r.compared).length;
-  if (bulkRows.length && nCmp)
-    out.push(`⏳ <b>${nCmp.toLocaleString('en-US')}</b> صنف أرقامه <b>مبدئية</b> (من وقت تحميل الباركودات) — `
-      + `اضغط <b>«⚖️ قارن بشوبيفاي»</b> عشان تتسحب الأرقام الحقيقية دلوقتي. `
-      + `<b>التنفيذ مقفول عليهم</b> لحد ما يتقارنوا.`);
-  else if (bulkRows.length && bulkComparedAt && isBulkCompareStale())
+  // حالة المقارنة: قبل أول مقارنة الجدول بسيط (بلا أرقام مبدئية) فمفيش تنبيه محتاج.
+  if (bulkRows.length && bulkComparedAt && isBulkCompareStale())
     out.push(`🕐 آخر مقارنة كانت <b>${formatTimeOnly(bulkComparedAt.toISOString()).replace('🕐 ','')}</b> — `
       + `عدّى عليها وقت. لو المخزن شغّال، اضغط «⚖️ قارن تاني» قبل التنفيذ.`);
   if (bulkOrphanScans)
     out.push(`⚠️ <b>${bulkOrphanScans.toLocaleString('en-US')}</b> قطعة اتمسحت على أصناف مش موجودة في الفهرس الحالي `
       + `(اتشالت من شوبيفاي أو بقت Suspended بعد آخر تحميل) — <b>مش ظاهرة في الجدول ومش هتتنفّذ</b>.`);
-  if (bulkIndex){
-    const touched = new Set();
-    for (const vid of bulkScans.keys()){
-      const v = bulkIndex.byId.get(vid);
-      if (v) touched.add(v.productId);
-    }
-    const extra = bulkRows.filter(r => !bulkScans.has(r.variantId)).length;
-    if (touched.size)
-      out.push(`👟 وضع «باقي المقاسات»: <b>${touched.size.toLocaleString('en-US')}</b> منتج اتمسح منه حاجة، `
-        + `و<b>${extra.toLocaleString('en-US')}</b> مقاس منهم ما اتمسحش — ظاهرين في الجدول تحت. `
-        + `المنتجات اللي ما اتلمستش خالص مش هنا أصلاً.`);
-  }
-  const dups = bulkDupList();
-  if (dups.length)
-    out.push(`ℹ️ في <b>${dups.length.toLocaleString('en-US')}</b> باركود متكرر على أكتر من صنف في المتجر — `
-      + `مسح أي واحد منهم هيروح لقايمة «أكواد فيها مشكلة» بدل ما الأداة تخمّن، `
-      + `وهتحتاج تضيف الصنف الصح يدويًا بالـ SKU. `
-      + `<button class="log-refresh-btn" style="padding:2px 10px;margin-inline-start:6px;" onclick="showBulkDupDetails()">📋 عرض التفاصيل</button>`);
   box.innerHTML = out.map(t => `<div class="export-warn">${t}</div>`).join('');
   box.style.display = out.length ? '' : 'none';
 }
@@ -3729,7 +3724,7 @@ function updateBulkButtons(){
   cmpBtn.classList.toggle('primary', nCmp > 0);
   cmpBtn.classList.toggle('amber',   nCmp === 0 && bulkComparedAt && isBulkCompareStale());
 
-  expBtn.disabled = isUpdatingBulk || !bulkRows.length;
+  expBtn.disabled = isUpdatingBulk || !bulkRows.length || nCmp === bulkRows.length;
 }
 
 function isBulkCompareStale(){
