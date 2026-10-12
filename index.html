@@ -167,7 +167,12 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary)
 .cl-item{display:flex;gap:8px;font-size:13px;}
 .cl-item-label{font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:2px;}
 .cl-new{background:var(--green-light);color:var(--green-dark);}.cl-fix{background:var(--red-light);color:var(--red);}.cl-change{background:var(--amber-light);color:var(--amber-dark);}
+.confirm-detail-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 2px;border-bottom:1px solid var(--border);}
 .confirm-detail-row:last-of-type{border-bottom:none;}
+.btn-modal-cancel.cancel-red{color:var(--red);border:1.5px solid var(--red);background:var(--red-light);font-weight:700;}
+.btn-modal-cancel.cancel-red:hover{background:var(--red);color:var(--on-accent);}
+#confirmBody .confirm-note{line-height:1.8;margin-top:10px;padding:12px 14px;}
+#confirmBody .confirm-note + .confirm-note{margin-top:8px;}
 .confirm-detail-label{font-size:12px;color:var(--text-secondary);}
 .confirm-detail-val{font-size:13px;font-weight:700;}
 .confirm-detail-val.green{color:var(--green);}.confirm-detail-val.red{color:var(--red);}.confirm-detail-val.accent{color:var(--accent);}.confirm-detail-val.amber{color:var(--amber);}
@@ -746,7 +751,14 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.10.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.11.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>نافذة تأكيد الجرد الجماعي:</b> العنوان بقى «نافذة تأكيد تسجيل الجرد الجماعي»، الصفوف منظّمة بمسافات وخطوط فاصلة، زرار التأكيد أخضر وزرار الإلغاء بإطار أحمر.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>«ابدأ المسح» بقى «ابدأ الجرد» و«إيقاف المسح» بقى «إيقاف الجرد».</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>اتشالت الـ placeholders من مربع السكانر ومن مربع الـ SKU اليدوي (بقت جملة الإضافة اليدوية نفسها هي الـ placeholder)، واتشال نص «مفيش مسحات لسه».</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>جلسة المسح بتتطوي عند إيقاف الجرد (النتايج تبان)، والزرار بيبقى «استكمال جلسة الجرد»، و«جلسة جرد جديدة» جنب الزرار بلون مختلف.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.9.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي: الجدول قبل أول مقارنة بقى بسيط</b> (SKU · البراند · سكانر · يدوي · المعدود) من غير المتوقع والفرق والحالة والنتيجة ومربعات الحالة. الجدول الكامل بيظهر بعد «قارن بشوبيفاي».</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>المقاسات اللي ما اتمسحتش (عدّها 0) بقت باهتة. رسايل «أرقام مبدئية» و«باقي المقاسات» اتشالت.</span></li>
@@ -1247,19 +1259,19 @@ col.hl{background:var(--accent-light);}
         <span class="bulk-card-title">② 🔫 جلسة المسح</span>
         <div class="bulk-card-spacer"></div>
         <button class="bulk-btn new" id="bulkResetBtn" onclick="confirmResetBulkSession()" disabled>🆕 جلسة جرد جديدة</button>
-        <button class="bulk-btn go" id="bulkScanToggle" onclick="toggleBulkScan()" disabled>▶ ابدأ المسح</button>
+        <button class="bulk-btn go" id="bulkScanToggle" onclick="toggleBulkScan()" disabled>▶ ابدأ الجرد</button>
       </div>
       <div class="bulk-scan-collapse"><div class="bulk-scan-collapse-in">
       <div class="bulk-card-body">
         <div class="bulk-scan-row">
           <div class="bulk-scan-wrap disabled" id="bulkScanWrap">
             <span>🔫</span>
-            <input type="text" id="bulkScanInput" placeholder="حمّل الباركودات ثم اضغط «ابدأ المسح»"
+            <input type="text" id="bulkScanInput"
                    autocomplete="off" spellcheck="false" inputmode="numeric" disabled />
           </div>
         </div>
 
-        <div class="bulk-live" id="bulkLive">مفيش مسحات لسه.</div>
+        <div class="bulk-live" id="bulkLive"></div>
 
         <div class="bulk-stats">
           <div class="bulk-stat accent"><div class="bulk-stat-num" id="bulkStatScans">0</div><div class="bulk-stat-lbl">إجمالي المسحات</div></div>
@@ -1271,9 +1283,8 @@ col.hl{background:var(--accent-light);}
         <!-- إضافة يدوية للقطع اللي باركودها تالف أو مش موجود -->
         <div class="bulk-manual-add">
           <div class="uf-fg" style="flex:1;min-width:230px;">
-            <span class="uf-flabel">إضافة صنف يدويًا بالـ SKU (للقطع اللي باركودها تالف)</span>
             <div class="uf-search"><span>🔎</span><input type="text" class="uf-input" id="bulkSkuAdd"
-                 placeholder="اكتب الـ SKU بالظبط واضغط Enter" onkeydown="if(event.key==='Enter')addBulkBySku()" /></div>
+                 placeholder="إضافة صنف يدويًا بالـ SKU (للقطع اللي باركودها تالف)" onkeydown="if(event.key==='Enter')addBulkBySku()" /></div>
           </div>
           <button class="bulk-btn" onclick="addBulkBySku()">➕ أضف</button>
         </div>
@@ -1331,7 +1342,7 @@ col.hl{background:var(--accent-light);}
             <colgroup id="bulkCg"></colgroup>
             <thead><tr id="bulkHeadRow"></tr></thead>
             <tbody id="bulkBody">
-              <tr><td colspan="11"><div class="state-box"><div class="state-icon">🧾</div><p>حمّل الباركودات وابدأ المسح — وبعد ما تخلص اضغط «⚖️ قارن بشوبيفاي»</p></div></td></tr>
+              <tr><td colspan="11"><div class="state-box"><div class="state-icon">🧾</div><p>حمّل الباركودات وابدأ الجرد — وبعد ما تخلص اضغط «⚖️ قارن بشوبيفاي»</p></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -1439,7 +1450,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.9.0';
+const TOOL_VERSION = '6.11.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -2246,11 +2257,11 @@ function stepDelta(step){const inp=document.getElementById('deltaInput');inp.val
 function stepManualCount(step){const inp=document.getElementById('scanCountManual');inp.value=Math.max(0,(parseInt(inp.value)||0)+step);updateScanCountTotal();}
 function updatePreview(){const delta=parseInt(document.getElementById('deltaInput').value)||0,current=parseInt((document.getElementById('adjustCurrentVal').textContent||'').replace(/,/g,''));const previewEl=document.getElementById('previewNew'),btnApply=document.getElementById('btnApplyAdjust');if(isNaN(current)||delta===0){previewEl.textContent=isNaN(current)?'—':current.toLocaleString('en-US');previewEl.className='preview-new zero';btnApply.disabled=true;return;}const newVal=current+delta;previewEl.textContent=newVal.toLocaleString('en-US');previewEl.className='preview-new '+(delta>0?'positive':'negative');btnApply.disabled=false;}
 function updateAuditInfo(isoString,employee,notes){document.getElementById('auditLastVal').textContent=formatDateTime(isoString);const empRow=document.getElementById('auditEmpRow');if(employee){document.getElementById('auditEmpVal').textContent=employee.replace(/_/g,' ');empRow.style.display='flex';}else empRow.style.display='none';const notesRow=document.getElementById('auditNotesRow');if(notes){document.getElementById('auditNotesVal').textContent=notes;notesRow.style.display='block';}else notesRow.style.display='none';document.getElementById('auditInfoBox').style.display='flex';}
-function openConfirm(headerHTML,bodyHTML,okLabel,okClass,onConfirm){
+function openConfirm(headerHTML,bodyHTML,okLabel,okClass,onConfirm,cancelClass){
   document.getElementById('confirmHeader').innerHTML=headerHTML;document.getElementById('confirmBody').innerHTML=bodyHTML;
   const okBtn=document.getElementById('confirmOkBtn'),cancelBtn=document.getElementById('confirmCancelBtn');
   const newOk=okBtn.cloneNode(true),newCancel=cancelBtn.cloneNode(true);okBtn.parentNode.replaceChild(newOk,okBtn);cancelBtn.parentNode.replaceChild(newCancel,cancelBtn);
-  newOk.textContent=okLabel;newOk.className='btn-confirm-ok '+okClass;newOk.addEventListener('click',()=>{document.getElementById('confirmOverlay').classList.remove('open');onConfirm();});newCancel.addEventListener('click',()=>document.getElementById('confirmOverlay').classList.remove('open'));document.getElementById('confirmOverlay').classList.add('open');
+  newOk.textContent=okLabel;newOk.className='btn-confirm-ok '+okClass;newOk.addEventListener('click',()=>{document.getElementById('confirmOverlay').classList.remove('open');onConfirm();});newCancel.className='btn-modal-cancel'+(cancelClass?' '+cancelClass:'');newCancel.addEventListener('click',()=>document.getElementById('confirmOverlay').classList.remove('open'));document.getElementById('confirmOverlay').classList.add('open');
 }
 function confirmAuditOk(){if(!currentVariant){showToast('لم يتم اختيار منتج','warning');return;}const shelf=currentShelfQty!=null?currentShelfQty.toLocaleString('en-US'):'—',empName=esc(currentEmployee?.displayName||'—');const body='<div class="confirm-detail-row"><span class="confirm-detail-label">المنتج</span><span class="confirm-detail-val">'+esc(currentVariant.product?.title||'')+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">SKU</span><span class="confirm-detail-val accent">'+esc(currentVariant.sku)+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">الموظف</span><span class="confirm-detail-val accent">'+empName+'</span></div><div class="confirm-detail-row"><span class="confirm-detail-label">عدد القطع على الرف</span><span class="confirm-detail-val green">'+shelf+'</span></div><div class="confirm-note">سيتم تسجيل تاريخ ووقت الجرد واسم الموظف.</div>';openConfirm('✅ تأكيد: الجرد مظبوط',body,'تأكيد','green-btn',doAuditOk);}
 // ─── §TOOL-JS::writeResult — أربع حالات مش اتنين (Standards Step 3C) ───
@@ -3222,13 +3233,11 @@ function toggleBulkScan(){
   wrap.classList.toggle('disabled', !bulkScanActive);
   wrap.classList.toggle('armed', bulkScanActive);
   if (bulkScanActive) bulkScanStarted = true;
-  btn.textContent = bulkScanActive ? '⏸ إيقاف المسح'
-                  : bulkScanStarted ? '▶ استكمال جلسة الجرد' : '▶ ابدأ المسح';
+  btn.textContent = bulkScanActive ? '⏸ إيقاف الجرد'
+                  : bulkScanStarted ? '▶ استكمال جلسة الجرد' : '▶ ابدأ الجرد';
   btn.classList.toggle('go', !bulkScanActive);
   btn.classList.toggle('amber', bulkScanActive);
-  bulkScanInputEl.placeholder = bulkScanActive
-    ? 'امسح... (سيب المؤشر هنا)'
-    : 'اضغط «ابدأ المسح» قبل ما تمسح';
+  bulkScanInputEl.placeholder = '';
   // القسم بيتفتح مع المسح ويتطوي عند الإيقاف عشان النتائج تبان؛ «استكمال» بيفتحه تاني
   const card = document.getElementById('bulkScanCard');
   card.classList.toggle('started', bulkScanStarted);
@@ -3583,7 +3592,7 @@ function renderBulkTable(){
   const body = document.getElementById('bulkBody');
   if (!bulkRows.length){
     body.innerHTML = `<tr><td colspan="${BULK_COLS.length}"><div class="state-box"><div class="state-icon">🧾</div>`
-      + `<p>${bulkIndex ? 'ابدأ المسح — الأصناف هتظهر هنا أول بأول' : 'حمّل الباركودات الأول'}</p></div></td></tr>`;
+      + `<p>${bulkIndex ? 'ابدأ الجرد — الأصناف هتظهر هنا أول بأول' : 'حمّل الباركودات الأول'}</p></div></td></tr>`;
     return;
   }
   if (!bulkFiltered.length){
@@ -3750,8 +3759,7 @@ function setBulkUpdateLock(on){
   document.getElementById('bulkResetBtn').disabled   = on || !bulkIndex;
   document.getElementById('bulkSkuAdd').disabled     = on;
   bulkScanInputEl.disabled = on || !bulkScanActive;
-  bulkScanInputEl.placeholder = on ? '⏳ في تنفيذ شغّال — المسح متوقّف'
-    : bulkScanActive ? 'امسح... (سيب المؤشر هنا)' : 'اضغط «ابدأ المسح» قبل ما تمسح';
+  bulkScanInputEl.placeholder = '';
   updateBulkButtons();
   // (9) الجدول لازم يعكس القفل فورًا — من غير كده الخانات تفضل شكلها مفتوح
   //     لحد أول مجموعة ما تخلص.
@@ -3874,8 +3882,8 @@ function confirmBulkExecute(){
   body += `<div class="confirm-note">التعديل بيتبعت كقيمة مطلقة مع تحقق من الرصيد الحالي — `
         + `أي صنف رصيده اتغيّر بعد ما عدّيته هيترفض <b>من غير أي تعديل عليه</b> بدل ما يتعدّل غلط.</div>`;
 
-  openConfirm('🧾 تأكيد الجرد الجماعي', body,
-    `تأكيد — نفّذ على ${rows.length.toLocaleString('en-US')} صنف`, 'btn-red', executeBulk);
+  openConfirm('🧾 نافذة تأكيد تسجيل الجرد الجماعي', body,
+    `تأكيد — نفّذ على ${rows.length.toLocaleString('en-US')} صنف`, 'green-btn', executeBulk, 'cancel-red');
 }
 
 async function executeBulk(){
@@ -3996,8 +4004,8 @@ function resetBulkSession(){
   bulkSessionScans = 0; bulkBatchId = null;
   bulkScanStarted = false;
   document.getElementById('bulkScanCard').classList.remove('started');
-  document.getElementById('bulkScanToggle').textContent = '▶ ابدأ المسح';
-  setBulkLive('', 'مفيش مسحات لسه.', null);
+  document.getElementById('bulkScanToggle').textContent = '▶ ابدأ الجرد';
+  setBulkLive('', '', null);
   renderBulkProblems(); updateBulkScanStats();
   computeBulkRows(); applyBulkFilters();
   showToast('جلسة جديدة — الشاشة اتمسحت', 'neutral');
