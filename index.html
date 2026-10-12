@@ -670,7 +670,13 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.4.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.5.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>الجرد الجماعي — تفاصيل الباركودات المتكررة:</b> زرار «📋 عرض التفاصيل» في تنبيه الباركودات المتكررة بيعرض كل باركود والأصناف (SKU · المنتج) اللي شايلاه.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span><b>صوت إنذار قوي واهتزاز</b> لما يتمسح كود مجهول أو متكرر — أعلى وأوضح من بيب الخطأ العادي.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>عمود «المنتج» اتشال من جدول نتائج الجرد الجماعي (البحث بالاسم والتصدير زي ما هم).</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.4.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>جدول أولويات الجرد بنفس معيار باقي الجداول:</b> فلاتر الأولوية وآخر جرد والبحث بقت في رأس العمود (اختيار متعدد) بدل القوايم فوق الجدول، مع صف نتائج و«مسح كل الفلاتر» وchips.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>ترتيب من اسم أي عمود (تصاعدي ← تنازلي ← بلا ترتيب = أولوية ثم الأقدم جردًا)، وتحكّم لايف في عرض الأعمدة، وعناوين ثابتة أثناء السكرول.</span></li>
@@ -1326,7 +1332,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.4.0';
+const TOOL_VERSION = '6.5.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
