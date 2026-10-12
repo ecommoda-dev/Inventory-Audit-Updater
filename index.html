@@ -2943,7 +2943,6 @@ const BULK_COLS = [
   { k:'_sel',         l:'', sort:false, flt:'sel',
     pre:'<input type="checkbox" id="bulkSelAll" onchange="bulkSelectAll(this.checked)" title="تحديد/إلغاء كل المعروض">' },
   { k:'sku',          l:'SKU',     flt:'search' },
-  { k:'productTitle', l:'المنتج' },
   { k:'vendor',       l:'البراند', flt:'vendor' },
   { k:'scanned',      l:'سكانر' },
   { k:'manual',       l:'يدوي' },
@@ -2955,7 +2954,7 @@ const BULK_COLS = [
 ];
 const BULK_T = {
   id:'bulk', tblId:'bulkTbl', cgId:'bulkCg', headId:'bulkHeadRow', chipsId:'bulkChipsZone', zoneId:'bulkTableZone', togId:'bulkTog',
-  lsKey:'stockaudit_col_widths_bulk_v1',         // ⚠️ ارفع _v1 → _v2 لو الأعمدة اتغيّرت
+  lsKey:'stockaudit_col_widths_bulk_v2',         // ⚠️ ارفع _v1 → _v2 لو الأعمدة اتغيّرت
   cols: BULK_COLS,
   FL: { state:'الحالة', vendor:'البراند', sel:'التحديد', search:'بحث SKU / اسم المنتج' },
   ms: { state:new Set(), vendor:new Set(), sel:new Set() },
@@ -3452,7 +3451,6 @@ function renderBulkTable(){
       <td><input type="checkbox" ${sel ? 'checked' : ''} ${selectable ? '' : 'disabled'}
            onchange="toggleBulkRowIdx(${i})"></td>
       <td><span class="log-sku-badge">${esc(r.sku)}</span></td>
-      <td>${esc(r.productTitle)}${r.variantTitle ? ` <span class="bulk-card-sub">· ${esc(r.variantTitle)}</span>` : ''}</td>
       <td>${esc(r.vendor)}</td>
       <td class="col-num">${r.scanned.toLocaleString('en-US')}</td>
       <td><input type="number" min="0" class="bulk-manual-cell" value="${r.manual}" ${isUpdatingBulk || done ? 'disabled' : ''}
@@ -3522,9 +3520,26 @@ function renderBulkNotices(){
   if (dups.length)
     out.push(`ℹ️ في <b>${dups.length.toLocaleString('en-US')}</b> باركود متكرر على أكتر من صنف في المتجر — `
       + `مسح أي واحد منهم هيروح لقايمة «أكواد فيها مشكلة» بدل ما الأداة تخمّن، `
-      + `وهتحتاج تضيف الصنف الصح يدويًا بالـ SKU.`);
+      + `وهتحتاج تضيف الصنف الصح يدويًا بالـ SKU. `
+      + `<button class="log-refresh-btn" style="padding:2px 10px;margin-inline-start:6px;" onclick="showBulkDupDetails()">📋 عرض التفاصيل</button>`);
   box.innerHTML = out.map(t => `<div class="export-warn">${t}</div>`).join('');
   box.style.display = out.length ? '' : 'none';
+}
+
+// تفاصيل الباركودات المتكررة: كل باركود وتحته الأصناف اللي شايلاه (SKU · المنتج)
+function showBulkDupDetails(){
+  const dups = bulkIndex ? Object.entries(bulkIndex.dupBarcodes || {}) : [];
+  if (!dups.length) return;
+  const body = '<div style="max-height:60vh;overflow-y:auto;">'
+    + dups.map(([bc, list]) =>
+        `<div style="margin-bottom:12px;">`
+        + `<div style="font-weight:800;margin-bottom:4px;"><span class="log-sku-badge">${esc(bc)}</span> `
+        + `<span class="bulk-card-sub">· ${list.length.toLocaleString('en-US')} أصناف</span></div>`
+        + list.map(c => `<div class="confirm-detail-row"><span class="confirm-detail-label">${esc(c.sku || '—')}</span>`
+            + `<span class="confirm-detail-val">${esc(c.productTitle || '—')}</span></div>`).join('')
+        + `</div>`).join('')
+    + '</div>';
+  openConfirm(`ℹ️ باركودات متكررة (${dups.length.toLocaleString('en-US')})`, body, 'تمام', 'accent-btn', () => {});
 }
 
 function updateBulkButtons(){
