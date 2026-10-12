@@ -549,14 +549,6 @@ td.centered{text-align:center;}
 .bulk-prob-why{font-size:12px;font-weight:600;color:var(--text-mid);flex:1;min-width:180px;}
 .bulk-prob-x{background:none;border:none;color:var(--red);font-size:16px;font-weight:800;cursor:pointer;line-height:1;padding:0 4px;}
 
-/* ─── نطاق الجرد ─── */
-.bulk-scope-opts{display:flex;gap:10px;flex-wrap:wrap;}
-.bulk-scope-opt{flex:1;min-width:260px;display:flex;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface-2);cursor:pointer;transition:border-color .15s,background .15s;}
-.bulk-scope-opt.on{border-color:var(--accent);background:var(--accent-light);}
-.bulk-scope-opt.locked{opacity:.5;cursor:not-allowed;}
-.bulk-scope-opt input{margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;}
-.bulk-scope-name{font-size:13px;font-weight:800;color:var(--text-primary);}
-.bulk-scope-desc{font-size:12px;font-weight:600;color:var(--text-secondary);line-height:1.7;margin-top:3px;}
 
 /* ─── الجدول ─── */
 .bulk-table-wrap{overflow-x:auto;overflow-y:auto;max-height:640px;}
@@ -626,7 +618,12 @@ td.centered{text-align:center;}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.1.0</span><span class="cl-ver-date">18-09-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.2.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي: خطوة «نطاق الجرد» اتشالت.</b> النطاق بقى ثابت: اللي اتمسح + باقي مقاسات نفس المنتج. وضعَي «اللي اتمسح بس» و«الجرد الشامل» اتشالوا. الخطوات بقت ①②③④</span></li>
+      </ul>
+
+      <div class="cl-version"><span class="cl-ver-badge">v6.1.0</span><span class="cl-ver-date">18-09-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-fix">إصلاح</span><span><b>أرقام شوبيفاي بقت بتتسحب لحظة المقارنة مش لحظة تحميل الباركودات.</b> قبل كده الرصيد المعروض كان من أول الجلسة، فلو اتباعت قطعة أو اتشحنت وإنت بتمسح، الشاشة كانت بتقول رقم والحقيقة رقم تاني. الكتابة كانت محميّة، لكن <b>القرار كان بيتاخد على رقم قديم</b></span></li>
         <li class="cl-item"><span class="cl-item-label cl-new">جديد</span><span>زرار <b>«⚖️ قارن بشوبيفاي»</b> — بيسحب الأرصدة الحيّة والقطع المغلَّفة <b>في نفس اللحظة ونفس النداء</b>، وللأصناف اللي عدّيتها بس. أسرع كمان: بتسحب ٣٠٠ صنف عدّيتهم مش الكتالوج كله</span></li>
@@ -742,23 +739,18 @@ td.centered{text-align:center;}
                 الأرصدة بتيجي معاها كمان بس <b>كأرقام مبدئية للعرض</b> — القرار مابيتبناش عليها.</li>
             <li><b>جلسة المسح</b> — مسح متواصل لرفوف كاملة. الكود المجهول أو المتكرر على أكتر من صنف
                 بيروح لقايمة حمرا و<b>بيقفل التنفيذ</b> لحد ما تتفضى.</li>
-            <li><b>النطاق</b> — تلات أوضاع، والفرق بينهم هو معنى الصنف اللي <b>ما اتمسحش</b>:
-              <table>
-                <tr><th>الوضع</th><th>الصنف اللي ما اتمسحش</th></tr>
-                <tr><td>🔒 اللي اتمسح بس <i>(الافتراضي)</i></td><td>مش جزء من الجرد → مايتلمسش</td></tr>
-                <tr><td>👟 + باقي مقاسات نفس المنتج</td><td>لو المنتج اتمسح منه مقاس واحد على الأقل → باقي مقاساته «مش متسكن». المنتج اللي ما اتلمسش خالص مش بيظهر</td></tr>
-                <tr><td>🧹 جرد شامل</td><td>مش موجود على الرف → رصيده يتصفّر</td></tr>
-              </table>
+            <li><b>النطاق (ثابت)</b> — اللي اتمسح <b>+ باقي مقاسات نفس المنتج</b>:
+              لو المنتج اتمسح منه مقاس واحد على الأقل، باقي مقاساته بتظهر «مش متسكن».
+              المنتج اللي ما اتلمسش خالص مش بيظهر.
               <b>التجميع بـ <code>productId</code></b> — في المتجر ده كل لون منتج مستقل في شوبيفاي
               والمتغيّرات هي المقاسات (<code>GT1 / Black</code> منتج · <code>GT1 / White</code> منتج
-              تاني)، فالتجميع ده بيدّي «باقي مقاسات نفس اللون» بالظبط. نفس تجميع زرار
-              «باقي مقاسات هذا المنتج».</li>
-            <li><b>④ قارن بشوبيفاي</b> — 🔴 <b>هنا بالظبط بتتقرا الأرقام الحقيقية</b>:
+              تاني)، فالتجميع ده بيدّي «باقي مقاسات نفس اللون» بالظبط.</li>
+            <li><b>③ قارن بشوبيفاي</b> — 🔴 <b>هنا بالظبط بتتقرا الأرقام الحقيقية</b>:
                 الأرصدة الحيّة على <code>LOCATION_ID</code> <b>والقطع المغلَّفة</b> في
                 <b>نفس النداء ونفس اللحظة</b> (<code>at</code> بترجع في الرد)، وللأصناف اللي
                 اتعدّت بس. المتوقع = <code>available + committed − المغلَّف</code>.
                 <b>أي صف ما اتقارنش مش بيتنفّذ</b> ورقمه بيتعرض بعلامة «؟».</li>
-            <li><b>⑤ التنفيذ</b> — بالمجموعات مع شريط تقدّم حقيقي وقفل على كل نقط التعديل،
+            <li><b>④ التنفيذ</b> — بالمجموعات مع شريط تقدّم حقيقي وقفل على كل نقط التعديل،
                 والصف اللي اتنفّذ بيتنزع سلاحه فورًا.</li>
           </ol>
 
@@ -836,9 +828,9 @@ td.centered{text-align:center;}
             <li><b>الصفوف الأقدم من v5.0.0</b> مالهاش <code>extra.result</code> — بتتعرض «—» مش «✓»، لأننا فعليًا مش عارفين.</li>
             <li><b>الجرد الجماعي مافيهوش قيم <code>type</code> جديدة</b> — بيكتب تحت <code>adjustment</code> و<code>ok</code> زي الفردي، والفرق في <code>extra.mode = 'bulk'</code> و<code>extra.batchId</code>.</li>
             <li><b>الصنف اللي <code>onHand ≠ available + committed</code></b> (عليه حالات مخزون تانية زي تالف أو فحص جودة) بيتشال من التنفيذ الجماعي — معادلة الرف مابتغطّيهاش.</li>
-            <li><b>الصنف بدون باركود</b> في الوضع الشامل بياخد حالة مستقلة «🚫 بدون باركود» ومش بيتصفّر — لأنه أصلاً مايتجردش بالسكانر.</li>
-            <li><b>«⚠️ مش متسكن» مشروطة بإن المتوقع أكبر من صفر.</b> المقاس اللي شوبيفاي بتقول عنه صفر والرف فاضي = «✅ مظبوط»، وبيتسجّل إنه اتراجع. الوضع الشامل بيتخطّى الأصناف الصفر من الأساس (مش هيرمي المتجر كله في الجدول)، أما وضع «باقي المقاسات» فبيضمّها لأن نطاقه صغير والتسجيل ده هو نص فايدة جرد الرف.</li>
-            <li><b>الفهرس المقصوص بيقفل «الجرد الشامل» بس</b> — وضع «باقي المقاسات» نطاقه اللي اتمسح فعلاً فهو مابيدّعيش شمول، بس اللافتة بتنبّه إن ممكن يكون فيه مقاسات مش في الفهرس.</li>
+            <li><b>الصنف بدون باركود</b> بياخد حالة مستقلة «🚫 بدون باركود» ومش بيتصفّر — لأنه أصلاً مايتجردش بالسكانر.</li>
+            <li><b>«⚠️ مش متسكن» مشروطة بإن المتوقع أكبر من صفر.</b> المقاس اللي شوبيفاي بتقول عنه صفر والرف فاضي = «✅ مظبوط»، وبيتسجّل إنه اتراجع. المقاسات الصفر بتتضم لأن نطاق «باقي المقاسات» صغير والتسجيل ده هو نص فايدة جرد الرف.</li>
+            <li><b>الفهرس المقصوص</b> بيطلّع لافتة تنبّه إن ممكن يكون فيه مقاسات مش في الفهرس.</li>
             <li>🔴 <b>الأرقام المبدئية مقابل الأرقام المقارَنة:</b> الفهرس بيتحمّل <b>قبل</b> العدّ، فأرقامه بتقدم أثناء جلسة المسح (بيعة · شحنة). عشان كده صفوف ما اتقارنتش بتتعرض بعلامة «؟» و<b>التنفيذ عليها مقفول</b>. الكتابة نفسها محميّة بالـ CAS، فالخطر مكانش على المخزون — كان إن <b>الشاشة تعرض رقم قديم</b> والموظف ياخد قرار عليه.</li>
             <li><b>كل الباركودات في ذاكرة المتصفح</b> — الجلسة بتضيع مع أي refresh. ده مقصود: مفيش عدّ بيتخزّن في <code>localStorage</code>.</li>
             <li><b>إعادة تحميل الباركودات بتحافظ على المسحات</b> — اللي بيتمسح هو نتيجة المقارنة، فالصفوف بترجع «لسه ما اتقارنش» لحد ما تضغط «قارن» تاني.</li>
@@ -1065,13 +1057,13 @@ td.centered{text-align:center;}
 
     <!-- ─── §BULK::index — فهرس المنتجات ─── -->
     <div class="bulk-toolbar">
-      <button class="bulk-btn primary" id="bulkLoadBtn" onclick="loadBulkIndex()">① حمّل الباركودات</button>
+      <button class="bulk-btn primary" id="bulkLoadBtn" onclick="bulkLoadBtnClick()">🧾 ابدأ الجرد</button>
       <div class="priority-ts-badge" id="bulkIndexTs">
         <span class="priority-ts-part">📅 <span id="bxDate">—</span></span>
         <span class="priority-ts-part">🕐 <span id="bxTime">—</span></span>
         <span class="priority-ts-relative" id="bxRelative"></span>
       </div>
-      <div class="bulk-idx-stat" id="bulkIdxStat">لازم تحمّل الباركودات الأول عشان الأداة تعرف كل مسحة بتاعة أنهي صنف</div>
+      <div class="bulk-idx-stat" id="bulkIdxStat">الباركودات لسه ما اتحمّلتش</div>
       <div class="bulk-card-spacer"></div>
       <button class="bulk-btn" id="bulkResetBtn" onclick="confirmResetBulkSession()" disabled>🗑 جلسة جديدة</button>
     </div>
@@ -1134,52 +1126,6 @@ td.centered{text-align:center;}
       </div>
     </div>
 
-    <!-- ─── §BULK::scope — نطاق الجرد ─── -->
-    <div class="bulk-card">
-      <div class="bulk-card-hdr">
-        <span class="bulk-card-title">③ 🎯 نطاق الجرد</span>
-        <span class="bulk-card-sub">الفرق بين الوضعين هو إيه اللي بيحصل للصنف اللي **ما اتمسحش**.</span>
-      </div>
-      <div class="bulk-card-body">
-        <div class="bulk-scope-opts">
-          <label class="bulk-scope-opt on" id="bulkScopeScanned">
-            <input type="radio" name="bulkScope" value="scanned" checked onchange="setBulkMode('scanned')" />
-            <span>
-              <span class="bulk-scope-name">🔒 اللي اتمسح بس (الافتراضي)</span>
-              <span class="bulk-scope-desc">الأصناف اللي اتمسحت هي اللي هتتقارن وتتعدّل.
-                أي صنف تاني في المتجر **مايتلمسش خالص**.</span>
-            </span>
-          </label>
-          <label class="bulk-scope-opt" id="bulkScopeSiblings">
-            <input type="radio" name="bulkScope" value="siblings" onchange="setBulkMode('siblings')" />
-            <span>
-              <span class="bulk-scope-name">👟 اللي اتمسح + باقي مقاسات نفس المنتج</span>
-              <span class="bulk-scope-desc">لو مسحت مقاس واحد على الأقل من منتج، باقي مقاساته
-                بتظهر «مش متسكن». مسحت 41 و42 و43؟ يبقى 44 و45 هيبانوا.
-                <b>المنتجات اللي ما لمستش منها حاجة خالص مش بتظهر أصلاً.</b></span>
-            </span>
-          </label>
-          <label class="bulk-scope-opt" id="bulkScopeFull">
-            <input type="radio" name="bulkScope" value="full" onchange="setBulkMode('full')" />
-            <span>
-              <span class="bulk-scope-name">🧹 جرد شامل للنطاق</span>
-              <span class="bulk-scope-desc">بيقول للأداة إنك مسحت **كل** اللي في النطاق المختار.
-                الصنف اللي ما اتمسحش ورصيده أكبر من صفر هيظهر «مش متسكن» و<b>رصيده هيتصفّر</b> لو حدّدته.</span>
-            </span>
-          </label>
-        </div>
-        <div class="uf-row">
-          <div class="uf-fg">
-            <span class="uf-flabel">النطاق (للجرد الشامل بس)</span>
-            <div class="ms-wrap" id="bmsWrap-scope"><button class="ms-btn" id="bmsBtn-scope" onclick="bmsToggle('scope',event)"><span id="bmsLbl-scope">كل البراندات</span><span>▾</span></button><div class="ms-list" id="bmsList-scope"></div></div>
-          </div>
-          <div class="uf-fg" style="flex:1;min-width:240px;align-self:flex-end;">
-            <div class="bulk-note warn" id="bulkScopeNote" style="display:none;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- ─── §BULK::results — القسم الموحّد: فلاتر + جدول ─── -->
     <div class="unified-section">
 
@@ -1217,7 +1163,7 @@ td.centered{text-align:center;}
 
       <div class="results-row" onclick="toggleBulkTable()">
         <span class="uf-arrow" id="bulkTblArrow">▼</span>
-        <span class="results-title">④ النتائج</span>
+        <span class="results-title">③ النتائج</span>
         <span class="results-count" id="bulkResultsCount">—</span>
         <span class="results-actions">
           <button class="bulk-btn primary" id="bulkCompareBtn" onclick="event.stopPropagation();runBulkCompare()" disabled>⚖️ قارن بشوبيفاي</button>
@@ -1406,7 +1352,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.1.0';
+const TOOL_VERSION = '6.2.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -1650,6 +1596,7 @@ function switchMainTab(tab){
   });
   if (tab === 'log' && !logLoaded) { logLoaded = true; initLogFilters(); fetchLog(); }
   if (tab === 'priority' && priorityData === null) loadPriorityData();
+  if (tab === 'bulk' && !bulkIndex && !isUpdatingBulk) openBulkStartPrompt();
 }
 
 // §AUTH-JS
@@ -2677,12 +2624,10 @@ async function exportLogXLSX(){
 // (الفهرس متحمّل مرة واحدة فمفيش نداء شبكة لكل مسحة)، وبعدين بتقارن المعدود
 // بالمتوقع من شوبيفاي وتنفّذ التعديلات دفعة واحدة.
 //
-// 🔴 أخطر سؤال في القسم ده: **الصنف اللي ما اتمسحش معناه إيه؟**
-//    · «اللي اتمسح بس» (الافتراضي) → معناه «مش جزء من الجرد ده» → مايتلمسش.
-//    · «جرد شامل»                   → معناه «مش موجود على الرف»  → رصيده يتصفّر.
-//    الفرق بين التفسيرين هو الفرق بين جرد سليم وتصفير المتجر كله. عشان كده
-//    الوضع الشامل **اختيار صريح**، وصفوفه **مش متحدّدة افتراضيًا**، ونافذة
-//    التأكيد بتقول عدد الأصناف اللي هتتصفّر بالرقم.
+// 🔴 النطاق ثابت: اللي اتمسح + باقي مقاسات نفس المنتج (التجميع بـ productId).
+//    الصنف اللي ما اتمسحش من منتج اتمسح منه حاجة بيظهر «مش متسكن» ومش متحدّد
+//    افتراضيًا. منتج ما اتلمسش خالص مش بيظهر. (وضعا «اللي اتمسح بس» و«الشامل»
+//    اتشالوا في v6.2.0.)
 
 // ─── §BULK-JS::state ───
 let bulkIndex      = null;      // { variants, byId, byBarcode, bySku, dupBarcodes, loadedAt, truncated }
@@ -2697,7 +2642,7 @@ let bulkProblems   = new Map(); // code → { code, count, reason, candidates }
 let bulkSelOverride= new Map(); // variantId → اختيار الموظف الصريح (بيغلب الافتراضي)
 let bulkDone       = new Set(); // الأصناف اللي اتنفّذت في الجلسة دي — مش بتترشّح تاني
 let bulkRows = [], bulkFiltered = [];
-let bulkMode = 'scanned';       // 'scanned' | 'full'
+// النطاق ثابت: اللي اتمسح + باقي مقاسات نفس المنتج (مفيش اختيار نطاق)
 let bulkScanActive = false;
 let isUpdatingBulk = false;     // القفل أثناء أي دفعة (Standards #43)
 let bulkSessionScans = 0, bulkBatchId = null;
@@ -2735,7 +2680,6 @@ const bmsState = {
   sel:    { selected: new Set(), options: [
               { v:'on', t:'المحدّد' }, { v:'off', t:'غير المحدّد' }, { v:'done', t:'اتنفّذ خلاص' } ],
             label: 'الكل', title: 'التحديد' },
-  scope:  { selected: new Set(), options: [], label: 'كل البراندات', title: 'النطاق' },
 };
 
 function bmsRenderList(key){
@@ -2766,13 +2710,11 @@ function bmsToggleItem(key, val){
   const st = bmsState[key];
   if (st.selected.has(val)) st.selected.delete(val); else st.selected.add(val);
   bmsRenderList(key); bmsSyncBtn(key); renderBulkChips();
-  if (key === 'scope') { computeBulkRows(); }
   applyBulkFilters();
 }
 function bmsClear(key){
   bmsState[key].selected.clear();
   bmsRenderList(key); bmsSyncBtn(key); renderBulkChips();
-  if (key === 'scope') { computeBulkRows(); }
   applyBulkFilters();
 }
 function bmsSyncBtn(key){
@@ -2837,10 +2779,22 @@ function toggleBulkTable(){
 // ⚠️ إعادة التحميل **بتحافظ على المسحات** عن قصد. واللي بيتمسح هو نتيجة
 //    المقارنة (`bulkLive`) — أرقامها بقت من لقطة أقدم من الفهرس الجديد،
 //    فالصفوف بترجع «لسه ما اتقارنش» لحد ما تضغط «قارن» تاني.
+// نافذة الدخول للتاب — الباركودات لازم تتحمّل قبل أي مسح عشان الأداة تعرف
+// كل مسحة بتاعة أنهي صنف.
+function openBulkStartPrompt(){
+  openConfirm('🧾 الجرد الجماعي',
+    '<div style="font-size:15px;font-weight:800;text-align:center;padding:8px 0;">هتبدأ الجرد؟</div>'
+    + '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-align:center;line-height:1.8;">'
+    + 'لازم تحمّل الباركودات الأول عشان الأداة تعرف كل مسحة بتاعة أنهي صنف.</div>',
+    'تحميل الباركودات للمنتجات كلها', 'accent-btn', () => loadBulkIndex());
+}
+function bulkLoadBtnClick(){ if (bulkIndex) loadBulkIndex(); else openBulkStartPrompt(); }
+
 async function loadBulkIndex(){
   if (isUpdatingBulk) return;
   const btn = document.getElementById('bulkLoadBtn');
   btn.disabled = true; const old = btn.textContent; btn.textContent = '⏳ جاري التحميل...';
+  showToast('⏳ جاري تحميل الباركودات...', 'neutral');
   try {
     const data = await apiGet('get_bulk_index');
     const variants = data.variants || [];
@@ -2873,8 +2827,7 @@ async function loadBulkIndex(){
     const vendors = [...new Set(variants.map(v => v.vendor || '—'))].sort((a,b) => a.localeCompare(b,'ar'));
     const opts = vendors.map(v => ({ v, t: v }));
     bmsState.vendor.options = opts;
-    bmsState.scope.options  = opts;
-    bmsRenderList('vendor'); bmsRenderList('scope');
+    bmsRenderList('vendor');
     bmsState.state.options = Object.keys(BULK_STATES).map(k => ({ v:k, t:BULK_STATES[k].label }));
     bmsRenderList('state'); bmsRenderList('sel');
 
@@ -2892,23 +2845,17 @@ async function loadBulkIndex(){
     showToast(`✓ الفهرس اتحمّل — ${variants.length.toLocaleString('en-US')} صنف`, 'success');
   } catch (e){
     showToast('تعذّر تحميل الفهرس: ' + e.message, 'error', 9000);
-  } finally { btn.disabled = false; btn.textContent = old; }
+  } finally { btn.disabled = false; btn.textContent = bulkIndex ? '🔄 إعادة تحميل الباركودات' : old; }
 }
 
-// بانر ثابت — التقصّ لازم يبان، والوضع الشامل بيتقفل معاه:
-// «جرد شامل» على فهرس ناقص ادّعاء، مش جرد.
+// بانر ثابت — التقصّ لازم يبان (ممكن يكون فيه مقاسات مش في الفهرس).
 function renderBulkIndexWarn(){
-  const box  = document.getElementById('bulkIndexWarn');
-  const full = document.getElementById('bulkScopeFull');
-  if (!bulkIndex || !bulkIndex.truncated){ box.style.display = 'none'; box.innerHTML = '';
-    full.classList.remove('locked'); full.querySelector('input').disabled = false; return; }
+  const box = document.getElementById('bulkIndexWarn');
+  if (!bulkIndex || !bulkIndex.truncated){ box.style.display = 'none'; box.innerHTML = ''; return; }
   box.innerHTML = `⚠️ <b>الفهرس اتقص</b> — الأداة وقفت عند <b>${Number(bulkIndex.cap || 0).toLocaleString('en-US')}</b> متغيّر، `
     + `يعني فيه أصناف في المتجر مش في الفهرس ده. المسح والمقارنة شغّالين عادي على اللي اتحمّل، `
-    + `لكن <b>وضع «الجرد الشامل» متقفل</b> — جرد شامل على فهرس ناقص بيقول «مفيش» على أصناف الأداة أصلاً ما شافتهاش.`;
+    + `لكن ممكن يكون فيه مقاسات من منتجاتك مش ظاهرة في الجدول.`;
   box.style.display = '';
-  full.classList.add('locked');
-  full.querySelector('input').disabled = true;
-  if (bulkMode === 'full') setBulkMode('scanned');
 }
 
 function updateBulkIndexTs(){
@@ -3091,37 +3038,6 @@ function clearBulkProblems(){
   showToast('اتشالوا من القايمة — التنفيذ اتفتح', 'neutral');
 }
 
-// ─── §BULK-JS::scope ───
-function setBulkMode(mode){
-  // الفهرس المقصوص بيقفل **الشامل بس**. وضع «باقي المقاسات» نطاقه اللي اتمسح
-  // فعلاً، فهو مابيدّعيش شمول ومابيتأثرش بالتقصّ نفس التأثير.
-  if (mode === 'full' && bulkIndex && bulkIndex.truncated){
-    showToast('الوضع الشامل متقفل — الفهرس اتقص', 'warning', 6000);
-    document.querySelector('input[name="bulkScope"][value="scanned"]').checked = true;
-    mode = 'scanned';
-  }
-  bulkMode = mode;
-  document.getElementById('bulkScopeScanned').classList.toggle('on',  mode === 'scanned');
-  document.getElementById('bulkScopeSiblings').classList.toggle('on', mode === 'siblings');
-  document.getElementById('bulkScopeFull').classList.toggle('on',     mode === 'full');
-  const note = document.getElementById('bulkScopeNote');
-  if (mode === 'siblings'){
-    note.style.display = '';
-    note.innerHTML = '👟 <b>وضع «باقي المقاسات» شغّال.</b> المقاس اللي ما اتمسحش من منتج مسحت منه '
-      + 'حاجة بيظهر «⚠️ مش متسكن»، والمقاس اللي رصيده صفر أصلاً بيظهر «✅ مظبوط». '
-      + 'صفوف «مش متسكن» <b>مش متحدّدة افتراضيًا</b> — حدّدها بس لو متأكد إن المقاس ده '
-      + 'مش على رف تاني.'
-      + (bulkIndex && bulkIndex.truncated
-          ? ' ⚠️ والفهرس مقصوص، فممكن يكون فيه مقاسات مش ظاهرة أصلاً.' : '');
-  } else if (mode === 'full'){
-    note.style.display = '';
-    note.innerHTML = '🧹 <b>الوضع الشامل شغّال.</b> أي صنف في النطاق ما اتمسحش ورصيده أكبر من صفر '
-      + 'هيظهر «⚠️ مش متسكن». الصفوف دي <b>مش متحدّدة افتراضيًا</b> — حدّدها بنفسك بس لو إنت متأكد '
-      + 'إنك مسحت كل حاجة في النطاق ده.';
-  } else { note.style.display = 'none'; note.innerHTML = ''; }
-  computeBulkRows(); applyBulkFilters();
-}
-
 // ─── §BULK-JS::compare — المقارنة ───
 //
 // المتوقع على الرف = available + committed − المغلَّف
@@ -3132,9 +3048,6 @@ function setBulkMode(mode){
 function computeBulkRows(){
   bulkRows = [];
   if (!bulkIndex) return;
-
-  const scopeSel = bmsState.scope.selected;
-  const inScope  = v => !scopeSel.size || scopeSel.has(v.vendor || '—');
 
   const build = (v, scanned, manual) => {
     const counted = scanned + manual;
@@ -3200,7 +3113,7 @@ function computeBulkRows(){
   //    بيدّي «باقي مقاسات نفس اللون» بالظبط، من غير أي تخمين على أسماء
   //    الأوبشنز، ومن غير ما لون ما اتلمسش يتفلت مع اللون اللي اتجرد.
   //    نفس التجميع اللي زرار «باقي مقاسات هذا المنتج» شغّال بيه من v3.0.0.
-  if (bulkMode === 'siblings'){
+  {
     const touched = new Set();
     for (const vid of bulkScans.keys()){
       const v = bulkIndex.byId.get(vid);
@@ -3211,15 +3124,6 @@ function computeBulkRows(){
       if (!touched.has(v.productId))  continue;
       // ⚠️ المقاس اللي رصيده صفر **بيدخل** هنا (بعكس الشامل) — النطاق صغير،
       //    وتسجيل «المقاس ده اتراجع وطلع صفر فعلاً» هو نص فايدة جرد الرف.
-      build(v, 0, 0);
-    }
-  }
-
-  if (bulkMode === 'full'){
-    for (const v of bulkIndex.variants){
-      if (bulkScans.has(v.variantId)) continue;
-      if (!inScope(v)) continue;
-      if (((v.available ?? 0) + (v.committed ?? 0)) <= 0) continue;   // رصيده صفر أصلاً
       build(v, 0, 0);
     }
   }
@@ -3433,7 +3337,7 @@ function renderBulkNotices(){
   if (bulkOrphanScans)
     out.push(`⚠️ <b>${bulkOrphanScans.toLocaleString('en-US')}</b> قطعة اتمسحت على أصناف مش موجودة في الفهرس الحالي `
       + `(اتشالت من شوبيفاي أو بقت Suspended بعد آخر تحميل) — <b>مش ظاهرة في الجدول ومش هتتنفّذ</b>.`);
-  if (bulkMode === 'siblings' && bulkIndex){
+  if (bulkIndex){
     const touched = new Set();
     for (const vid of bulkScans.keys()){
       const v = bulkIndex.byId.get(vid);
@@ -3609,7 +3513,7 @@ function confirmBulkExecute(){
   if (nMissing)
     body += `<div class="confirm-note">⚠️ من ضمنهم <b>${nMissing.toLocaleString('en-US')}</b> صنف «مش متسكن» `
           + `(ما اتمسحش خالص) — رصيدهم هينزل لحد المغلَّف بس. `
-          + `${bulkMode === 'siblings' ? 'دول مقاسات من منتجات مسحت منها حاجة تانية. ' : ''}`
+          + `دول مقاسات من منتجات مسحت منها حاجة تانية. `
           + `لو فيهم مقاس على رف تاني ما مسحتوش، شيله من التحديد الأول.</div>`;
   if (nNeg)
     body += `<div class="confirm-note">⚠️ <b>${nNeg.toLocaleString('en-US')}</b> صنف رصيده المتاح هيبقى بالسالب بعد التعديل — `
