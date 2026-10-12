@@ -6,6 +6,11 @@
 //
 // skills: worker-builder v3.8.0 · constants v3.1.0 · shopify-graphql-helper v1.0.0 — 24-09-2026
 //
+// CHANGELOG v6.1.2 (12-10-2026) — الأداة بتجرد بغض النظر عن حالة المنتج
+//   🟠 اتشال استثناء «غير ACTIVE» من `getBulkIndex` و`getAllVariantsForAudit`:
+//      منتج DRAFT/ARCHIVED عليه رصيد بيتجرد عادي (كان بيطلع «مش موجود في الفهرس»
+//      رغم إن الباركود سليم). باقي الاستثناءات: بدون SKU · not tracked · Suspended.
+//
 // CHANGELOG v6.1.1 (24-09-2026) — الطبقة ٥: الحارس الديناميكي لقيم اللوج
 //   🟢 استبدال check-log-values.mjs بالنسخة المصلَّحة (بتمسك object shorthand
 //      `{ tool, type }` كمان — النسخة القديمة كانت بتعدّي عليه في صمت)
@@ -81,7 +86,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const TOOL_NAME      = 'inventory_audit';
-const WORKER_VERSION = '6.1.1';
+const WORKER_VERSION = '6.1.2';
 
 // قيم `type` المسجّلة لهذه الأداة في ecommoda-constants §7:
 //   ok · adjustment · login · logout
@@ -659,7 +664,7 @@ async function lookupBarcode(env, token, barcode) {
 
 // ── Get all variants for Priority Audit Queue ────────────────────────────────
 // بدون collection filter — كل المنتجات من المتجر
-// يستثني: غير ACTIVE · بدون SKU · Inventory not tracked · تاج Suspended
+// يستثني: بدون SKU · Inventory not tracked · تاج Suspended (مش بيبص على حالة المنتج)
 // v5.0.0: سقف صفحات + truncated — السحب المفتوح كان ممكن يرجّع قايمة ناقصة
 //         (أو يستهلك وقت الطلب كله) من غير أي إشارة.
 async function getAllVariantsForAudit(env, token) {
@@ -707,13 +712,12 @@ async function getAllVariantsForAudit(env, token) {
     scanned += nodes.length;
 
     for (const v of nodes) {
-      // استثناء 1: غير ACTIVE
-      if (v.product?.status !== 'ACTIVE') continue;
-      // استثناء 2: بدون SKU
+      // (حالة المنتج مش معيار — DRAFT/ARCHIVED بيتجردوا عادي، من v6.1.2)
+      // استثناء 1: بدون SKU
       if (!v.sku?.trim()) continue;
-      // استثناء 3: Inventory not tracked
+      // استثناء 2: Inventory not tracked
       if (!v.inventoryItem?.tracked) continue;
-      // استثناء 4: تاج Suspended
+      // استثناء 3: تاج Suspended
       if ((v.product?.tags || []).includes('Suspended')) continue;
 
       const levels = v.inventoryItem?.inventoryLevels?.nodes?.[0]?.quantities || [];
@@ -1031,7 +1035,8 @@ const BULK_ADJUST_REASON = 'cycle_count_available';
 // ─── §BULK::getBulkIndex — فهرس الباركود لجلسة المسح ───
 // بيرجّع **كل** متغيّر صالح للجرد مرة واحدة، عشان كل مسحة تبقى بحث محلي في
 // Map بدل نداء شبكة. نفس استثناءات `getAllVariantsForAudit`:
-//   غير ACTIVE · بدون SKU · Inventory not tracked · تاج Suspended
+//   بدون SKU · Inventory not tracked · تاج Suspended
+//   (حالة المنتج مش معيار — DRAFT/ARCHIVED بيدخلوا الفهرس)
 //
 // 🔴 `dupBarcodes` مش تفصيلة — هو الحارس اللي بيمنع أخطر فشل صامت في القسم ده:
 //    باركود واحد على أكتر من متغيّر (مقاسين بنفس الباركود مثلاً). من غيره
@@ -1090,7 +1095,7 @@ async function getBulkIndex(env, token) {
     scanned += nodes.length;
 
     for (const v of nodes) {
-      if (v.product?.status !== 'ACTIVE')                    continue;
+      // حالة المنتج مش معيار (DRAFT/ARCHIVED بيتجردوا) — من v6.1.2
       if (!v.sku?.trim())                                    continue;
       if (!v.inventoryItem?.tracked)                         continue;
       if ((v.product?.tags || []).includes('Suspended'))      continue;
