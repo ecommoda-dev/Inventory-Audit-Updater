@@ -544,9 +544,6 @@ td.centered{text-align:center;}
 
 
 /* ─── الجدول ─── */
-.bulk-manual-cell{width:74px;height:30px;padding:0 8px;border:1.5px solid var(--border-strong);border-radius:6px;background:var(--surface);font-family:var(--font-body);font-size:12.5px;font-weight:700;color:var(--text-primary);text-align:center;outline:none;}
-.bulk-manual-cell:focus{border-color:var(--accent);}
-.bulk-manual-cell:disabled{opacity:.5;cursor:not-allowed;}
 
 .bulk-state{display:inline-block;padding:2px 9px;border-radius:5px;font-size:11.5px;font-weight:700;white-space:nowrap;}
 /* مربعات الحالة في شريط الإحصاء = فلتر «الحالة» نفسه (v6.7.0) — بتكتب في BULK_T.ms.state */
@@ -752,6 +749,7 @@ col.hl{background:var(--accent-light);}
     <div class="eco-modal-body changelog-body">
       <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.12.0</span><span class="cl-ver-date">12-10-2026</span></div>
       <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> بعد تنفيذ التعديلات بنجاح كامل، قسم ③ النتائج بيختفي والجلسة بتبدأ من جديد تلقائيًا (لو فيه فشل أو تحذير أو رصيد اتغيّر، الجدول بيفضل للمراجعة). وعمود «يدوي» في الجدول بقى للعرض بس — مفيش تعديل رقم يدوي من الجدول.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> حالة «مش متسكن» اتشالت — المقاس اللي ما اتمسحش من منتج اتمسح منه حاجة بيتحسب معدوده صفر، فبيظهر «🔴 عجز» (ومتحدّد تلقائيًا) لو شوبيفاي شايفة منه رصيد، و«✅ مظبوط» لو صفر.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>نافذة تأكيد الجرد الجماعي:</b> العنوان بقى «نافذة تأكيد تسجيل الجرد الجماعي»، الصفوف منظّمة بمسافات وخطوط فاصلة، زرار التأكيد أخضر وزرار الإلغاء بإطار أحمر.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span>«ابدأ المسح» بقى «ابدأ الجرد» و«إيقاف المسح» بقى «إيقاف الجرد».</span></li>
@@ -3613,8 +3611,7 @@ function renderBulkTable(){
       <td><span class="log-sku-badge">${esc(r.sku)}</span></td>
       <td>${esc(r.vendor)}</td>
       <td class="col-num">${r.scanned.toLocaleString('en-US')}</td>
-      <td><input type="number" min="0" class="bulk-manual-cell" value="${r.manual}" ${isUpdatingBulk || done ? 'disabled' : ''}
-           onchange="setBulkManualIdx(${i}, this.value)"></td>
+      <td class="col-num">${r.manual.toLocaleString('en-US')}</td>
       <td class="col-num">${r.counted.toLocaleString('en-US')}</td>
       <td class="col-num" title="${r.compared ? `available ${r.available} + committed ${r.committed} − مغلَّف ${r.packed}` : 'رقم مبدئي من وقت تحميل الباركودات — اضغط «قارن بشوبيفاي»'}">${
         r.compared ? r.expected.toLocaleString('en-US')
@@ -3943,6 +3940,9 @@ async function executeBulk(){
     computeBulkRows(); applyBulkFilters(); updateBulkScanStats();
   }
   showBulkSummary(counts, batch.length, doneCount, netErr);
+  // لو الدفعة كلها نجحت: الجدول بيختفي والجلسة بتبدأ من جديد. لو في فشل/تحذير/رفض
+  // بسبب تغيّر الرصيد، الجدول بيفضل عشان الموظف يراجع الصفوف دي ويعيد عليها.
+  if (!(counts.error || counts.warning || counts.mismatched || counts.stale || netErr)) resetBulkSession(true);
 }
 
 // نافذة ملخّص **إجبارية** — التوست بيختفي في ثواني وفي مخزن دي مدة كافية
@@ -3994,7 +3994,7 @@ function confirmResetBulkSession(){
     + `التعديلات اللي اتنفّذت خلاص على شوبيفاي <b>مابتترجعش</b> — دي مسح للشاشة بس.</div>`,
     'امسح وابدأ من جديد', 'btn-red', resetBulkSession);
 }
-function resetBulkSession(){
+function resetBulkSession(silent){
   bulkScans.clear(); bulkLive.clear(); bulkResults.clear(); bulkComparedAt = null;
   bulkProblems.clear(); bulkSelOverride.clear(); bulkDone.clear();
   bulkSessionScans = 0; bulkBatchId = null;
@@ -4004,7 +4004,7 @@ function resetBulkSession(){
   setBulkLive('', '', null);
   renderBulkProblems(); updateBulkScanStats();
   computeBulkRows(); applyBulkFilters();
-  showToast('جلسة جديدة — الشاشة اتمسحت', 'neutral');
+  if (silent !== true) showToast('جلسة جديدة — الشاشة اتمسحت', 'neutral');
 }
 
 // ─── §BULK-JS::export ───
