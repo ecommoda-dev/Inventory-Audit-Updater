@@ -747,8 +747,9 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.12.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.12.1</span><span class="cl-ver-date">13-10-2026</span></div>
       <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>أسماء وأيقونات التابات:</b> «الجرد» بقى «🏷️ جرد فردي»، و«الجرد الجماعي» بقى «📚 جرد جماعي».</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> بعد تنفيذ التعديلات بنجاح كامل، قسم ③ النتائج بيختفي والجلسة بتبدأ من جديد تلقائيًا (لو فيه فشل أو تحذير أو رصيد اتغيّر، الجدول بيفضل للمراجعة). وعمود «يدوي» في الجدول بقى للعرض بس — مفيش تعديل رقم يدوي من الجدول.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> حالة «مش متسكن» اتشالت — المقاس اللي ما اتمسحش من منتج اتمسح منه حاجة بيتحسب معدوده صفر، فبيظهر «🔴 عجز» (ومتحدّد تلقائيًا) لو شوبيفاي شايفة منه رصيد، و«✅ مظبوط» لو صفر.</span></li>
       </ul>
@@ -1076,9 +1077,9 @@ col.hl{background:var(--accent-light);}
 </div>
 <div class="main-tabs-wrap">
   <div class="main-tabs-bar">
-    <button class="main-tab-btn active" id="mainTabAudit" onclick="switchMainTab('audit')"><span class="msb-icon">📦</span><span>الجرد</span></button>
+    <button class="main-tab-btn active" id="mainTabAudit" onclick="switchMainTab('audit')"><span class="msb-icon">🏷️</span><span>جرد فردي</span></button>
     <button class="main-tab-btn" id="mainTabPriority" onclick="switchMainTab('priority')"><span class="msb-icon">🎯</span><span>أولويات الجرد</span></button>
-    <button class="main-tab-btn" id="mainTabBulk" onclick="switchMainTab('bulk')"><span class="msb-icon">🧾</span><span>الجرد الجماعي</span></button>
+    <button class="main-tab-btn" id="mainTabBulk" onclick="switchMainTab('bulk')"><span class="msb-icon">📚</span><span>جرد جماعي</span></button>
     <button class="main-tab-btn" id="mainTabLog" onclick="switchMainTab('log')"><span class="msb-icon">📜</span><span>سجل العمليات</span></button>
   </div>
 </div>
@@ -1451,7 +1452,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.12.0';
+const TOOL_VERSION = '6.12.1';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
