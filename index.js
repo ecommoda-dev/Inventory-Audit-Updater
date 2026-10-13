@@ -1,14 +1,18 @@
 // ══════════════════════════════════════════════════════════════
 // §HEADER
-// inventory-audit-updater-worker — EcomModa v6.2.1
+// inventory-audit-updater-worker — EcomModa v6.2.2
 // Account: ecommoda-dev (762c353004e8472b20261fba273bfe8d)
 // D1: DB → ecommoda-dev-logs
 //
 // skills: worker-builder v3.8.0 · constants v4.3.0 · shopify-graphql-helper v2.4.0 — 13-10-2026
 //
+// CHANGELOG v6.2.2 (13-10-2026) — شيل تاج Suspended القديم
+//   🟠 الاستبعاد بقى بميتافيلد `custom.suspended` بس. التاج كان على منتجات
+//      Archived مش موقوفة (shopify-graphql-helper Step 12)، فمنتجات Archived
+//      عليها التاج بترجع تدخل الأداة (متسقة مع v6.1.2: حالة المنتج مش معيار).
+//
 // CHANGELOG v6.2.1 (13-10-2026) — الموقوف مش موجود في الأداة خالص
-//   🔴 `isSuspendedNode` (ميتافيلد `custom.suspended` على المنتج/المقاس + تاج
-//      Suspended) بتستبعد الصنف من **كل** مسارات الاكتشاف: `list_skus` ·
+//   🔴 `isSuspendedNode` (ميتافيلد `custom.suspended` على المنتج/المقاس) بتستبعد الصنف من **كل** مسارات الاكتشاف: `list_skus` ·
 //      `lookup_barcode` · `get_audit_priorities` · `get_bulk_index`.
 //      فبالتالي مش بيتعدّ كمان في الباركودات المتكررة.
 //
@@ -96,7 +100,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const TOOL_NAME      = 'inventory_audit';
-const WORKER_VERSION = '6.2.1';
+const WORKER_VERSION = '6.2.2';
 
 // قيم `type` المسجّلة لهذه الأداة في ecommoda-constants §7:
 //   ok · adjustment · login · logout
@@ -593,7 +597,7 @@ async function shopifyGQL(env, token, query, variables = {}, label = 'shopifyGQL
 
 // ── List SKUs ────────────────────────────────────────────────────────────────
 // v4.0.0: إضافة product.vendor (اسم البراند)
-// v3.1.0: إضافة product.tags + فلتر Suspended
+// v3.1.0: إضافة product.tags
 async function listSkus(env, token, search = '') {
   let queryStr = '';
   if (search) {
@@ -676,7 +680,7 @@ async function lookupBarcode(env, token, barcode) {
 
 // ── Get all variants for Priority Audit Queue ────────────────────────────────
 // بدون collection filter — كل المنتجات من المتجر
-// يستثني: بدون SKU · Inventory not tracked · تاج Suspended (مش بيبص على حالة المنتج)
+// يستثني: بدون SKU · Inventory not tracked · موقوف (custom.suspended) (مش بيبص على حالة المنتج)
 // v5.0.0: سقف صفحات + truncated — السحب المفتوح كان ممكن يرجّع قايمة ناقصة
 //         (أو يستهلك وقت الطلب كله) من غير أي إشارة.
 async function getAllVariantsForAudit(env, token) {
@@ -730,7 +734,7 @@ async function getAllVariantsForAudit(env, token) {
       if (!v.sku?.trim()) continue;
       // استثناء 2: Inventory not tracked
       if (!v.inventoryItem?.tracked) continue;
-      // استثناء 3: موقوف (ميتافيلد custom.suspended أو تاج Suspended)
+      // استثناء 3: موقوف (ميتافيلد custom.suspended)
       if (isSuspendedNode(v)) continue;
 
       const levels = v.inventoryItem?.inventoryLevels?.nodes?.[0]?.quantities || [];
@@ -1048,7 +1052,7 @@ const BULK_ADJUST_REASON = 'cycle_count_available';
 // ─── §BULK::getBulkIndex — فهرس الباركود لجلسة المسح ───
 // بيرجّع **كل** متغيّر صالح للجرد مرة واحدة، عشان كل مسحة تبقى بحث محلي في
 // Map بدل نداء شبكة. نفس استثناءات `getAllVariantsForAudit`:
-//   بدون SKU · Inventory not tracked · تاج Suspended
+//   بدون SKU · Inventory not tracked · موقوف (custom.suspended)
 //   (حالة المنتج مش معيار — DRAFT/ARCHIVED بيدخلوا الفهرس)
 //
 // 🔴 `dupBarcodes` مش تفصيلة — هو الحارس اللي بيمنع أخطر فشل صامت في القسم ده:
@@ -1149,13 +1153,12 @@ async function getBulkIndex(env, token) {
 }
 
 // 🔴 الموقوف = مش موجود. المنتج أو المقاس معلَّم `custom.suspended = "true"`
-// (القيمة نص مش boolean) **أو** تاج `Suspended` (قاعدة قديمة، محفوظة).
+// (القيمة نص مش boolean). تاج `Suspended` القديم اتشال في v6.2.2.
 // العلامة نسخة مخزّنة مش مصدر حقيقة (constants §1) — الموقوف بعد 13-10-2026
 // غير معلّم لحد ما تتضبط علامته. كل مسارات اكتشاف الأصناف لازم تعدّي من هنا.
 function isSuspendedNode(v) {
   return v.suspended?.value === 'true'
-      || v.product?.suspended?.value === 'true'
-      || (v.product?.tags || []).includes('Suspended');
+      || v.product?.suspended?.value === 'true';
 }
 
 // باركود بيتكرر على أكتر من متغيّر → اسمه + الـ SKUs بتاعته، عشان الواجهة
