@@ -9,6 +9,7 @@
 و**جرد جماعي** لرفوف كاملة بالسكانر في جلسة واحدة.
 
 - **الواجهة:** GitHub Pages (`index.html` — v6.2.1)
+- **جوّه الهب:** `Inventory-Audit-Updater.html` في [`Warehouse-Operations-Center`](https://github.com/ecommoda-dev/Warehouse-Operations-Center) — نفس الـ Worker، والواجهة هنا لسه نقطة رجوع (راجع `CLAUDE.md`).
 - **الـ Worker:** Cloudflare Workers (`index.js` — v6.1.1) — Shopify GraphQL Admin API + D1 logging
 
 تفاصيل الإعداد والقواعد والفخاخ الخاصة بالأداة → [`CLAUDE.md`](./CLAUDE.md).
