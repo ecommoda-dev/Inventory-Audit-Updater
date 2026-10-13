@@ -733,8 +733,9 @@ col.hl{background:var(--accent-light);}
 <div class="modal-overlay" id="bulkLoadOverlay" role="alertdialog" aria-modal="true" aria-live="polite">
   <div class="modal bulk-load-modal">
     <div class="loading-spinner"></div>
-    <div class="bulk-load-title">⏳ جاري تحميل الباركودات...</div>
-    <div class="bulk-load-sub">استنى لحد ما التحميل يخلص — ممكن ياخد شوية وقت لو المتجر كبير.</div>
+    <div class="bulk-load-title">⏳ انتظر ثواني لتحميل الباركودات من شوبيفاي...</div>
+    <div class="bulk-load-sub">الوقت المتوقع 15 - 30 ثانية (نصف دقيقة).</div>
+    <div style="margin-top:16px;"><button class="btn-modal-cancel cancel-red" id="bulkLoadCancelBtn" onclick="cancelBulkLoad()">إلغاء</button></div>
   </div>
 </div>
 
@@ -1558,13 +1559,18 @@ function formatTimeForExport(iso){
 const API_TIMEOUT_MS = 90000;   // طويلة عن قصد: القطع بدري أسوأ من الانتظار
 
 async function apiRequest(url, opts = {}){
+  const { cancelSignal, ...fetchOpts } = opts;   // إلغاء يدوي من المستخدم (اختياري)
   const ctrl  = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), API_TIMEOUT_MS);
+  if (cancelSignal) cancelSignal.addEventListener('abort', () => ctrl.abort());
   let resp, text;
   try {
-    resp = await fetch(url, { ...opts, signal: ctrl.signal });
+    resp = await fetch(url, { ...fetchOpts, signal: ctrl.signal });
     text = await resp.text();
   } catch (e) {
+    if (e.name === 'AbortError' && cancelSignal && cancelSignal.aborted){
+      const ce = new Error('اتلغى'); ce.cancelled = true; throw ce;
+    }
     if (e.name === 'AbortError')
       throw new Error(`الـ Worker ما ردّش خلال ${API_TIMEOUT_MS/1000} ثانية — `
         + `**راجع تاب السجل قبل ما تعيد المحاولة**: ممكن تكون العملية تمّت`);
@@ -1586,10 +1592,10 @@ function apiUrl(action, params = {}){
   Object.entries(params).forEach(([k,v]) => u.searchParams.set(k, String(v)));
   return u.toString();
 }
-async function apiGet(action, params = {}){
+async function apiGet(action, params = {}, cancelSignal){
   const { secret } = getConfig();
   if (!secret) { openSettings(); throw new Error('الإعدادات غير مكتملة — أدخل الـ Worker Secret'); }
-  return apiRequest(apiUrl(action, params), { headers: { 'Authorization': 'Bearer ' + secret } });
+  return apiRequest(apiUrl(action, params), { headers: { 'Authorization': 'Bearer ' + secret }, cancelSignal });
 }
 async function apiPost(action, body = {}){
   const { secret } = getConfig();
@@ -3118,25 +3124,22 @@ tblReg(BULK_T);
 // ⚠️ إعادة التحميل **بتحافظ على المسحات** عن قصد. واللي بيتمسح هو نتيجة
 //    المقارنة (`bulkLive`) — أرقامها بقت من لقطة أقدم من الفهرس الجديد،
 //    فالصفوف بترجع «لسه ما اتقارنش» لحد ما تضغط «قارن» تاني.
-// نافذة الدخول للتاب — الباركودات لازم تتحمّل قبل أي مسح عشان الأداة تعرف
-// كل مسحة بتاعة أنهي صنف.
-function openBulkStartPrompt(){
-  openConfirm('🧾 الجرد الجماعي',
-    '<div style="font-size:15px;font-weight:800;text-align:center;padding:8px 0;">هتبدأ الجرد؟</div>'
-    + '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-align:center;line-height:1.8;">'
-    + 'لازم تحمّل الباركودات الأول عشان الأداة تعرف كل مسحة بتاعة أنهي صنف.</div>',
-    'تحميل الباركودات للمنتجات كلها', 'accent-btn', () => loadBulkIndex());
-}
-function bulkLoadBtnClick(){ if (bulkIndex) loadBulkIndex(); else openBulkStartPrompt(); }
+// الدخول للتاب — الباركودات لازم تتحمّل قبل أي مسح عشان الأداة تعرف
+// كل مسحة بتاعة أنهي صنف. التحميل بيبدأ تلقائيًا (من غير سؤال) وفيه زرار إلغاء.
+let bulkLoadAbort = null;
+function openBulkStartPrompt(){ loadBulkIndex(); }
+function bulkLoadBtnClick(){ loadBulkIndex(); }
+function cancelBulkLoad(){ if (bulkLoadAbort) bulkLoadAbort.abort(); }
 
 async function loadBulkIndex(){
-  if (isUpdatingBulk) return;
+  if (isUpdatingBulk || bulkLoadAbort) return;
   const btn = document.getElementById('bulkLoadBtn');
   btn.disabled = true; const old = btn.textContent; btn.textContent = '⏳ جاري التحميل...';
   const loadOv = document.getElementById('bulkLoadOverlay');
-  loadOv.classList.add('open');                // نافذة بتفضل لحد ما التحميل يخلص (نجاح أو فشل)
+  loadOv.classList.add('open');                // نافذة بتفضل لحد ما التحميل يخلص (نجاح أو فشل أو إلغاء)
+  bulkLoadAbort = new AbortController();
   try {
-    const data = await apiGet('get_bulk_index');
+    const data = await apiGet('get_bulk_index', {}, bulkLoadAbort.signal);
     const variants = data.variants || [];
     const byId = new Map(), byBarcode = new Map(), bySku = new Map();
     for (const v of variants){
@@ -3187,8 +3190,10 @@ async function loadBulkIndex(){
     computeBulkRows(); applyBulkFilters();
     showToast(`✓ الفهرس اتحمّل — ${variants.length.toLocaleString('en-US')} صنف`, 'success');
   } catch (e){
-    showToast('تعذّر تحميل الفهرس: ' + e.message, 'error', 9000);
+    if (e.cancelled) showToast('اتلغى تحميل الباركودات', 'neutral');
+    else showToast('تعذّر تحميل الفهرس: ' + e.message, 'error', 9000);
   } finally {
+    bulkLoadAbort = null;
     loadOv.classList.remove('open');
     btn.disabled = false; btn.textContent = bulkIndex ? '🔄 إعادة تحميل الباركودات' : old;
   }
