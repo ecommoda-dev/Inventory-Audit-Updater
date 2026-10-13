@@ -760,7 +760,11 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.13.0</span><span class="cl-ver-date">13-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.14.0</span><span class="cl-ver-date">13-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الباركودات المتكررة:</b> قاعدة «نفس الـ SKU مش بتظهر» اتشالت. بدلها: المنتج أو المقاس الموقوف (<code>custom.suspended = true</code>) مش بيتعدّ في التكرار، فباركود على صنف موقوف وصنف شغّال مبقاش بيظهر في القايمة ولا بيروح لـ«أكواد فيها مشكلة» — المسحة بتتعدّ على الصنف الشغّال. (محتاج Worker v6.2.0)</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.13.0</span><span class="cl-ver-date">13-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>تاب «📦 الجرد» واحد:</b> دمج «جرد فردي» و«أولويات الجرد» و«جرد جماعي» في تاب واحد بيفتح على 3 مربعات للاختيار، وفي كل قسم زرار «خيارات الجرد الأخرى». سجل العمليات تاب منفصل زي ما هو.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>أسماء وأيقونات التابات:</b> «الجرد» بقى «🏷️ جرد فردي»، و«الجرد الجماعي» بقى «📚 جرد جماعي».</span></li>
@@ -1475,12 +1479,12 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.13.0';
+const TOOL_VERSION = '6.14.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
 // على Worker 6.0.0: `bulk_compare` هيرجّع «Unknown action».
-const MIN_WORKER_VERSION = '6.1.0';
+const MIN_WORKER_VERSION = '6.2.0';
 
 // السر الوحيد اللي بيتخزّن جهة العميل.
 const LS_SECRET = 'stockaudit_worker_secret';
@@ -3300,12 +3304,15 @@ function processBulkScanCode(raw){
   const code = String(raw || '').trim();
   if (!bulkIndex){ showToast('حمّل الباركودات الأول', 'warning'); return; }
 
-  const list = bulkIndex.byBarcode.get(code) || [];
-  if (list.length === 0){ addBulkProblem(code, 'unknown', []); return; }
-  // 🔴 باركود على أكتر من صنف: الأداة **مش هتخمّن**. من غير الحارس ده المسحة
+  const all = bulkIndex.byBarcode.get(code) || [];
+  if (all.length === 0){ addBulkProblem(code, 'unknown', []); return; }
+  // الموقوف (`custom.suspended`) مش بيدخل الغموض: لو فيه صنف شغّال على نفس الباركود
+  // المسحة بتروح له. لو كلهم موقوفين بنسيب القايمة زي ما هي.
+  const live = all.filter(x => !x.suspended);
+  const list = live.length ? live : all;
+  // 🔴 باركود على أكتر من صنف شغّال: الأداة **مش هتخمّن**. من غير الحارس ده المسحة
   //    كانت هتتحسب على أول صنف نلاقيه، والرصيد يتعدّل على صنف تاني خالص.
-  //    الاستثناء: كل المتغيّرات بنفس الـ SKU بالظبط (EXACT) → مش غموض، بنعدّ على أولها.
-  if (list.length > 1 && new Set(list.map(x => x.sku)).size > 1){ addBulkProblem(code, 'ambiguous', list); return; }
+  if (list.length > 1){ addBulkProblem(code, 'ambiguous', list); return; }
 
   const v = list[0];
   if (bulkDone.has(v.variantId)){
@@ -3700,12 +3707,11 @@ function renderBulkNotices(){
 }
 
 // تفاصيل الباركودات المتكررة: كل باركود وتحته الأصناف اللي شايلاه (SKU · المنتج)
-// الباركود المتكرر على متغيّرات بنفس الـ SKU بالظبط (EXACT) مش بيتعرض —
-// بيظهر بس لو فيه على الأقل SKUين مختلفين.
+// المتغيّرات الموقوفة (`custom.suspended`) مستبعدة من التكرار في الـ Worker (v6.2.0)،
+// فالقايمة دي هي `dupBarcodes` زي ما رجعت — مفيش فلترة تانية هنا.
 function bulkDupList(){
   if (!bulkIndex) return [];
-  return Object.entries(bulkIndex.dupBarcodes || {})
-    .filter(([, list]) => new Set(list.map(c => c.sku)).size > 1);
+  return Object.entries(bulkIndex.dupBarcodes || {});
 }
 
 function closeBulkDupDetails(){ document.getElementById('dupOverlay').classList.remove('open'); }
