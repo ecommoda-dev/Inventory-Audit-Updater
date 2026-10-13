@@ -509,6 +509,9 @@ td.centered{text-align:center;}
 .bulk-scan-card.closed .bulk-card-hdr{border-bottom-color:transparent;}
 .bulk-scan-card.closed:not(.started) .bulk-card-title{display:none;}
 .bulk-scan-card:not(.started) #bulkResetBtn{display:none;}
+.bulk-scan-card.closed:not(.started) .bulk-card-hdr{justify-content:center;padding:36px 16px;}
+.bulk-scan-card.closed:not(.started) .bulk-card-spacer{display:none;}
+.bulk-scan-card.closed:not(.started) #bulkScanToggle{padding:18px 64px;font-size:20px;font-weight:800;border-radius:var(--radius);min-width:min(320px,100%);}
 .bulk-btn.new{background:var(--accent-light);border-color:var(--accent-border);color:var(--accent);}
 .bulk-btn.new:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
 
@@ -733,8 +736,9 @@ col.hl{background:var(--accent-light);}
 <div class="modal-overlay" id="bulkLoadOverlay" role="alertdialog" aria-modal="true" aria-live="polite">
   <div class="modal bulk-load-modal">
     <div class="loading-spinner"></div>
-    <div class="bulk-load-title">⏳ جاري تحميل الباركودات...</div>
-    <div class="bulk-load-sub">استنى لحد ما التحميل يخلص — ممكن ياخد شوية وقت لو المتجر كبير.</div>
+    <div class="bulk-load-title">⏳ انتظر ثواني لتحميل الباركودات من شوبيفاي...</div>
+    <div class="bulk-load-sub">الوقت المتوقع 15 - 30 ثانية (نصف دقيقة).</div>
+    <div style="margin-top:16px;"><button class="btn-modal-cancel cancel-red" id="bulkLoadCancelBtn" onclick="cancelBulkLoad()">إلغاء</button></div>
   </div>
 </div>
 
@@ -758,7 +762,7 @@ col.hl{background:var(--accent-light);}
     <div class="eco-modal-body changelog-body">
       <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.13.0</span><span class="cl-ver-date">13-10-2026</span></div>
       <ul class="cl-items">
-        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>تاب «📦 الجرد» واحد:</b> دمج «جرد فردي» و«أولويات الجرد» و«جرد جماعي» في تاب واحد بيفتح على 3 مربعات للاختيار، وفي كل قسم زرار «رجوع لخيارات الجرد». سجل العمليات تاب منفصل زي ما هو.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>تاب «📦 الجرد» واحد:</b> دمج «جرد فردي» و«أولويات الجرد» و«جرد جماعي» في تاب واحد بيفتح على 3 مربعات للاختيار، وفي كل قسم زرار «خيارات الجرد الأخرى». سجل العمليات تاب منفصل زي ما هو.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>أسماء وأيقونات التابات:</b> «الجرد» بقى «🏷️ جرد فردي»، و«الجرد الجماعي» بقى «📚 جرد جماعي».</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> بعد تنفيذ التعديلات بنجاح كامل، قسم ③ النتائج بيختفي والجلسة بتبدأ من جديد تلقائيًا (لو فيه فشل أو تحذير أو رصيد اتغيّر، الجدول بيفضل للمراجعة). وعمود «يدوي» في الجدول بقى للعرض بس — مفيش تعديل رقم يدوي من الجدول.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> حالة «مش متسكن» اتشالت — المقاس اللي ما اتمسحش من منتج اتمسح منه حاجة بيتحسب معدوده صفر، فبيظهر «🔴 عجز» (ومتحدّد تلقائيًا) لو شوبيفاي شايفة منه رصيد، و«✅ مظبوط» لو صفر.</span></li>
@@ -1102,7 +1106,7 @@ col.hl{background:var(--accent-light);}
   </div>
 </div>
 <div id="auditTabContent" style="display:none;">
-  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ رجوع لخيارات الجرد</button>
+  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ خيارات الجرد الأخرى</button>
   <div class="search-card">
     <div class="search-tabs">
       <button class="tab-btn active" id="tabSku" onclick="switchTab('sku')">🔍 بحث بالـ SKU</button>
@@ -1212,7 +1216,7 @@ col.hl{background:var(--accent-light);}
 
 <!-- §TOOL — Priority Tab -->
 <div id="priorityTabContent" style="display:none;">
-  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ رجوع لخيارات الجرد</button>
+  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ خيارات الجرد الأخرى</button>
   <div class="priority-wrap">
     <div class="priority-toolbar">
       <button class="priority-refresh-btn" id="priorityRefreshBtn" onclick="loadPriorityData()">↺ تحديث القائمة</button>
@@ -1257,7 +1261,7 @@ col.hl{background:var(--accent-light);}
 
 <!-- §BULK — Bulk Audit Tab (v6.0.0) -->
 <div id="bulkTabContent" style="display:none;">
-  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ رجوع لخيارات الجرد</button>
+  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ خيارات الجرد الأخرى</button>
   <div class="bulk-wrap">
 
     <!-- ─── §BULK::index — فهرس المنتجات ─── -->
@@ -1558,13 +1562,18 @@ function formatTimeForExport(iso){
 const API_TIMEOUT_MS = 90000;   // طويلة عن قصد: القطع بدري أسوأ من الانتظار
 
 async function apiRequest(url, opts = {}){
+  const { cancelSignal, ...fetchOpts } = opts;   // إلغاء يدوي من المستخدم (اختياري)
   const ctrl  = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), API_TIMEOUT_MS);
+  if (cancelSignal) cancelSignal.addEventListener('abort', () => ctrl.abort());
   let resp, text;
   try {
-    resp = await fetch(url, { ...opts, signal: ctrl.signal });
+    resp = await fetch(url, { ...fetchOpts, signal: ctrl.signal });
     text = await resp.text();
   } catch (e) {
+    if (e.name === 'AbortError' && cancelSignal && cancelSignal.aborted){
+      const ce = new Error('اتلغى'); ce.cancelled = true; throw ce;
+    }
     if (e.name === 'AbortError')
       throw new Error(`الـ Worker ما ردّش خلال ${API_TIMEOUT_MS/1000} ثانية — `
         + `**راجع تاب السجل قبل ما تعيد المحاولة**: ممكن تكون العملية تمّت`);
@@ -1586,10 +1595,10 @@ function apiUrl(action, params = {}){
   Object.entries(params).forEach(([k,v]) => u.searchParams.set(k, String(v)));
   return u.toString();
 }
-async function apiGet(action, params = {}){
+async function apiGet(action, params = {}, cancelSignal){
   const { secret } = getConfig();
   if (!secret) { openSettings(); throw new Error('الإعدادات غير مكتملة — أدخل الـ Worker Secret'); }
-  return apiRequest(apiUrl(action, params), { headers: { 'Authorization': 'Bearer ' + secret } });
+  return apiRequest(apiUrl(action, params), { headers: { 'Authorization': 'Bearer ' + secret }, cancelSignal });
 }
 async function apiPost(action, body = {}){
   const { secret } = getConfig();
@@ -3118,25 +3127,22 @@ tblReg(BULK_T);
 // ⚠️ إعادة التحميل **بتحافظ على المسحات** عن قصد. واللي بيتمسح هو نتيجة
 //    المقارنة (`bulkLive`) — أرقامها بقت من لقطة أقدم من الفهرس الجديد،
 //    فالصفوف بترجع «لسه ما اتقارنش» لحد ما تضغط «قارن» تاني.
-// نافذة الدخول للتاب — الباركودات لازم تتحمّل قبل أي مسح عشان الأداة تعرف
-// كل مسحة بتاعة أنهي صنف.
-function openBulkStartPrompt(){
-  openConfirm('🧾 الجرد الجماعي',
-    '<div style="font-size:15px;font-weight:800;text-align:center;padding:8px 0;">هتبدأ الجرد؟</div>'
-    + '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-align:center;line-height:1.8;">'
-    + 'لازم تحمّل الباركودات الأول عشان الأداة تعرف كل مسحة بتاعة أنهي صنف.</div>',
-    'تحميل الباركودات للمنتجات كلها', 'accent-btn', () => loadBulkIndex());
-}
-function bulkLoadBtnClick(){ if (bulkIndex) loadBulkIndex(); else openBulkStartPrompt(); }
+// الدخول للتاب — الباركودات لازم تتحمّل قبل أي مسح عشان الأداة تعرف
+// كل مسحة بتاعة أنهي صنف. التحميل بيبدأ تلقائيًا (من غير سؤال) وفيه زرار إلغاء.
+let bulkLoadAbort = null;
+function openBulkStartPrompt(){ loadBulkIndex(); }
+function bulkLoadBtnClick(){ loadBulkIndex(); }
+function cancelBulkLoad(){ if (bulkLoadAbort) bulkLoadAbort.abort(); }
 
 async function loadBulkIndex(){
-  if (isUpdatingBulk) return;
+  if (isUpdatingBulk || bulkLoadAbort) return;
   const btn = document.getElementById('bulkLoadBtn');
   btn.disabled = true; const old = btn.textContent; btn.textContent = '⏳ جاري التحميل...';
   const loadOv = document.getElementById('bulkLoadOverlay');
-  loadOv.classList.add('open');                // نافذة بتفضل لحد ما التحميل يخلص (نجاح أو فشل)
+  loadOv.classList.add('open');                // نافذة بتفضل لحد ما التحميل يخلص (نجاح أو فشل أو إلغاء)
+  bulkLoadAbort = new AbortController();
   try {
-    const data = await apiGet('get_bulk_index');
+    const data = await apiGet('get_bulk_index', {}, bulkLoadAbort.signal);
     const variants = data.variants || [];
     const byId = new Map(), byBarcode = new Map(), bySku = new Map();
     for (const v of variants){
@@ -3172,23 +3178,19 @@ async function loadBulkIndex(){
 
     renderBulkIndexWarn();
     updateBulkIndexTs();
-    document.getElementById('bulkIdxStat').innerHTML =
-      `الفهرس: <b>${variants.length.toLocaleString('en-US')}</b> صنف صالح للجرد · `
-      + `<b>${byBarcode.size.toLocaleString('en-US')}</b> باركود`
-      + (bulkIndex.skippedNoLevel
-          ? ` · <b>${bulkIndex.skippedNoLevel.toLocaleString('en-US')}</b> صنف مش مخزّن في الموقع ده (اتشالوا)`
-          : '')
-      + (bulkDupList().length
-          ? ` · <button class="log-refresh-btn" style="padding:2px 10px;" onclick="showBulkDupDetails()" title="الباركود المتكرر على أكتر من صنف: مسحه بيروح لقايمة «أكواد فيها مشكلة» وتضيف الصنف الصح يدويًا بالـ SKU">`
-            + `ℹ️ <b>${bulkDupList().length.toLocaleString('en-US')}</b> باركود متكرر · 📋 التفاصيل</button>`
-          : '');
+    document.getElementById('bulkIdxStat').innerHTML = bulkDupList().length
+      ? `<button class="log-refresh-btn" style="padding:2px 10px;" onclick="showBulkDupDetails()" title="الباركود المتكرر على أكتر من صنف: مسحه بيروح لقايمة «أكواد فيها مشكلة» وتضيف الصنف الصح يدويًا بالـ SKU">`
+        + `ℹ️ <b>${bulkDupList().length.toLocaleString('en-US')}</b> باركود متكرر · 📋 التفاصيل</button>`
+      : '';
     document.getElementById('bulkScanToggle').disabled = false;
     document.getElementById('bulkResetBtn').disabled   = false;
     computeBulkRows(); applyBulkFilters();
     showToast(`✓ الفهرس اتحمّل — ${variants.length.toLocaleString('en-US')} صنف`, 'success');
   } catch (e){
-    showToast('تعذّر تحميل الفهرس: ' + e.message, 'error', 9000);
+    if (e.cancelled) showToast('اتلغى تحميل الباركودات', 'neutral');
+    else showToast('تعذّر تحميل الفهرس: ' + e.message, 'error', 9000);
   } finally {
+    bulkLoadAbort = null;
     loadOv.classList.remove('open');
     btn.disabled = false; btn.textContent = bulkIndex ? '🔄 إعادة تحميل الباركودات' : old;
   }
