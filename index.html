@@ -427,12 +427,11 @@ td.centered{text-align:center;}
 .dup-tbl{width:100%;border-collapse:collapse;font-size:13px;}
 .dup-tbl th{position:sticky;top:0;z-index:1;background:var(--surface-2);color:var(--text-secondary);font-size:12px;font-weight:700;text-align:start;padding:9px 12px;border-bottom:1.5px solid var(--border-strong);white-space:nowrap;}
 .dup-tbl td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
-.dup-tbl tr.dup-first td{border-top:1.5px solid var(--border-strong);}
-.dup-tbl tr.dup-first:first-child td{border-top:none;}
 .dup-tbl a.dup-sku{color:var(--accent);font-weight:700;font-family:var(--font-mono);text-decoration:none;white-space:nowrap;}
 .dup-tbl a.dup-sku:hover{text-decoration:underline;}
 .dup-tbl .dup-bc{white-space:nowrap;}
-.dup-tbl .dup-prod{min-width:200px;}
+.dup-tbl .dup-skus{display:flex;flex-wrap:wrap;gap:6px 22px;}
+.dup-tbl .dup-size{color:var(--danger,#dc2626);}
 @media(max-width:600px){.dup-tbl th,.dup-tbl td{padding:7px 8px;font-size:12px;}}
 .log-sku-badge{display:inline-block;padding:2px 8px;border-radius:5px;background:var(--accent-light);border:1px solid var(--accent-border);color:var(--accent);font-size:12px;font-weight:700;}
 .log-type-badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:12px;font-weight:700;white-space:nowrap;}
@@ -760,7 +759,11 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.14.2</span><span class="cl-ver-date">13-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.14.3</span><span class="cl-ver-date">13-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>نافذة الباركودات المتكررة:</b> عمود المنتج وسطر «N أصناف» اتشالوا، وأصناف نفس الباركود جنب بعض في صف واحد، والمقاس (آخر جزء من الـ SKU) بالأحمر.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.14.2</span><span class="cl-ver-date">13-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>تاج Suspended القديم اتشال:</b> استبعاد الموقوف بقى بالميتافيلد <code>custom.suspended = true</code> بس. منتجات Archived اللي عليها التاج بترجع تدخل الجرد.</span></li>
       </ul>
@@ -1487,7 +1490,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.14.2';
+const TOOL_VERSION = '6.14.3';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -3721,28 +3724,30 @@ function bulkDupList(){
 
 function closeBulkDupDetails(){ document.getElementById('dupOverlay').classList.remove('open'); }
 
-// تفاصيل الباركودات المتكررة: جدول (الباركود · SKU كرابط لصفحة الـ variant · المنتج · المقاس)
+// تفاصيل الباركودات المتكررة: صف لكل باركود — الباركود · أصنافه جنب بعض (SKU رابط لصفحة الـ variant، آخر جزء فيه = المقاس بالأحمر)
 function showBulkDupDetails(){
   const dups = bulkDupList();
   if (!dups.length) return;
   const num = n => Number(n).toLocaleString('en-US');
   const gidTail = g => String(g || '').split('/').pop();
-  const rows = dups.map(([bc, list]) => list.map((c, i) => {
-    const v   = bulkIndex.byId.get(c.variantId) || {};
-    const pid = gidTail(v.productId), vid = gidTail(c.variantId);
-    const sku = c.sku
-      ? (pid && vid
-          ? `<a class="dup-sku" href="https://admin.shopify.com/store/6c7e1a-53/products/${esc(pid)}/variants/${esc(vid)}" target="_blank" rel="noopener">${esc(c.sku)}</a>`
-          : `<span class="dup-sku">${esc(c.sku)}</span>`)
-      : '—';
-    const first = i === 0
-      ? `<td class="dup-bc" rowspan="${list.length}"><span class="log-sku-badge">${esc(bc)}</span><div class="bulk-card-sub">${num(list.length)} أصناف</div></td>` : '';
-    return `<tr${i === 0 ? ' class="dup-first"' : ''}>${first}<td>${sku}</td>`
-      + `<td class="dup-prod">${esc(c.productTitle || '—')}</td><td>${esc(v.variantTitle || '—')}</td></tr>`;
-  }).join('')).join('');
+  const skuHtml = sku => {
+    const k = sku.lastIndexOf(' / ');
+    return k < 0 ? esc(sku) : `${esc(sku.slice(0, k + 3))}<span class="dup-size">${esc(sku.slice(k + 3))}</span>`;
+  };
+  const rows = dups.map(([bc, list]) => {
+    const items = list.map(c => {
+      const v   = bulkIndex.byId.get(c.variantId) || {};
+      const pid = gidTail(v.productId), vid = gidTail(c.variantId);
+      if (!c.sku) return '<span class="dup-sku">—</span>';
+      return pid && vid
+        ? `<a class="dup-sku" href="https://admin.shopify.com/store/6c7e1a-53/products/${esc(pid)}/variants/${esc(vid)}" target="_blank" rel="noopener">${skuHtml(c.sku)}</a>`
+        : `<span class="dup-sku">${skuHtml(c.sku)}</span>`;
+    }).join('');
+    return `<tr><td class="dup-bc"><span class="log-sku-badge">${esc(bc)}</span></td><td><div class="dup-skus">${items}</div></td></tr>`;
+  }).join('');
   document.getElementById('dupHeader').innerHTML = `ℹ️ باركودات متكررة (${num(dups.length)})`;
   document.getElementById('dupBody').innerHTML =
-    `<table class="dup-tbl"><thead><tr><th>الباركود</th><th>SKU</th><th>المنتج</th><th>المقاس</th></tr></thead><tbody>${rows}</tbody></table>`;
+    `<table class="dup-tbl"><thead><tr><th>الباركود</th><th>SKU</th></tr></thead><tbody>${rows}</tbody></table>`;
   document.getElementById('dupOverlay').classList.add('open');
 }
 
