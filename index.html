@@ -123,6 +123,15 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary)
 .main-tab-btn .msb-icon{font-size:16px;}
 .main-tab-btn.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
 .main-tab-btn:not(.active):hover{background:var(--accent-light);color:var(--accent);border-color:var(--accent-border);}
+.inv-hub{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.inv-hub-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:28px 16px;text-align:center;background:var(--surface);border:1.5px solid var(--border-strong);border-radius:var(--radius);box-shadow:var(--shadow);cursor:pointer;font-family:var(--font-body);color:var(--text-primary);transition:background .15s,border-color .15s;}
+.inv-hub-card:hover{background:var(--accent-light);border-color:var(--accent-border);}
+.inv-hub-icon{font-size:36px;line-height:1;}
+.inv-hub-title{font-size:16px;font-weight:800;}
+.inv-hub-desc{font-size:12px;color:var(--text-secondary);}
+.inv-back-btn{display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;padding:8px 14px;border-radius:10px;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text-secondary);cursor:pointer;border:1.5px solid var(--border-strong);background:var(--surface-2);}
+.inv-back-btn:hover{background:var(--accent-light);color:var(--accent);border-color:var(--accent-border);}
+@media(max-width:640px){.inv-hub{grid-template-columns:1fr;}}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
 .modal-overlay.open{opacity:1;pointer-events:all;}
 .modal{background:var(--surface);border-radius:var(--radius);width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;transform:translateY(14px);transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
@@ -747,8 +756,10 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.12.0</span><span class="cl-ver-date">12-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.13.0</span><span class="cl-ver-date">13-10-2026</span></div>
       <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>تاب «📦 الجرد» واحد:</b> دمج «جرد فردي» و«أولويات الجرد» و«جرد جماعي» في تاب واحد بيفتح على 3 مربعات للاختيار، وفي كل قسم زرار «رجوع لخيارات الجرد». سجل العمليات تاب منفصل زي ما هو.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>أسماء وأيقونات التابات:</b> «الجرد» بقى «🏷️ جرد فردي»، و«الجرد الجماعي» بقى «📚 جرد جماعي».</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> بعد تنفيذ التعديلات بنجاح كامل، قسم ③ النتائج بيختفي والجلسة بتبدأ من جديد تلقائيًا (لو فيه فشل أو تحذير أو رصيد اتغيّر، الجدول بيفضل للمراجعة). وعمود «يدوي» في الجدول بقى للعرض بس — مفيش تعديل رقم يدوي من الجدول.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> حالة «مش متسكن» اتشالت — المقاس اللي ما اتمسحش من منتج اتمسح منه حاجة بيتحسب معدوده صفر، فبيظهر «🔴 عجز» (ومتحدّد تلقائيًا) لو شوبيفاي شايفة منه رصيد، و«✅ مظبوط» لو صفر.</span></li>
       </ul>
@@ -1076,15 +1087,22 @@ col.hl{background:var(--accent-light);}
 </div>
 <div class="main-tabs-wrap">
   <div class="main-tabs-bar">
-    <button class="main-tab-btn active" id="mainTabAudit" onclick="switchMainTab('audit')"><span class="msb-icon">📦</span><span>الجرد</span></button>
-    <button class="main-tab-btn" id="mainTabPriority" onclick="switchMainTab('priority')"><span class="msb-icon">🎯</span><span>أولويات الجرد</span></button>
-    <button class="main-tab-btn" id="mainTabBulk" onclick="switchMainTab('bulk')"><span class="msb-icon">🧾</span><span>الجرد الجماعي</span></button>
+    <button class="main-tab-btn active" id="mainTabInventory" onclick="switchMainTab('hub')"><span class="msb-icon">📦</span><span>الجرد</span></button>
     <button class="main-tab-btn" id="mainTabLog" onclick="switchMainTab('log')"><span class="msb-icon">📜</span><span>سجل العمليات</span></button>
   </div>
 </div>
 
 <!-- §TOOL — Audit Tab -->
-<div id="auditTabContent">
+<!-- §INV-HUB — شاشة اختيار نوع الجرد -->
+<div id="hubTabContent">
+  <div class="inv-hub">
+    <button class="inv-hub-card" onclick="switchMainTab('audit')"><span class="inv-hub-icon">🏷️</span><span class="inv-hub-title">جرد فردي</span><span class="inv-hub-desc">مراجعة وضبط رصيد صنف بالـ SKU أو الباركود</span></button>
+    <button class="inv-hub-card" onclick="switchMainTab('priority')"><span class="inv-hub-icon">🎯</span><span class="inv-hub-title">أولويات الجرد</span><span class="inv-hub-desc">الأصناف المرتّبة P0–P6 حسب الأولوية</span></button>
+    <button class="inv-hub-card" onclick="switchMainTab('bulk')"><span class="inv-hub-icon">📚</span><span class="inv-hub-title">جرد جماعي</span><span class="inv-hub-desc">مسح رفوف كاملة بالسكانر في جلسة واحدة</span></button>
+  </div>
+</div>
+<div id="auditTabContent" style="display:none;">
+  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ رجوع لخيارات الجرد</button>
   <div class="search-card">
     <div class="search-tabs">
       <button class="tab-btn active" id="tabSku" onclick="switchTab('sku')">🔍 بحث بالـ SKU</button>
@@ -1194,6 +1212,7 @@ col.hl{background:var(--accent-light);}
 
 <!-- §TOOL — Priority Tab -->
 <div id="priorityTabContent" style="display:none;">
+  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ رجوع لخيارات الجرد</button>
   <div class="priority-wrap">
     <div class="priority-toolbar">
       <button class="priority-refresh-btn" id="priorityRefreshBtn" onclick="loadPriorityData()">↺ تحديث القائمة</button>
@@ -1238,6 +1257,7 @@ col.hl{background:var(--accent-light);}
 
 <!-- §BULK — Bulk Audit Tab (v6.0.0) -->
 <div id="bulkTabContent" style="display:none;">
+  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ رجوع لخيارات الجرد</button>
   <div class="bulk-wrap">
 
     <!-- ─── §BULK::index — فهرس المنتجات ─── -->
@@ -1451,7 +1471,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.12.0';
+const TOOL_VERSION = '6.13.0';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
@@ -1688,11 +1708,12 @@ async function runDiag(){
 }
 
 function switchMainTab(tab){
-  ['audit','priority','bulk','log'].forEach(t => {
-    const tid = 'mainTab' + t.charAt(0).toUpperCase() + t.slice(1);
-    document.getElementById(tid).classList.toggle('active', t === tab);
+  // تاب «الجرد» الرئيسي = شاشة الاختيار (hub) + الأقسام التلاتة (audit · priority · bulk)
+  ['hub','audit','priority','bulk','log'].forEach(t => {
     document.getElementById(t + 'TabContent').style.display = t === tab ? 'block' : 'none';
   });
+  document.getElementById('mainTabInventory').classList.toggle('active', tab !== 'log');
+  document.getElementById('mainTabLog').classList.toggle('active', tab === 'log');
   if (tab === 'log' && !logLoaded) { logLoaded = true; initLogFilters(); fetchLog(); }
   if (tab === 'priority' && priorityData === null) loadPriorityData();
   if (tab === 'bulk' && !bulkIndex && !isUpdatingBulk) openBulkStartPrompt();
