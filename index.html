@@ -3178,16 +3178,10 @@ async function loadBulkIndex(){
 
     renderBulkIndexWarn();
     updateBulkIndexTs();
-    document.getElementById('bulkIdxStat').innerHTML =
-      `الفهرس: <b>${variants.length.toLocaleString('en-US')}</b> صنف صالح للجرد · `
-      + `<b>${byBarcode.size.toLocaleString('en-US')}</b> باركود`
-      + (bulkIndex.skippedNoLevel
-          ? ` · <b>${bulkIndex.skippedNoLevel.toLocaleString('en-US')}</b> صنف مش مخزّن في الموقع ده (اتشالوا)`
-          : '')
-      + (bulkDupList().length
-          ? ` · <button class="log-refresh-btn" style="padding:2px 10px;" onclick="showBulkDupDetails()" title="الباركود المتكرر على أكتر من صنف: مسحه بيروح لقايمة «أكواد فيها مشكلة» وتضيف الصنف الصح يدويًا بالـ SKU">`
-            + `ℹ️ <b>${bulkDupList().length.toLocaleString('en-US')}</b> باركود متكرر · 📋 التفاصيل</button>`
-          : '');
+    document.getElementById('bulkIdxStat').innerHTML = bulkDupList().length
+      ? `<button class="log-refresh-btn" style="padding:2px 10px;" onclick="showBulkDupDetails()" title="الباركود المتكرر على أكتر من صنف: مسحه بيروح لقايمة «أكواد فيها مشكلة» وتضيف الصنف الصح يدويًا بالـ SKU">`
+        + `ℹ️ <b>${bulkDupList().length.toLocaleString('en-US')}</b> باركود متكرر · 📋 التفاصيل</button>`
+      : '';
     document.getElementById('bulkScanToggle').disabled = false;
     document.getElementById('bulkResetBtn').disabled   = false;
     computeBulkRows(); applyBulkFilters();
