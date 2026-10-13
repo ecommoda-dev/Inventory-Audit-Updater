@@ -509,6 +509,9 @@ td.centered{text-align:center;}
 .bulk-scan-card.closed .bulk-card-hdr{border-bottom-color:transparent;}
 .bulk-scan-card.closed:not(.started) .bulk-card-title{display:none;}
 .bulk-scan-card:not(.started) #bulkResetBtn{display:none;}
+.bulk-scan-card.closed:not(.started) .bulk-card-hdr{justify-content:center;padding:36px 16px;}
+.bulk-scan-card.closed:not(.started) .bulk-card-spacer{display:none;}
+.bulk-scan-card.closed:not(.started) #bulkScanToggle{padding:18px 64px;font-size:20px;font-weight:800;border-radius:var(--radius);min-width:min(320px,100%);}
 .bulk-btn.new{background:var(--accent-light);border-color:var(--accent-border);color:var(--accent);}
 .bulk-btn.new:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
 
@@ -759,7 +762,7 @@ col.hl{background:var(--accent-light);}
     <div class="eco-modal-body changelog-body">
       <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.13.0</span><span class="cl-ver-date">13-10-2026</span></div>
       <ul class="cl-items">
-        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>تاب «📦 الجرد» واحد:</b> دمج «جرد فردي» و«أولويات الجرد» و«جرد جماعي» في تاب واحد بيفتح على 3 مربعات للاختيار، وفي كل قسم زرار «رجوع لخيارات الجرد». سجل العمليات تاب منفصل زي ما هو.</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>تاب «📦 الجرد» واحد:</b> دمج «جرد فردي» و«أولويات الجرد» و«جرد جماعي» في تاب واحد بيفتح على 3 مربعات للاختيار، وفي كل قسم زرار «خيارات الجرد الأخرى». سجل العمليات تاب منفصل زي ما هو.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>أسماء وأيقونات التابات:</b> «الجرد» بقى «🏷️ جرد فردي»، و«الجرد الجماعي» بقى «📚 جرد جماعي».</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> بعد تنفيذ التعديلات بنجاح كامل، قسم ③ النتائج بيختفي والجلسة بتبدأ من جديد تلقائيًا (لو فيه فشل أو تحذير أو رصيد اتغيّر، الجدول بيفضل للمراجعة). وعمود «يدوي» في الجدول بقى للعرض بس — مفيش تعديل رقم يدوي من الجدول.</span></li>
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الجرد الجماعي:</b> حالة «مش متسكن» اتشالت — المقاس اللي ما اتمسحش من منتج اتمسح منه حاجة بيتحسب معدوده صفر، فبيظهر «🔴 عجز» (ومتحدّد تلقائيًا) لو شوبيفاي شايفة منه رصيد، و«✅ مظبوط» لو صفر.</span></li>
@@ -1103,7 +1106,7 @@ col.hl{background:var(--accent-light);}
   </div>
 </div>
 <div id="auditTabContent" style="display:none;">
-  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ رجوع لخيارات الجرد</button>
+  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ خيارات الجرد الأخرى</button>
   <div class="search-card">
     <div class="search-tabs">
       <button class="tab-btn active" id="tabSku" onclick="switchTab('sku')">🔍 بحث بالـ SKU</button>
@@ -1213,7 +1216,7 @@ col.hl{background:var(--accent-light);}
 
 <!-- §TOOL — Priority Tab -->
 <div id="priorityTabContent" style="display:none;">
-  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ رجوع لخيارات الجرد</button>
+  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ خيارات الجرد الأخرى</button>
   <div class="priority-wrap">
     <div class="priority-toolbar">
       <button class="priority-refresh-btn" id="priorityRefreshBtn" onclick="loadPriorityData()">↺ تحديث القائمة</button>
@@ -1258,7 +1261,7 @@ col.hl{background:var(--accent-light);}
 
 <!-- §BULK — Bulk Audit Tab (v6.0.0) -->
 <div id="bulkTabContent" style="display:none;">
-  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ رجوع لخيارات الجرد</button>
+  <button class="inv-back-btn" onclick="switchMainTab('hub')">↩ خيارات الجرد الأخرى</button>
   <div class="bulk-wrap">
 
     <!-- ─── §BULK::index — فهرس المنتجات ─── -->
