@@ -760,9 +760,13 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.14.1</span><span class="cl-ver-date">13-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.14.2</span><span class="cl-ver-date">13-10-2026</span></div>
       <ul class="cl-items">
-        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الصنف الموقوف (Suspended) مش موجود في الأداة خالص:</b> المنتج أو المقاس اللي عليه <code>custom.suspended = true</code> (أو تاج Suspended) مبيظهرش في البحث ولا بالباركود ولا في أولويات الجرد ولا في الجرد الجماعي ولا في الباركودات المتكررة. (محتاج Worker v6.2.1)</span></li>
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>تاج Suspended القديم اتشال:</b> استبعاد الموقوف بقى بالميتافيلد <code>custom.suspended = true</code> بس. منتجات Archived اللي عليها التاج بترجع تدخل الجرد.</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.14.1</span><span class="cl-ver-date">13-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الصنف الموقوف (Suspended) مش موجود في الأداة خالص:</b> المنتج أو المقاس اللي عليه <code>custom.suspended = true</code> مبيظهرش في البحث ولا بالباركود ولا في أولويات الجرد ولا في الجرد الجماعي ولا في الباركودات المتكررة. (محتاج Worker v6.2.1)</span></li>
       </ul>
       <div class="cl-version"><span class="cl-ver-badge">v6.14.0</span><span class="cl-ver-date">13-10-2026</span></div>
       <ul class="cl-items">
@@ -940,7 +944,7 @@ col.hl{background:var(--accent-light);}
         <div class="about-sec-body">
           <p>أداة مراجعة وضبط الجرد — بتعرض أولويات الجرد تلقائيًا (P0–P6) بفلاتر
              متقدمة وجرد متسلسل، وبتستثني من الـ Worker المنتجات غير المتتبعة
-             (<code>inventoryItem.tracked = false</code>) وكل المنتجات بتاج <code>Suspended</code>.</p>
+             (<code>inventoryItem.tracked = false</code>) وكل المنتج أو المقاس الموقوف (<code>custom.suspended = true</code>).</p>
 
           <h4>المستخدمون</h4>
           <p>موظفو المخزن — جرد المنتجات وضبط الكميات ومتابعة الأولويات.</p>
@@ -1483,7 +1487,7 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.14.1';
+const TOOL_VERSION = '6.14.2';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
