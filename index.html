@@ -760,7 +760,11 @@ col.hl{background:var(--accent-light);}
   <div class="eco-modal">
     <div class="eco-modal-hdr">📋 سجل التحديثات<button class="modal-close-x" onclick="closeChangelog()">✕</button></div>
     <div class="eco-modal-body changelog-body">
-      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.14.0</span><span class="cl-ver-date">13-10-2026</span></div>
+      <div class="cl-version"><span class="cl-ver-badge" id="clLatestBadge">v6.14.1</span><span class="cl-ver-date">13-10-2026</span></div>
+      <ul class="cl-items">
+        <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الصنف الموقوف (Suspended) مش موجود في الأداة خالص:</b> المنتج أو المقاس اللي عليه <code>custom.suspended = true</code> (أو تاج Suspended) مبيظهرش في البحث ولا بالباركود ولا في أولويات الجرد ولا في الجرد الجماعي ولا في الباركودات المتكررة. (محتاج Worker v6.2.1)</span></li>
+      </ul>
+      <div class="cl-version"><span class="cl-ver-badge">v6.14.0</span><span class="cl-ver-date">13-10-2026</span></div>
       <ul class="cl-items">
         <li class="cl-item"><span class="cl-item-label cl-change">تغيير</span><span><b>الباركودات المتكررة:</b> قاعدة «نفس الـ SKU مش بتظهر» اتشالت. بدلها: المنتج أو المقاس الموقوف (<code>custom.suspended = true</code>) مش بيتعدّ في التكرار، فباركود على صنف موقوف وصنف شغّال مبقاش بيظهر في القايمة ولا بيروح لـ«أكواد فيها مشكلة» — المسحة بتتعدّ على الصنف الشغّال. (محتاج Worker v6.2.0)</span></li>
       </ul>
@@ -1479,12 +1483,12 @@ const WORKER_URL = 'https://inventory-audit-updater-worker.ecommoda-dev.workers.
 
 // مصدر واحد لرقم النسخة (Standards #15) — الهيدر والـ changelog وشاشة الدخول
 // كلهم بيتملوا منه عن طريق renderVersionUI().
-const TOOL_VERSION = '6.14.0';
+const TOOL_VERSION = '6.14.1';
 // أقل نسخة Worker الواجهة دي بتشتغل معاها. تاب الجرد الجماعي بيقرا
 // `bulk_compare` (بـ `at` و`available`/`committed`/`packed` في رد واحد) —
 // اتضاف في 6.1.0 وحلّ محل `bulk_shelf_check`. الواجهة دي **مش هتشتغل**
 // على Worker 6.0.0: `bulk_compare` هيرجّع «Unknown action».
-const MIN_WORKER_VERSION = '6.2.0';
+const MIN_WORKER_VERSION = '6.2.1';
 
 // السر الوحيد اللي بيتخزّن جهة العميل.
 const LS_SECRET = 'stockaudit_worker_secret';
@@ -3304,13 +3308,10 @@ function processBulkScanCode(raw){
   const code = String(raw || '').trim();
   if (!bulkIndex){ showToast('حمّل الباركودات الأول', 'warning'); return; }
 
-  const all = bulkIndex.byBarcode.get(code) || [];
-  if (all.length === 0){ addBulkProblem(code, 'unknown', []); return; }
-  // الموقوف (`custom.suspended`) مش بيدخل الغموض: لو فيه صنف شغّال على نفس الباركود
-  // المسحة بتروح له. لو كلهم موقوفين بنسيب القايمة زي ما هي.
-  const live = all.filter(x => !x.suspended);
-  const list = live.length ? live : all;
-  // 🔴 باركود على أكتر من صنف شغّال: الأداة **مش هتخمّن**. من غير الحارس ده المسحة
+  const list = bulkIndex.byBarcode.get(code) || [];
+  if (list.length === 0){ addBulkProblem(code, 'unknown', []); return; }
+  // (الموقوف مش في الفهرس أصلاً — Worker v6.2.1)
+  // 🔴 باركود على أكتر من صنف: الأداة **مش هتخمّن**. من غير الحارس ده المسحة
   //    كانت هتتحسب على أول صنف نلاقيه، والرصيد يتعدّل على صنف تاني خالص.
   if (list.length > 1){ addBulkProblem(code, 'ambiguous', list); return; }
 
@@ -3707,7 +3708,7 @@ function renderBulkNotices(){
 }
 
 // تفاصيل الباركودات المتكررة: كل باركود وتحته الأصناف اللي شايلاه (SKU · المنتج)
-// المتغيّرات الموقوفة (`custom.suspended`) مستبعدة من التكرار في الـ Worker (v6.2.0)،
+// المتغيّرات الموقوفة (`custom.suspended`) مستبعدة من الفهرس كله في الـ Worker (v6.2.1)،
 // فالقايمة دي هي `dupBarcodes` زي ما رجعت — مفيش فلترة تانية هنا.
 function bulkDupList(){
   if (!bulkIndex) return [];

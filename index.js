@@ -1,15 +1,20 @@
 // ══════════════════════════════════════════════════════════════
 // §HEADER
-// inventory-audit-updater-worker — EcomModa v6.2.0
+// inventory-audit-updater-worker — EcomModa v6.2.1
 // Account: ecommoda-dev (762c353004e8472b20261fba273bfe8d)
 // D1: DB → ecommoda-dev-logs
 //
 // skills: worker-builder v3.8.0 · constants v4.3.0 · shopify-graphql-helper v2.4.0 — 13-10-2026
 //
+// CHANGELOG v6.2.1 (13-10-2026) — الموقوف مش موجود في الأداة خالص
+//   🔴 `isSuspendedNode` (ميتافيلد `custom.suspended` على المنتج/المقاس + تاج
+//      Suspended) بتستبعد الصنف من **كل** مسارات الاكتشاف: `list_skus` ·
+//      `lookup_barcode` · `get_audit_priorities` · `get_bulk_index`.
+//      فبالتالي مش بيتعدّ كمان في الباركودات المتكررة.
+//
 // CHANGELOG v6.2.0 (13-10-2026) — الباركودات المتكررة: استبعاد الموقوف
-//   🟠 `get_bulk_index` بيرجّع `suspended` لكل متغيّر (ميتافيلد `custom.suspended`
-//      = "true" على المنتج أو المقاس)، و`dupBarcodes` مابقتش بتعدّ المتغيّرات
-//      الموقوفة. الاستعلام زوّد ميتافيلدين (متغيّر + منتج) على خفّته.
+//   🟠 `dupBarcodes` مابقتش بتعدّ المتغيّرات الموقوفة (ميتافيلد `custom.suspended`
+//      = "true" على المنتج أو المقاس). اتعمّمت في v6.2.1 (الموقوف برّه الفهرس كله).
 //
 // CHANGELOG v6.1.2 (12-10-2026) — الأداة بتجرد بغض النظر عن حالة المنتج
 //   🟠 اتشال استثناء «غير ACTIVE» من `getBulkIndex` و`getAllVariantsForAudit`:
@@ -79,7 +84,7 @@
 //   - listSkus / lookupBarcode: إضافة product.vendor للـ GraphQL query
 // CHANGELOG v3.1.0:
 //   - getAllVariantsForAudit: inventoryItem.tracked + product.tags + product.title
-//   - استثناء Inventory not tracked وتاج Suspended
+//   - استثناء Inventory not tracked والموقوف (ميتافيلد/تاج Suspended)
 // CHANGELOG v3.0.0:
 //   - endpoint جديد: get_audit_priorities
 // CHANGELOG v2.5.0:
@@ -91,7 +96,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const TOOL_NAME      = 'inventory_audit';
-const WORKER_VERSION = '6.2.0';
+const WORKER_VERSION = '6.2.1';
 
 // قيم `type` المسجّلة لهذه الأداة في ecommoda-constants §7:
 //   ok · adjustment · login · logout
@@ -604,9 +609,11 @@ async function listSkus(env, token, search = '') {
       productVariants(first: 100, query: $q, sortKey: SKU) {
         nodes {
           id sku barcode displayName
+          suspended: metafield(namespace: "custom", key: "suspended") { value }
           selectedOptions { name value }
           product {
             id title status tags vendor
+            suspended: metafield(namespace: "custom", key: "suspended") { value }
             featuredImage { url altText }
           }
           inventoryItem {
@@ -626,10 +633,8 @@ async function listSkus(env, token, search = '') {
   `;
   const data = await shopifyGQL(env, token, gql, { q: queryStr || null }, 'listSkus');
 
-  // v3.1.0: استثناء منتجات تاج Suspended من نتائج البحث
-  return data.data.productVariants.nodes.filter(
-    v => !(v.product?.tags || []).includes('Suspended')
-  );
+  // v6.2.1: الموقوف (منتج أو مقاس) مش موجود بالنسبة للأداة
+  return data.data.productVariants.nodes.filter(v => !isSuspendedNode(v));
 }
 
 // ── Lookup by barcode ─────────────────────────────────────────────────────────
@@ -639,9 +644,11 @@ async function lookupBarcode(env, token, barcode) {
       productVariants(first: 1, query: $q) {
         nodes {
           id sku barcode displayName
+          suspended: metafield(namespace: "custom", key: "suspended") { value }
           selectedOptions { name value }
           product {
             id title status tags vendor
+            suspended: metafield(namespace: "custom", key: "suspended") { value }
             featuredImage { url altText }
           }
           inventoryItem {
@@ -662,8 +669,8 @@ async function lookupBarcode(env, token, barcode) {
   const nodes = data.data.productVariants.nodes;
   if (!nodes.length) return null;
   const variant = nodes[0];
-  // v3.1.0: استثناء منتجات Suspended حتى لو تم مسح باركودها
-  if ((variant.product?.tags || []).includes('Suspended')) return null;
+  // v6.2.1: الموقوف مش موجود حتى لو الباركود اتمسح
+  if (isSuspendedNode(variant)) return null;
   return variant;
 }
 
@@ -690,7 +697,8 @@ async function getAllVariantsForAudit(env, token) {
           nodes {
             id
             sku
-            product { id status tags title }
+            suspended: metafield(namespace: "custom", key: "suspended") { value }
+            product { id status tags title suspended: metafield(namespace: "custom", key: "suspended") { value } }
             last_audit_date: metafield(namespace: "custom", key: "last_stock_audit_date") { value }
             inventoryItem {
               tracked
@@ -722,8 +730,8 @@ async function getAllVariantsForAudit(env, token) {
       if (!v.sku?.trim()) continue;
       // استثناء 2: Inventory not tracked
       if (!v.inventoryItem?.tracked) continue;
-      // استثناء 3: تاج Suspended
-      if ((v.product?.tags || []).includes('Suspended')) continue;
+      // استثناء 3: موقوف (ميتافيلد custom.suspended أو تاج Suspended)
+      if (isSuspendedNode(v)) continue;
 
       const levels = v.inventoryItem?.inventoryLevels?.nodes?.[0]?.quantities || [];
       const getQty = name => {
@@ -1104,7 +1112,7 @@ async function getBulkIndex(env, token) {
       // حالة المنتج مش معيار (DRAFT/ARCHIVED بيتجردوا) — من v6.1.2
       if (!v.sku?.trim())                                    continue;
       if (!v.inventoryItem?.tracked)                         continue;
-      if ((v.product?.tags || []).includes('Suspended'))      continue;
+      if (isSuspendedNode(v))                                 continue;
 
       // مش مخزّن في الموقع ده خالص → الكتابة عليه هترجع ITEM_NOT_STOCKED_AT_LOCATION.
       // بيتشال من الفهرس وبيتعدّ، عشان العدد يبان للموظف بدل ما يختفي في صمت.
@@ -1129,10 +1137,6 @@ async function getBulkIndex(env, token) {
         committed:       getQty('committed'),
         onHand:          getQty('on_hand'),
         lastAuditDate:   v.last_audit_date?.value || null,
-        // علامة الإيقاف على المنتج أو المقاس (`custom.suspended` = "true") — نسخة
-        // مخزّنة مش مصدر حقيقة (constants §1)، فبتتستخدم لاستبعاد الباركودات
-        // المتكررة بس، مش لمنع الجرد.
-        suspended:       isSuspendedMarked(v),
       });
     }
 
@@ -1144,20 +1148,22 @@ async function getBulkIndex(env, token) {
            dupBarcodes: collectDupBarcodes(variants) };
 }
 
-// المنتج أو المقاس معلَّم `custom.suspended = "true"` (القيمة نص مش boolean).
-function isSuspendedMarked(v) {
-  return v.suspended?.value === 'true' || v.product?.suspended?.value === 'true';
+// 🔴 الموقوف = مش موجود. المنتج أو المقاس معلَّم `custom.suspended = "true"`
+// (القيمة نص مش boolean) **أو** تاج `Suspended` (قاعدة قديمة، محفوظة).
+// العلامة نسخة مخزّنة مش مصدر حقيقة (constants §1) — الموقوف بعد 13-10-2026
+// غير معلّم لحد ما تتضبط علامته. كل مسارات اكتشاف الأصناف لازم تعدّي من هنا.
+function isSuspendedNode(v) {
+  return v.suspended?.value === 'true'
+      || v.product?.suspended?.value === 'true'
+      || (v.product?.tags || []).includes('Suspended');
 }
 
 // باركود بيتكرر على أكتر من متغيّر → اسمه + الـ SKUs بتاعته، عشان الواجهة
 // تعرض للموظف الاختيارين بدل ما تخمّن.
-// 🟠 المتغيّر الموقوف (`suspended`) مش بيتعدّ في التكرار — باركود واحد على
-//    موقوف + شغّال مش غموض، والمسح بيروح للشغّال. (كان بديل قاعدة «نفس الـ SKU»
-//    اللي اتشالت في v6.2.0.)
 function collectDupBarcodes(variants) {
   const seen = new Map();
   for (const v of variants) {
-    if (!v.barcode || v.suspended) continue;
+    if (!v.barcode) continue;
     if (!seen.has(v.barcode)) seen.set(v.barcode, []);
     seen.get(v.barcode).push({ variantId: v.variantId, sku: v.sku, productTitle: v.productTitle });
   }
