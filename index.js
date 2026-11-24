@@ -1,10 +1,17 @@
 // ══════════════════════════════════════════════════════════════
 // §HEADER
-// inventory-audit-updater-worker — EcomModa v6.2.2
+// inventory-audit-updater-worker — EcomModa v6.2.3
 // Account: ecommoda-dev (762c353004e8472b20261fba273bfe8d)
 // D1: DB → ecommoda-dev-logs
 //
 // skills: worker-builder v3.8.0 · constants v4.3.0 · shopify-graphql-helper v2.4.0 — 13-10-2026
+//
+// CHANGELOG v6.2.3 (24-11-2026) — أولويات الجرد على LOCATION_ID صراحةً
+//   🟠 `getAllVariantsForAudit` بقت بتقرا الأرصدة بـ `inventoryLevel(locationId:)`
+//      (زي `getBulkIndex`) بدل `inventoryLevels(first: 1)` — «أول موقع» ممكن يكون
+//      موقع تاني غير اللي الكتابة بتتم عليه في متجر بأكتر من موقع. المتغيّر اللي
+//      مش مخزّن في الموقع ده بيتخطّى (مايتجردش هنا أصلاً) وبيتعدّ في
+//      `skippedNoLevel` في رد `get_audit_priorities` (حقل جديد — مش بيكسر أي مستهلك).
 //
 // CHANGELOG v6.2.2 (13-10-2026) — شيل تاج Suspended القديم
 //   🟠 الاستبعاد بقى بميتافيلد `custom.suspended` بس. التاج كان على منتجات
@@ -100,7 +107,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const TOOL_NAME      = 'inventory_audit';
-const WORKER_VERSION = '6.2.2';
+const WORKER_VERSION = '6.2.3';
 
 // قيم `type` المسجّلة لهذه الأداة في ecommoda-constants §7:
 //   ok · adjustment · login · logout
@@ -689,14 +696,17 @@ async function getAllVariantsForAudit(env, token) {
   let hasNext = true;
   let pages   = 0;
   let scanned = 0;
+  let skippedNoLevel = 0;
+  // v6.2.3: الأرقام بتاعة الموقع اللي بنكتب عليه (LOCATION_ID) مش «أول موقع» — زي getBulkIndex
+  const locationGid = requireLocationId(env);
 
   while (hasNext) {
     if (pages >= MAX_VARIANT_PAGES) {
-      return { variants: allVariants, truncated: true, scanned, pages };
+      return { variants: allVariants, truncated: true, scanned, pages, skippedNoLevel };
     }
 
     const gql = `
-      query GetAllVariants($cursor: String, $n: Int!) {
+      query GetAllVariants($cursor: String, $n: Int!, $loc: ID!) {
         productVariants(first: $n, after: $cursor) {
           nodes {
             id
@@ -706,11 +716,9 @@ async function getAllVariantsForAudit(env, token) {
             last_audit_date: metafield(namespace: "custom", key: "last_stock_audit_date") { value }
             inventoryItem {
               tracked
-              inventoryLevels(first: 1) {
-                nodes {
-                  quantities(names: ["available", "committed", "on_hand"]) {
-                    name quantity
-                  }
+              inventoryLevel(locationId: $loc) {
+                quantities(names: ["available", "committed", "on_hand"]) {
+                  name quantity
                 }
               }
             }
@@ -721,7 +729,7 @@ async function getAllVariantsForAudit(env, token) {
     `;
 
     const data = await shopifyGQL(
-      env, token, gql, { cursor, n: VARIANTS_PER_PAGE }, 'getAllVariantsForAudit'
+      env, token, gql, { cursor, n: VARIANTS_PER_PAGE, loc: locationGid }, 'getAllVariantsForAudit'
     );
 
     const { nodes, pageInfo } = data.data.productVariants;
@@ -737,7 +745,10 @@ async function getAllVariantsForAudit(env, token) {
       // استثناء 3: موقوف (ميتافيلد custom.suspended)
       if (isSuspendedNode(v)) continue;
 
-      const levels = v.inventoryItem?.inventoryLevels?.nodes?.[0]?.quantities || [];
+      // مش مخزّن في الموقع ده → مايتجردش من هنا (الكتابة عليه هترجع ITEM_NOT_STOCKED_AT_LOCATION)
+      if (!v.inventoryItem.inventoryLevel) { skippedNoLevel++; continue; }
+
+      const levels = v.inventoryItem.inventoryLevel.quantities || [];
       const getQty = name => {
         const found = levels.find(l => l.name === name);
         return found !== undefined ? found.quantity : null;
@@ -759,7 +770,7 @@ async function getAllVariantsForAudit(env, token) {
     cursor  = pageInfo.endCursor;
   }
 
-  return { variants: allVariants, truncated: false, scanned, pages };
+  return { variants: allVariants, truncated: false, scanned, pages, skippedNoLevel };
 }
 
 // ── Get unfulfilled orders — v2.5.0 ──────────────────────────────────────────
@@ -1061,7 +1072,7 @@ const BULK_ADJUST_REASON = 'cycle_count_available';
 //    الغلط والرصيد يتعدّل على متغيّر تاني خالص.
 async function getBulkIndex(env, token) {
   // 🔴 الأرقام لازم تبقى بتاعة **الموقع اللي هنكتب عليه**، مش أول موقع في القايمة.
-  //    باقي الأداة بتستخدم `inventoryLevels(first: 1)` — وده مقبول في متجر بموقع
+  //    `list_skus`/`lookup_barcode` لسه بيستخدموا `inventoryLevels(first: 1)` — وده مقبول في متجر بموقع
   //    واحد، لكن في الجرد الجماعي معناه مئات التعديلات محسوبة على أرقام موقع تاني.
   //    هنا الاستعلام مربوط بـ LOCATION_ID صراحةً.
   const locationGid = requireLocationId(env);
@@ -1641,10 +1652,10 @@ export default {
       // ─── §AUDIT — Priority Queue ──────────────────────────
 
       if (action === 'get_audit_priorities') {
-        const { variants, truncated, scanned, pages } = await getAllVariantsForAudit(env, token);
+        const { variants, truncated, scanned, pages, skippedNoLevel } = await getAllVariantsForAudit(env, token);
         return json({
           ok: true, variants, count: variants.length,
-          truncated, scanned, pages,
+          truncated, scanned, pages, skippedNoLevel,
           cap: MAX_VARIANT_PAGES * VARIANTS_PER_PAGE,
         }, 200, request);
       }
