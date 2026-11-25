@@ -1,10 +1,15 @@
 // ══════════════════════════════════════════════════════════════
 // §HEADER
-// inventory-audit-updater-worker — EcomModa v6.2.3
+// inventory-audit-updater-worker — EcomModa v6.2.4
 // Account: ecommoda-dev (762c353004e8472b20261fba273bfe8d)
 // D1: DB → ecommoda-dev-logs
 //
 // skills: worker-builder v3.8.0 · constants v4.3.0 · shopify-graphql-helper v2.4.0 — 13-10-2026
+//
+// CHANGELOG v6.2.4 (25-11-2026) — inventoryItemId في أولويات الجرد
+//   🟢 `get_audit_priorities` بيرجّع `inventoryItemId` لكل صف (gid) — الواجهة بتبني منه
+//      لينك «سجل حركة المخزون» مباشرةً بدل نداء `list_skus` عند كل ضغطة. حقل جديد
+//      فقط — مفيش تغيير في أي حقل موجود، و`MIN_WORKER_VERSION`/`audit.min` ما اتغيّروش.
 //
 // CHANGELOG v6.2.3 (24-11-2026) — أولويات الجرد على LOCATION_ID صراحةً
 //   🟠 `getAllVariantsForAudit` بقت بتقرا الأرصدة بـ `inventoryLevel(locationId:)`
@@ -107,7 +112,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const TOOL_NAME      = 'inventory_audit';
-const WORKER_VERSION = '6.2.3';
+const WORKER_VERSION = '6.2.4';
 
 // قيم `type` المسجّلة لهذه الأداة في ecommoda-constants §7:
 //   ok · adjustment · login · logout
@@ -715,6 +720,7 @@ async function getAllVariantsForAudit(env, token) {
             product { id status tags title suspended: metafield(namespace: "custom", key: "suspended") { value } }
             last_audit_date: metafield(namespace: "custom", key: "last_stock_audit_date") { value }
             inventoryItem {
+              id
               tracked
               inventoryLevel(locationId: $loc) {
                 quantities(names: ["available", "committed", "on_hand"]) {
@@ -763,6 +769,7 @@ async function getAllVariantsForAudit(env, token) {
         committed:     getQty('committed'),
         onHand:        getQty('on_hand'),
         lastAuditDate: v.last_audit_date?.value || null,
+        inventoryItemId: v.inventoryItem.id,
       });
     }
 
