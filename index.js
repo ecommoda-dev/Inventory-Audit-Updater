@@ -1,10 +1,13 @@
 // ══════════════════════════════════════════════════════════════
 // §HEADER
-// inventory-audit-updater-worker — EcomModa v6.2.5
+// inventory-audit-updater-worker — EcomModa v6.2.6
 // Account: ecommoda-dev (762c353004e8472b20261fba273bfe8d)
 // D1: DB → ecommoda-dev-logs
 //
 // skills: worker-builder v3.8.0 · constants v4.3.0 · shopify-graphql-helper v2.4.0 — 13-10-2026
+//
+// CHANGELOG v6.2.6 (26-11-2026) — get_details: `courier` (المندوب) بدل `zone`
+//   🟢 كل أوردر بقى فيه `courier` (custom.courier) — خام. و`zone` اتشال من الرد (الواجهة مابتبنيش أي حاجة على Other_Regions).
 //
 // CHANGELOG v6.2.5 (26-11-2026) — get_details: حالة S1/S2 + مكان الشحنة لكل أوردر
 //   🟢 كل أوردر في رد `get_details` بقى فيه `s1Status` (custom.manual_status) · `s2Status`
@@ -120,7 +123,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const TOOL_NAME      = 'inventory_audit';
-const WORKER_VERSION = '6.2.5';
+const WORKER_VERSION = '6.2.6';
 
 // قيم `type` المسجّلة لهذه الأداة في ecommoda-constants §7:
 //   ok · adjustment · login · logout
@@ -812,7 +815,7 @@ async function getUnfulfilledOrders(env, token, variantId, productId) {
             s1_packing_date_time: metafield(namespace: "custom", key: "s1_packing_date_time") { value }
             s2_packed_by:         metafield(namespace: "custom", key: "s2_packed_by")         { value }
             s2_packing_date_time: metafield(namespace: "custom", key: "s2_packing_date_time") { value }
-            zone:             metafield(namespace: "custom", key: "zone")                    { value }
+            courier:          metafield(namespace: "custom", key: "courier")                 { value }
             whereabouts_s1:   metafield(namespace: "custom", key: "package_whereabouts_s1")  { value }
             whereabouts_s2:   metafield(namespace: "custom", key: "package_whereabouts_s2")  { value }
             lineItems(first: 20) {
@@ -891,7 +894,7 @@ async function getUnfulfilledOrders(env, token, variantId, productId) {
           // v6.2.5 — عرض بس (خام من شوبيفاي): الواجهة هي اللي بتفسّر وبتعلّم القيمة الغريبة
           s1Status:      order.manual_status?.value  || null,
           s2Status:      order.status_2_r_e?.value   || null,
-          zone:          order.zone?.value           || null,
+          courier:       order.courier?.value        || null,
           whereaboutsS1: order.whereabouts_s1?.value || null,
           whereaboutsS2: order.whereabouts_s2?.value || null,
           items: matchingItems.map(li => ({
