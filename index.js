@@ -1,10 +1,19 @@
 // ══════════════════════════════════════════════════════════════
 // §HEADER
-// inventory-audit-updater-worker — EcomModa v6.2.6
+// inventory-audit-updater-worker — EcomModa v6.2.7
 // Account: ecommoda-dev (762c353004e8472b20261fba273bfe8d)
 // D1: DB → ecommoda-dev-logs
 //
 // skills: worker-builder v3.8.0 · constants v4.3.0 · shopify-graphql-helper v2.4.0 — 13-10-2026
+//
+// CHANGELOG v6.2.7 (26-11-2026) — تحديد مرحلة الأوردر (S1/S2) بنفس منطق أداة التغليف
+//   🔴 `S2_VALUES` القديمة (فيها `Printed` اللي مش موجودة في choice list، وبلا فحص return نشط) اتبدّلت
+//      بـ`resolveOrderStage` = نسخة طبق الأصل من `analyzeStage().stage` في Orders-Packing-Checker v2.8.0
+//      (`S1_VALUES`/`S2_VALUES` المتطابقة + `ACTIVE_RETURN_STATUSES`). الفرق العملي: أوردر استبدال حالة S2 بتاعته
+//      `Shipped` وفيه return لسه OPEN كان بيتحسب S1 (بيقرا تغليف الشحنة الأصلية)، وبقى S2.
+//   ⚠️ **ده بيغيّر «المتوقع على الرف»** للأوردرات دي في التابين مع بعض (`getUnfulfilledOrders` و`getShelfBreakdown` اتعدّلوا
+//      معًا — التوأم). أي تعديل تاني في المنطق ده لازم يتعمل هنا **وفي `analyzeStage` بريبو التغليف** (درس R1).
+//   🟢 `getShelfBreakdown` بقى بيجيب `manual_status` (محتاجه القاعدة).
 //
 // CHANGELOG v6.2.6 (26-11-2026) — get_details: `courier` (المندوب) بدل `zone`
 //   🟢 كل أوردر بقى فيه `courier` (custom.courier) — خام. و`zone` اتشال من الرد (الواجهة مابتبنيش أي حاجة على Other_Regions).
@@ -123,7 +132,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const TOOL_NAME      = 'inventory_audit';
-const WORKER_VERSION = '6.2.6';
+const WORKER_VERSION = '6.2.7';
 
 // قيم `type` المسجّلة لهذه الأداة في ecommoda-constants §7:
 //   ok · adjustment · login · logout
@@ -187,7 +196,20 @@ async function noteUnregisteredLogValues(db, entries) {
   }
 }
 
-const S2_VALUES = ['Confirmed + RETURN', 'Confirmed + EXCHANGE', 'Printed', 'Ready'];
+// ─── §STAGE — أنهي ماكينة بتتغلّف دلوقتي؟ (S1 ولا S2) ───
+// 🔴 نسخة طبق الأصل من `analyzeStage().stage` في Orders-Packing-Checker (v2.8.0) — مصدر الحقيقة هناك.
+//    القيم دي «حالات ما قبل الشحن» بالقصد: التغليف مالوش معنى بعد `Shipped`.
+//    'Printed' اتشالت (مش في choice list). أي تعديل هنا يتعمل في الأداتين مع بعض.
+const S1_VALUES = ['Confirmed', 'Confirmed + Edit', 'Ready'];
+const S2_VALUES = ['Confirmed + RETURN', 'Confirmed + EXCHANGE', 'Ready'];
+const ACTIVE_RETURN_STATUSES = ['OPEN', 'IN_PROGRESS', 'REQUESTED'];
+function resolveOrderStage(manualStatus, status2re, returnNodes) {
+  const hasActiveReturn = (returnNodes || []).some(r => ACTIVE_RETURN_STATUSES.includes(r.status));
+  const s1Signal = !!(manualStatus && S1_VALUES.includes(manualStatus));
+  const s2Signal = !!(status2re && S2_VALUES.includes(status2re)) || hasActiveReturn;
+  if (s2Signal) return 'S2';            // S2 فقط، أو الاتنين (تعارض) — نفس حكم analyzeStage
+  return 'S1';                          // S1 فقط، أو مفيش إشارة (unclear)
+}
 
 // ─── سلسلة السقوف (worker-builder Step 5A ⑪) ────────────────────
 // ① الواجهة  CHUNK           = غير منطبق — الأداة دي بتكتب صنف واحد لكل نداء،
@@ -855,7 +877,7 @@ async function getUnfulfilledOrders(env, token, variantId, productId) {
       if (order.cancelledAt) continue;
 
       const status2re  = order.status_2_r_e?.value || null;
-      const orderStage = S2_VALUES.includes(status2re) ? 'S2' : 'S1';
+      const orderStage = resolveOrderStage(order.manual_status?.value || null, status2re, order.returns?.nodes);
 
       const packedBy = orderStage === 'S2'
         ? (order.s2_packed_by?.value         || null)
@@ -1245,6 +1267,7 @@ async function getShelfBreakdown(env, token, productId) {
         orders(first: 50, query: $q, after: $after, sortKey: CREATED_AT, reverse: true) {
           nodes {
             id cancelledAt
+            manual_status: metafield(namespace: "custom", key: "manual_status") { value }
             status_2_r_e: metafield(namespace: "custom", key: "status_2_r_e") { value }
             s1_packed_by: metafield(namespace: "custom", key: "s1_packed_by") { value }
             s2_packed_by: metafield(namespace: "custom", key: "s2_packed_by") { value }
@@ -1285,7 +1308,7 @@ async function getShelfBreakdown(env, token, productId) {
       if (order.cancelledAt) continue;
 
       const status2re  = order.status_2_r_e?.value || null;
-      const orderStage = S2_VALUES.includes(status2re) ? 'S2' : 'S1';
+      const orderStage = resolveOrderStage(order.manual_status?.value || null, status2re, order.returns?.nodes);
       const packedBy   = orderStage === 'S2'
         ? (order.s2_packed_by?.value || null)
         : (order.s1_packed_by?.value || null);
