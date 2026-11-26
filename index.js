@@ -1,10 +1,18 @@
 // ══════════════════════════════════════════════════════════════
 // §HEADER
-// inventory-audit-updater-worker — EcomModa v6.2.4
+// inventory-audit-updater-worker — EcomModa v6.2.5
 // Account: ecommoda-dev (762c353004e8472b20261fba273bfe8d)
 // D1: DB → ecommoda-dev-logs
 //
 // skills: worker-builder v3.8.0 · constants v4.3.0 · shopify-graphql-helper v2.4.0 — 13-10-2026
+//
+// CHANGELOG v6.2.5 (26-11-2026) — get_details: حالة S1/S2 + مكان الشحنة لكل أوردر
+//   🟢 كل أوردر في رد `get_details` بقى فيه `s1Status` (custom.manual_status) · `s2Status`
+//      (custom.status_2_r_e) · `zone` (custom.zone) · `whereaboutsS1`/`whereaboutsS2`
+//      (custom.package_whereabouts_s1/_s2) — القيم **خام زي ما هي على شوبيفاي** (الواجهة هي اللي
+//      بتعرضها وبتعلّم القيمة الغريبة). `packingDateTime` كان موجود أصلاً.
+//   ⛔ صفر تغيير في منطق التغليف/S1-S2 (التوأم `getShelfBreakdown` ما اتلمسش) — حقول عرض بس.
+//      `MIN_WORKER_VERSION`/`audit.min` ما اتغيّروا: الواجهة بتعرض «—» على Worker أقدم.
 //
 // CHANGELOG v6.2.4 (25-11-2026) — inventoryItemId في أولويات الجرد
 //   🟢 `get_audit_priorities` بيرجّع `inventoryItemId` لكل صف (gid) — الواجهة بتبني منه
@@ -112,7 +120,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const TOOL_NAME      = 'inventory_audit';
-const WORKER_VERSION = '6.2.4';
+const WORKER_VERSION = '6.2.5';
 
 // قيم `type` المسجّلة لهذه الأداة في ecommoda-constants §7:
 //   ok · adjustment · login · logout
@@ -804,6 +812,9 @@ async function getUnfulfilledOrders(env, token, variantId, productId) {
             s1_packing_date_time: metafield(namespace: "custom", key: "s1_packing_date_time") { value }
             s2_packed_by:         metafield(namespace: "custom", key: "s2_packed_by")         { value }
             s2_packing_date_time: metafield(namespace: "custom", key: "s2_packing_date_time") { value }
+            zone:             metafield(namespace: "custom", key: "zone")                    { value }
+            whereabouts_s1:   metafield(namespace: "custom", key: "package_whereabouts_s1")  { value }
+            whereabouts_s2:   metafield(namespace: "custom", key: "package_whereabouts_s2")  { value }
             lineItems(first: 20) {
               nodes {
                 id sku title quantity currentQuantity
@@ -877,6 +888,12 @@ async function getUnfulfilledOrders(env, token, variantId, productId) {
           orderStage,
           packedBy,
           packingDateTime,
+          // v6.2.5 — عرض بس (خام من شوبيفاي): الواجهة هي اللي بتفسّر وبتعلّم القيمة الغريبة
+          s1Status:      order.manual_status?.value  || null,
+          s2Status:      order.status_2_r_e?.value   || null,
+          zone:          order.zone?.value           || null,
+          whereaboutsS1: order.whereabouts_s1?.value || null,
+          whereaboutsS2: order.whereabouts_s2?.value || null,
           items: matchingItems.map(li => ({
             id:                  li.id,
             title:               li.title,
